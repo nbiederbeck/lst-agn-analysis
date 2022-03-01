@@ -1,0 +1,45 @@
+#!/bin/bash
+
+argparse() {
+    while :; do
+        case "${1-}" in
+            -f|--input-file)
+                input_file=$(readlink -f "${2-}")
+                run_id="${2-}"
+                run_id="${run_id##*Run}"
+                run_id="${run_id%.*}"
+                shift
+                ;;
+            -o|--output-dir)
+                output_dir=$(readlink -f "${2-}")
+                shift
+                ;;
+            -p|--path-models)
+                path_models=$(readlink -f "${2-}")
+                shift
+                ;;
+            -c|--config)
+                config=$(readlink -f "${2-}")
+                shift
+                ;;
+            *) break ;;
+        esac
+        shift
+    done
+
+    return 0
+}
+
+argparse "$@"
+
+cmd="lstchain_dl1_to_dl2 "
+cmd+=" --input-file ${input_file} "
+cmd+=" --output-dir ${output_dir} "
+cmd+=" --path-models ${path_models} "
+cmd+=" --config ${config} "
+
+sbatch \
+    --mem=32G \
+    -o $(readlink -f build/${run_id}.stdout) \
+    -e $(readlink -f build/${run_id}.stderr) \
+    --wrap="$cmd"

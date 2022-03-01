@@ -1,0 +1,48 @@
+general:
+    log:
+        level: info
+
+observations:
+    datastore: build/dl3/
+    obs_time:
+        start: null
+        stop: null
+    required_irf:
+        - aeff
+        - edisp
+
+datasets:
+    type: 1d
+    stack: true
+    geom:
+        wcs:
+            skydir: {frame: galactic, lon: 179.88 deg, lat: 65.01 deg}
+            binsize: 0.02 deg
+            width: {width: 2.0 deg, height: 2.0 deg}
+            binsize_irf: 0.2 deg
+        selection: {offset_max: 2.5 deg}
+        axes:
+            energy:
+                min: 10 GeV
+                max: 100 TeV
+                nbins: 20
+            energy_true:
+                min: 10 GeV
+                max: 100 TeV
+                nbins: 20
+    background:
+        method: "reflected"
+        parameters: {min_distance_input: 0.6 deg, max_region_number: 15}
+    on_region: {frame: galactic, lon: 179.88 deg, lat: 65.01 deg, radius: 0.2 deg}
+    containment_correction: false
+
+fit:
+    fit_range: {min: 10 GeV, max: 100 TeV}
+
+flux_points:
+    energy: {min: 10 GeV, max: 100 TeV, nbins: 6}
+    source: Mrk421
+
+light_curve:
+    energy_edges: {min: 10 GeV, max: 100 TeV, nbins: 1}
+    source: Mrk421
