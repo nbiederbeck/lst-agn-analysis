@@ -10,15 +10,19 @@ GAMMAPY=$(GAMMAPY_CONFIG) $(GAMMAPY_MODELS)
 MODELS_DIR=/fefs/aswg/data/models/20200629_prod5_trans_80/zenith_20deg/south_pointing/20220215_v0.9.1_prod5_trans_80_local_tailcut_8_4/
 IRF=/fefs/aswg/data/mc/IRF/20200629_prod5_trans_80/zenith_20deg/south_pointing/20220215_v0.9.1_prod5_trans_80_local_tailcut_8_4/off0.4deg/irf_20220215_v091_prod5_trans_80_local_tailcut_8_4_gamma_point-like_off04deg.fits.gz
 
-DL3_FILES=$(addprefix build/dl3/dl3_LST-1.Run0, $(addsuffix .fits.gz, $(RUNS)))
+DL3_FILES=$(addprefix build/dl3/dl3_LST-1.Run, $(addsuffix .fits.gz, $(RUNS)))
 
 PLOTS=$(addprefix build/, $(addsuffix .pdf, \
 	flux_points \
 	observation_plots \
 	light_curve\
+	theta2 \
 ))
 
 all: $(PLOTS)
+
+build/theta2.pdf: build/dl3/hdu-index.fits.gz $(GAMMAPY)
+	poetry run plot_theta2
 
 build/light_curve.pdf: build/model-best-fit.yaml $(GAMMAPY)
 	poetry run fit_light_curve
@@ -41,8 +45,14 @@ build/dl3:
 dl2:
 	mkdir -p $@
 
-build/dl3/dl3_%.fits.gz: dl2/dl2_%.h5 $(IRF) | build/dl3
-	lstchain_create_dl3_file \
+.PHONY: DL2
+DL2: dl2/dl2_%.h5 
+
+.PHONY: DL3
+DL3: $(DL3_FILES)
+
+build/dl3/dl3_%.fits.gz: dl2/dl2_%.h5  $(IRF) | build/dl3
+	./my_create_dl3_file \
 		--input-dl2 $< \
 		--output-dl3-path $| \
 		--input-irf $(IRF) \

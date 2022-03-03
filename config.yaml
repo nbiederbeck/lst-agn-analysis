@@ -25,14 +25,14 @@ datasets:
             energy:
                 min: 10 GeV
                 max: 100 TeV
-                nbins: 20
+                nbins: 40
             energy_true:
                 min: 10 GeV
                 max: 100 TeV
                 nbins: 20
     background:
         method: "reflected"
-        parameters: {min_distance_input: 0.6 deg, max_region_number: 15}
+        parameters: {min_distance_input: 10 deg}
     on_region: {frame: galactic, lon: 179.88 deg, lat: 65.01 deg, radius: 0.2 deg}
     containment_correction: false
 
@@ -40,7 +40,7 @@ fit:
     fit_range: {min: 10 GeV, max: 100 TeV}
 
 flux_points:
-    energy: {min: 10 GeV, max: 100 TeV, nbins: 6}
+    energy: {min: 10 GeV, max: 100 TeV, nbins: 20}
     source: Mrk421
 
 light_curve:

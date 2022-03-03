@@ -1,5 +1,8 @@
+import logging
 from pathlib import Path
 from . import get_analysis
+
+log = logging.getLogger(__name__)
 
 
 def main():
@@ -15,7 +18,9 @@ def main():
     analysis.read_models("model_config.yaml")
 
     analysis.run_fit()
-    analysis.models.write("build/model-best-fit.yaml", overwrite=True)
+    best_fit = "build/model-best-fit.yaml"
+    analysis.models.write(best_fit, overwrite=True)
+    log.info(f"Fitted model parameters saved to {best_fit}.")
 
 
 if __name__ == "__main__":

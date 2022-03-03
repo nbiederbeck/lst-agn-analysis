@@ -1,21 +1,65 @@
 #!/bin/bash
 run_ids=(
+[20201212]='3222 3223 3224 3225 3226 3227'
+[20201213]='3238 3239'
+[20201214]='3247 3248 3249 3250'
+[20210214]='3661-3665 '
+[20210215]='3687 3688'
+[20210216]='3715 3716'
+[20210217]='3732 3733 3734 3735 3736'
+[20210219]='3800'
+[20210313]='4016'
+[20210316]='4097 4098 4099 4100'
+[20210317]='4131 4132 4133 4134'
+[20210320]='4184 4185'
+[20210416]='4441'
+[20210417]='4457 4458 4459'
 [20210430]='4568 4569 4570 4571 4572'
+[20210505]='4612 4613 4614'
+[20210509]='4667 4668 4669 4670 '
+[20210509]='4671'
+[20210430]='4568 4569 4570 4571 4572'
+)
+run_ids_high_zenith=(
+[20201212]='3216 3217 3218 3219 3220 3221'
+[20210214]='3666 3667 3668'
+[20210216]='3717 3718 3719 3720 3721'
+[20210313]='4017 4018 4019'
+[20210317]='4135 4136 4137 4138'
+[20210318]='4479'
+[20210320]='4186 4187 4188'
+[20210321]='4208'
+[20210412]='4386 4387 4388'
+[20210418]='4479'
+[20210531]='4852 4853'
+[20210601]='4868 4869'
+[20210606]='4939'
+[20210608]='4962'
 )
 
 base="/fefs/aswg/data/real/DL1/"
 
 mkdir -p ./dl1
 
-into_makefile="RUNS="
+versions="0.7.0 0.7.1 0.7.3 0.7.5 0.8.3 0.8.4 0.9 0.9.1"
 
-for night in "${!run_ids[@]}"; do
-    for run in ${run_ids[${night}]}; do
-        dl1_filename="${base}/${night}/v0.9/tailcut84/dl1_LST-1.Run0${run}.h5"
-        dl1_local="./dl1/$(basename ${dl1_filename})"
-        ln -s $dl1_filename $dl1_local 
-        into_makefile="$into_makefile $run"
-    done
+# for night in "${!run_ids[@]}"; do
+#     for run in ${run_ids[${night}]}; do
+#         for version in ${versions}; do
+#             dl1_filename="${base}/${night}/v${version}/tailcut84/dl1_LST-1.Run0${run}.h5"
+#             if [ -f "${dl1_filename}" ]; then
+#                 echo $dl1_filename
+#                 dl1_local="./dl1/$(basename ${dl1_filename})"
+#                 ln -sf $dl1_filename $dl1_local 
+#             fi
+#         done
+#     done
+# done
+
+runs="RUNS ="
+for dl1 in $(ls ./dl1); do
+    run="${dl1##*Run}"
+    run="${run%.*}"
+    runs+=" ${run}"
 done
-
-echo $into_makefile > run_ids.mk
+echo "${runs}" > run_ids.mk
