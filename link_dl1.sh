@@ -41,20 +41,20 @@ base="/fefs/aswg/data/real/DL1/"
 
 mkdir -p ./dl1
 
-versions="0.7.0 0.7.1 0.7.3 0.7.5 0.8.3 0.8.4 0.9 0.9.1"
+versions="0.7.0 0.7.1 0.7.3 0.7.5 0.8.3 0.8.4 0.9 0.9.1 0.9.3"
 
-# for night in "${!run_ids[@]}"; do
-#     for run in ${run_ids[${night}]}; do
-#         for version in ${versions}; do
-#             dl1_filename="${base}/${night}/v${version}/tailcut84/dl1_LST-1.Run0${run}.h5"
-#             if [ -f "${dl1_filename}" ]; then
-#                 echo $dl1_filename
-#                 dl1_local="./dl1/$(basename ${dl1_filename})"
-#                 ln -sf $dl1_filename $dl1_local 
-#             fi
-#         done
-#     done
-# done
+for night in "${!run_ids[@]}"; do
+    for run in ${run_ids[${night}]}; do
+        for version in ${versions}; do
+            dl1_filename="${base}/${night}/v${version}/tailcut84/dl1_LST-1.Run0${run}.h5"
+            if [ -f "${dl1_filename}" ]; then
+                echo $dl1_filename
+                dl1_local="./dl1/$(basename ${dl1_filename})"
+                ln -sf $dl1_filename $dl1_local 
+            fi
+        done
+    done
+done
 
 runs="RUNS ="
 for dl1 in $(ls ./dl1); do
