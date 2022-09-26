@@ -39,7 +39,8 @@ def main():
         label="bkg syst",
     )
 
-    crab.plot([10 * u.GeV, 100 * u.TeV], ax=ax, sed_type="e2dnde")
+    elim = ax.get_xlim() * t['energy'].unit
+    crab.plot(*elim, ax=ax, sed_type="e2dnde")
 
     ax.loglog()
     ax.set_xlabel(f"Energy ({t['energy'].unit})")
