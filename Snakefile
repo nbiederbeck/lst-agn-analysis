@@ -21,7 +21,7 @@ rule theta2:
         "configs/model_config.yaml"
     conda:
         "agn-analysis"
-    shell: "poetry run plot_theta2"
+    shell: "python analysis/scripts/theta2.py"
 
 rule flux_points:
     input:
@@ -110,7 +110,7 @@ rule dl2:
     params:
         cwd=CWD,
         models=MODELS_DIR,
-        config="lstchain.json",
+        config="configs/lstchain.json",
         outdir="dl2"
     output: "dl2/dl2_LST-1.Run{run_id}.h5"
     input: "dl1/dl1_LST-1.Run{run_id}.h5"

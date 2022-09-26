@@ -35,3 +35,6 @@ def main():
         fig, ax = plt.subplots()
         events.plot_time()
         pdf.savefig()
+
+if __name__ == "__main__":
+    main()

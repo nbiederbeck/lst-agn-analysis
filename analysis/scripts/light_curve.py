@@ -18,3 +18,7 @@ def main():
     fig, ax = plt.subplots()
     analysis.light_curve.plot(ax=ax, axis_name="time")
     fig.savefig("build/light_curve.pdf")
+
+
+if __name__ == "__main__":
+    main()
