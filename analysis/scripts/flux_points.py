@@ -1,10 +1,13 @@
-from analysis import get_analysis
+from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.estimators import FluxPoints
 from matplotlib import pyplot as plt
 
 
 def main():
-    analysis = get_analysis()
+    config = AnalysisConfig.read("configs/config.yaml")
+
+    analysis = Analysis(config)
+    analysis.get_observations()
     analysis.get_datasets()
 
     analysis.read_models("build/model-best-fit.yaml")
@@ -26,3 +29,6 @@ def main():
 
     axes[0].set_xlabel("")
     fig.savefig("build/flux_points.pdf")
+
+if __name__ == "__main__":
+    main()

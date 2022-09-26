@@ -7,17 +7,58 @@ CWD="/fefs/aswg/workspace/noah.biederbeck/agn/mrk421/"
 RUN_IDS = [3222, 3223, 3224, 3225, 3226, 3227, 3238, 3239, 3247, 3248, 3249, 3250, 3687, 3688, 3715, 3716, 3732, 3733, 3734, 3735, 3736, 3800, 4016, 4097, 4098, 4099, 4100, 4131, 4132, 4133, 4134, 4184, 4185, 4441, 4457, 4458, 4459, 4568, 4569, 4570, 4571, 4572, 4612, 4613, 4614, 4671]
 
 rule all:
-    input: "build/theta2.pdf"
+    input:
+        "build/theta2.pdf",
+        "build/flux_points.pdf",
+        "build/light_curve.pdf",
+        "build/observation_plots.pdf"
 
 rule theta2:
     output: "build/theta2.pdf"
     input:
         "build/dl3/hdu-index.fits.gz",
-        "config.yaml",
-        "model_config.yaml"
+        "configs/config.yaml",
+        "configs/model_config.yaml"
     conda:
         "agn-analysis"
     shell: "poetry run plot_theta2"
+
+rule flux_points:
+    input:
+        "build/model-best-fit.yaml",
+        "build/dl3/hdu-index.fits.gz"
+    output: "build/flux_points.pdf"
+    conda: "agn-analysis"
+    shell: "python analysis/scripts/flux_points.py"
+
+rule observation_plots:
+    input: "build/dl3/hdu-index.fits.gz"
+    output: "build/observation_plots.pdf"
+    conda: "agn-analysis"
+    shell: "python analysis/scripts/events.py"
+
+rule sensitivity:
+    input:
+        "build/model-best-fit.yaml",
+        "build/dl3/hdu-index.fits.gz"
+    output: "build/sensitivity.pdf"
+    conda: "agn-analysis"
+    shell: "python analysis/scripts/sensitivity.py"
+
+rule light_curve:
+    input:
+        "build/model-best-fit.yaml",
+        "build/dl3/hdu-index.fits.gz"
+    output: "build/light_curve.pdf"
+    conda: "agn-analysis"
+    shell: "python analysis/scripts/light_curve.py"
+
+
+rule model_best_fit:
+    input: "build/dl3/hdu-index.fits.gz"
+    output: "build/model-best-fit.yaml"
+    conda: "agn-analysis"
+    shell: "python analysis/analysis.py"
 
 rule dl3_hdu_index:
     conda:

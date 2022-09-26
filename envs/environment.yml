@@ -6,3 +6,4 @@ dependencies:
   - astropy
   - matplotlib
   - gammapy=0.19
+  - iminuit
