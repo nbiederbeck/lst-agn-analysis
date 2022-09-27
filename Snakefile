@@ -6,6 +6,8 @@ CWD="/fefs/aswg/workspace/noah.biederbeck/agn/mrk421/"
 
 RUN_IDS = [3222, 3223, 3224, 3225, 3226, 3227, 3238, 3239, 3247, 3248, 3249, 3250, 3687, 3688, 3715, 3716, 3732, 3733, 3734, 3735, 3736, 3800, 4016, 4097, 4098, 4099, 4100, 4131, 4132, 4133, 4134, 4184, 4185, 4441, 4457, 4458, 4459, 4568, 4569, 4570, 4571, 4572, 4612, 4613, 4614, 4671]
 
+lstchain_env = "lstchain-v0.9.3"
+
 rule all:
     input:
         "build/theta2.pdf",
@@ -19,8 +21,7 @@ rule theta2:
         "build/dl3/hdu-index.fits.gz",
         "configs/config.yaml",
         "configs/model_config.yaml"
-    conda:
-        "agn-analysis"
+    conda: "agn-analysis"
     shell: "python analysis/scripts/theta2.py"
 
 rule flux_points:
@@ -61,12 +62,9 @@ rule model_best_fit:
     shell: "python analysis/analysis.py"
 
 rule dl3_hdu_index:
-    conda:
-        "lstchain-v0.9.3"
+    conda: lstchain_env
     output: "build/dl3/hdu-index.fits.gz"
     input: expand("build/dl3/dl3_LST-1.Run{run_id:05d}.fits.gz", run_id=RUN_IDS)
-    conda:
-        "lstchain-v0.9.3"
     shell:
         """
         lstchain_create_dl3_index_files  \
@@ -88,10 +86,8 @@ rule dl3:
         irf=IRF,
         gh=0.8,
         outdir=f"{CWD}/build/dl3/",
-    conda:
-        "lstchain-v0.9.3"
-    log:
-        "build/logs/dl3/{run_id}.log"
+    conda: lstchain_env
+    log: "build/logs/dl3/{run_id}.log"
     shell:
         """
         lstchain_create_dl3_file  \
@@ -114,10 +110,8 @@ rule dl2:
         outdir="dl2"
     output: "dl2/dl2_LST-1.Run{run_id}.h5"
     input: "dl1/dl1_LST-1.Run{run_id}.h5"
-    conda:
-        "lstchain-v0.9.3"
-    log:
-        "build/logs/dl2/{run_id}.log"
+    conda: lstchain_env
+    log: "build/logs/dl2/{run_id}.log"
     shell:
         """
         lstchain_dl1_to_dl2  \
