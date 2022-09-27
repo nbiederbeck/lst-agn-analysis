@@ -1,4 +1,4 @@
-from analysis import get_analysis
+from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.estimators import SensitivityEstimator
 from gammapy.datasets import Datasets
 from gammapy.modeling.models import create_crab_spectral_model
@@ -7,7 +7,10 @@ from astropy import units as u
 
 
 def main():
-    analysis = get_analysis()
+    config = AnalysisConfig.read("configs/config.yaml")
+
+    analysis = Analysis(config)
+    analysis.get_observations()
     analysis.get_datasets()
     # = Datasets.read("build/analysis/stacked-dataset.fits.gz")
 
@@ -39,7 +42,8 @@ def main():
         label="bkg syst",
     )
 
-    crab.plot([10 * u.GeV, 100 * u.TeV], ax=ax, sed_type="e2dnde")
+    elim = ax.get_xlim() * t['energy'].unit
+    crab.plot(*elim, ax=ax, sed_type="e2dnde")
 
     ax.loglog()
     ax.set_xlabel(f"Energy ({t['energy'].unit})")

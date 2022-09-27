@@ -1,12 +1,16 @@
 import logging
 from pathlib import Path
-from . import get_analysis
+from gammapy.analysis import Analysis, AnalysisConfig
 
 log = logging.getLogger(__name__)
 
 
 def main():
-    analysis = get_analysis()
+    config = AnalysisConfig.read("configs/config.yaml")
+
+    analysis = Analysis(config)
+    analysis.get_observations()
+
     analysis.get_datasets()
 
     path = Path("build/analysis")
@@ -15,7 +19,7 @@ def main():
 
     analysis.datasets["stacked"].write(filename, overwrite=True)
 
-    analysis.read_models("model_config.yaml")
+    analysis.read_models("configs/model_config.yaml")
 
     analysis.run_fit()
     best_fit = "build/model-best-fit.yaml"

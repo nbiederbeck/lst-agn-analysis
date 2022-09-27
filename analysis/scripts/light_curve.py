@@ -1,9 +1,12 @@
-from analysis import get_analysis
+from gammapy.analysis import Analysis, AnalysisConfig
 from matplotlib import pyplot as plt
 
 
 def main():
-    analysis = get_analysis()
+    config = AnalysisConfig.read("configs/config.yaml")
+
+    analysis = Analysis(config)
+    analysis.get_observations()
 
     analysis.config.datasets.stack = False
     analysis.get_datasets()
@@ -15,3 +18,7 @@ def main():
     fig, ax = plt.subplots()
     analysis.light_curve.plot(ax=ax, axis_name="time")
     fig.savefig("build/light_curve.pdf")
+
+
+if __name__ == "__main__":
+    main()
