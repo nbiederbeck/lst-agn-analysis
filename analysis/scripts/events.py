@@ -1,14 +1,16 @@
-from gammapy.analysis import Analysis, AnalysisConfig
 from astropy.coordinates import SkyCoord
+from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.data import EventList
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+
 
 def on_region_to_skyframe(on_region):
     if on_region.frame != "galactic":
         raise ValueError(f"Currently unsupported frame {on_region.frame}.")
 
     return SkyCoord(frame=on_region.frame, b=on_region.lat, l=on_region.lon)
+
 
 def main():
     config = AnalysisConfig.read("configs/config.yaml")
@@ -35,6 +37,7 @@ def main():
         fig, ax = plt.subplots()
         events.plot_time()
         pdf.savefig()
+
 
 if __name__ == "__main__":
     main()

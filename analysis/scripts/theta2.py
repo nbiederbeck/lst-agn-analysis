@@ -1,15 +1,17 @@
-from gammapy.analysis import Analysis, AnalysisConfig
 from astropy.coordinates import SkyCoord
+from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.makers.utils import make_theta_squared_table
 from gammapy.maps import MapAxis
 from gammapy.visualization import plot_theta_squared_table
 from matplotlib import pyplot as plt
+
 
 def on_region_to_skyframe(on_region):
     if on_region.frame != "galactic":
         raise ValueError(f"Currently unsupported frame {on_region.frame}.")
 
     return SkyCoord(frame=on_region.frame, b=on_region.lat, l=on_region.lon)
+
 
 def main():
     config = AnalysisConfig.read("configs/config.yaml")

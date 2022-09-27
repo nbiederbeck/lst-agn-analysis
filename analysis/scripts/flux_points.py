@@ -30,5 +30,6 @@ def main():
     axes[0].set_xlabel("")
     fig.savefig("build/flux_points.pdf")
 
+
 if __name__ == "__main__":
     main()

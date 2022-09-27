@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+
 from gammapy.analysis import Analysis, AnalysisConfig
 
 log = logging.getLogger(__name__)

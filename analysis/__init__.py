@@ -10,5 +10,3 @@ def get_analysis():
     analysis.get_observations()
 
     return analysis
-
-
