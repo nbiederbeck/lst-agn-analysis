@@ -5,14 +5,14 @@ CWD = "/fefs/aswg/workspace/noah.biederbeck/agn/mrk421/"
 
 from config import RUN_IDS
 
-lstchain_env = "lstchain-v0.9.6"
+lstchain_env = "lstchain-v0.9.3"
 
 
 rule all:
     input:
         "build/theta2.pdf",
         "build/flux_points.pdf",
-        "build/light_curve.pdf",
+        # "build/light_curve.pdf",  # TODO: currently fails
         "build/observation_plots.pdf",
 
 
@@ -79,12 +79,25 @@ rule light_curve:
 rule model_best_fit:
     input:
         "build/dl3/hdu-index.fits.gz",
+        "build/datasets.fits.gz",
     output:
         "build/model-best-fit.yaml",
     conda:
         "agn-analysis"
     shell:
         "python analysis/analysis.py"
+
+
+rule dataset:
+    input:
+        "build/dl3/hdu-index.fits.gz",
+        config="configs/config.yaml",
+    output:
+        "build/datasets.fits.gz",
+    conda:
+        "agn-analysis"
+    shell:
+        "python analysis/scripts/write_datasets.py -c {input.config} -o {output}"
 
 
 rule dl3_hdu_index:
@@ -108,7 +121,7 @@ rule dl3:
     output:
         "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
     input:
-        "dl2/dl2_LST-1.Run{run_id}.h5",
+        "build/dl2/dl2_LST-1.Run{run_id}.h5",
         irf="build/irf.fits.gz",
     resources:
         mem_mb="12G",
@@ -136,14 +149,14 @@ rule dl3:
 rule dl2:
     resources:
         mem_mb="32G",
-        cpus=4,
+        cpus=16,
     params:
         cwd=CWD,
         models=MODELS_DIR,
         config="configs/lstchain.json",
-        outdir="dl2",
+        outdir="build/dl2",
     output:
-        "dl2/dl2_LST-1.Run{run_id}.h5",
+        "build/dl2/dl2_LST-1.Run{run_id}.h5",
     input:
         "dl1/dl1_LST-1.Run{run_id}.h5",
     conda:
@@ -161,6 +174,9 @@ rule dl2:
 
 
 rule irf:
+    resources:
+        mem_mb="8G",
+        cpus=2,
     output:
         "build/irf.fits.gz",
     input:
