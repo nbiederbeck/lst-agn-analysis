@@ -1,59 +1,11 @@
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 
 MODELS_DIR = "/fefs/aswg/data/models/20200629_prod5_trans_80/zenith_20deg/south_pointing/20220215_v0.9.1_prod5_trans_80_local_tailcut_8_4/"
-IRF = "/fefs/aswg/data/mc/IRF/20200629_prod5_trans_80/zenith_20deg/south_pointing/20220215_v0.9.1_prod5_trans_80_local_tailcut_8_4/off0.4deg/irf_20220215_v091_prod5_trans_80_local_tailcut_8_4_gamma_point-like_off04deg.fits.gz"
 CWD = "/fefs/aswg/workspace/noah.biederbeck/agn/mrk421/"
 
-RUN_IDS = [
-    3222,
-    3223,
-    3224,
-    3225,
-    3226,
-    3227,
-    3238,
-    3239,
-    3247,
-    3248,
-    3249,
-    3250,
-    3687,
-    3688,
-    3715,
-    3716,
-    3732,
-    3733,
-    3734,
-    3735,
-    3736,
-    3800,
-    4016,
-    4097,
-    4098,
-    4099,
-    4100,
-    4131,
-    4132,
-    4133,
-    4134,
-    4184,
-    4185,
-    4441,
-    4457,
-    4458,
-    4459,
-    4568,
-    4569,
-    4570,
-    4571,
-    4572,
-    4612,
-    4613,
-    4614,
-    4671,
-]
+from config import RUN_IDS
 
-lstchain_env = "lstchain-v0.9.3"
+lstchain_env = "lstchain-v0.9.6"
 
 
 rule all:
@@ -157,13 +109,13 @@ rule dl3:
         "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
     input:
         "dl2/dl2_LST-1.Run{run_id}.h5",
+        irf="build/irf.fits.gz",
     resources:
         mem_mb="12G",
         cpus=8,
     params:
         cwd=CWD,
         source="Mrk421",
-        irf=IRF,
         gh=0.8,
         outdir=f"{CWD}/build/dl3/",
     conda:
@@ -173,10 +125,9 @@ rule dl3:
     shell:
         """
         lstchain_create_dl3_file  \
-            --input-dl2 {params.cwd}/{input}  \
+            --input-dl2 {params.cwd}/{input[0]}  \
             --output-dl3-path {params.outdir}  \
-            --input-irf {params.irf}  \
-            --global-gh-cut {params.gh}  \
+            --input-irf {input.irf}  \
             --source-name {params.source}  \
             --overwrite \
         """
@@ -206,4 +157,23 @@ rule dl2:
             --output-dir {params.cwd}/{params.outdir}  \
             --path-models {params.models}  \
             --config {params.cwd}/{params.config}  \
+        """
+
+
+rule irf:
+    output:
+        "build/irf.fits.gz",
+    input:
+        gammas="/fefs/aswg/data/mc/DL2/20200629_prod5_trans_80/gamma/zenith_20deg/south_pointing/20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf/off0.4deg/dl2_gamma_20deg_180deg_off0.4deg_20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf_testing.h5",
+        protons="/fefs/aswg/data/mc/DL2/20200629_prod5_trans_80/proton/zenith_20deg/south_pointing/20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf/dl2_proton_20deg_180deg_20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf_testing.h5",
+        config="configs/irf_tool_config.json",
+    conda:
+        lstchain_env
+    shell:
+        """
+        lstchain_create_irf_files \
+            -o {output} \
+            -g {input.gammas} \
+            -p {input.protons} \
+            --config {input.config} \
         """

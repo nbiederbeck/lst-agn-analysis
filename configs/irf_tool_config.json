@@ -1,0 +1,12 @@
+{
+  "DL3Cuts": {
+    "gh_efficiency": 0.9,
+    "theta_containment": 0.68
+  },
+  "IRFFITSWriter": {
+      "energy_dependent_theta": true,
+      "energy_dependent_gh": true,
+      "point_like": true,
+      "overwrite": true
+  }
+}
