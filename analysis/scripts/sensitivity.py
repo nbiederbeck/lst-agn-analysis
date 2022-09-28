@@ -10,9 +10,7 @@ def main():
     config = AnalysisConfig.read("configs/config.yaml")
 
     analysis = Analysis(config)
-    analysis.get_observations()
-    analysis.get_datasets()
-    # = Datasets.read("build/analysis/stacked-dataset.fits.gz")
+    analysis.datasets = Datasets.read("build/datasets.fits.gz")
 
     total_time = analysis.datasets["stacked"].gti.time_sum
 

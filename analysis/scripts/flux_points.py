@@ -1,4 +1,5 @@
 from gammapy.analysis import Analysis, AnalysisConfig
+from gammapy.datasets import Datasets
 from gammapy.estimators import FluxPoints
 from matplotlib import pyplot as plt
 
@@ -7,8 +8,8 @@ def main():
     config = AnalysisConfig.read("configs/config.yaml")
 
     analysis = Analysis(config)
-    analysis.get_observations()
-    analysis.get_datasets()
+
+    analysis.datasets = Datasets.read("build/datasets.fits.gz")
 
     analysis.read_models("build/model-best-fit.yaml")
 
@@ -16,7 +17,7 @@ def main():
 
     filename = "build/flux-points.fits.gz"
 
-    analysis.flux_points.write(filename)
+    analysis.flux_points.write(filename, overwrite=True)
 
     flux_points = FluxPoints.read(filename)
 

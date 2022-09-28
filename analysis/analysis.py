@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from gammapy.analysis import Analysis, AnalysisConfig
+from gammapy.datasets import Datasets
 
 log = logging.getLogger(__name__)
 
@@ -10,15 +11,7 @@ def main():
     config = AnalysisConfig.read("configs/config.yaml")
 
     analysis = Analysis(config)
-    analysis.get_observations()
-
-    analysis.get_datasets()
-
-    path = Path("build/analysis")
-    path.mkdir(exist_ok=True)
-    filename = path / "stacked-dataset.fits.gz"
-
-    analysis.datasets["stacked"].write(filename, overwrite=True)
+    analysis.datasets = Datasets.read("build/datasets.fits.gz")
 
     analysis.read_models("configs/model_config.yaml")
 
