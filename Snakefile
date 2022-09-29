@@ -46,6 +46,9 @@ rule observation_plots:
         "build/dl3/hdu-index.fits.gz",
     output:
         "build/observation_plots.pdf",
+    resources:
+        mem_mb=32000,
+        time=10,
     conda:
         "agn-analysis"
     shell:
