@@ -1,20 +1,15 @@
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
-parser.add_argument('-o', '--output', required=True)
+parser.add_argument("-o", "--output", required=True)
 args = parser.parse_args()
-import logging
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
-log.info("Logging.")
 
+import numpy as np
 from astropy.coordinates import SkyCoord
 from gammapy.analysis import Analysis, AnalysisConfig
-import numpy as np
 from gammapy.makers.utils import make_theta_squared_table
 from gammapy.maps import MapAxis
-from gammapy.visualization import plot_theta_squared_table
 from matplotlib import pyplot as plt
 
 
@@ -31,8 +26,6 @@ def main(output):
     analysis = Analysis(config)
     analysis.get_observations()
 
-    log.info("Got observations")
-
     on_region = analysis.config.datasets.on_region
     position = on_region_to_skyframe(on_region)
 
@@ -45,16 +38,26 @@ def main(output):
         theta_squared_axis=theta2_axis,
     )
 
-    log.info("Plotting ...")
-
     fig, ax = plt.subplots()
 
     x = theta2_axis.center.value
-    ax.errorbar(x, theta2_table['counts'], yerr=np.sqrt(theta2_table['counts']), label='counts', linestyle='')
-    ax.errorbar(x, theta2_table['counts_off'], yerr=np.sqrt(theta2_table['counts_off']), label='counts off', linestyle='')
+    ax.errorbar(
+        x,
+        theta2_table["counts"],
+        yerr=np.sqrt(theta2_table["counts"]),
+        label="counts",
+        linestyle="",
+    )
+    ax.errorbar(
+        x,
+        theta2_table["counts_off"],
+        yerr=np.sqrt(theta2_table["counts_off"]),
+        label="counts off",
+        linestyle="",
+    )
 
     plt.savefig(output)
 
 
 if __name__ == "__main__":
-    main(vars(args))
+    main(**vars(args))

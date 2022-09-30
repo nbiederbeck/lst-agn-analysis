@@ -1,3 +1,10 @@
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument("-o", "--output", required=True)
+args = parser.parse_args()
+
+
 from astropy.coordinates import SkyCoord
 from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.data import EventList
@@ -12,7 +19,7 @@ def on_region_to_skyframe(on_region):
     return SkyCoord(frame=on_region.frame, b=on_region.lat, l=on_region.lon)
 
 
-def main():
+def main(output):
     config = AnalysisConfig.read("configs/config.yaml")
 
     analysis = Analysis(config)
@@ -22,7 +29,7 @@ def main():
 
     center = on_region_to_skyframe(analysis.config.datasets.on_region)
 
-    with PdfPages("build/observation_plots.pdf") as pdf:
+    with PdfPages(output) as pdf:
         events.plot_image()
         pdf.savefig()
 
@@ -40,4 +47,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(**vars(args))

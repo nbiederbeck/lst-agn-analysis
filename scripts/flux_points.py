@@ -1,10 +1,17 @@
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument("-o", "--output", required=True)
+args = parser.parse_args()
+
+
 from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.datasets import Datasets
 from gammapy.estimators import FluxPoints
 from matplotlib import pyplot as plt
 
 
-def main():
+def main(output):
     config = AnalysisConfig.read("configs/config.yaml")
 
     analysis = Analysis(config)
@@ -29,8 +36,8 @@ def main():
     analysis.flux_points.plot_fit(*axes)
 
     axes[0].set_xlabel("")
-    fig.savefig("build/flux_points.pdf")
+    fig.savefig(output)
 
 
 if __name__ == "__main__":
-    main()
+    main(**vars(args))

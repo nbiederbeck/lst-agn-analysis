@@ -1,3 +1,10 @@
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument("-o", "--output", required=True)
+args = parser.parse_args()
+
+
 import matplotlib.pyplot as plt
 from astropy import units as u
 from gammapy.analysis import Analysis, AnalysisConfig
@@ -6,7 +13,7 @@ from gammapy.estimators import SensitivityEstimator
 from gammapy.modeling.models import create_crab_spectral_model
 
 
-def main():
+def main(output):
     config = AnalysisConfig.read("configs/config.yaml")
 
     analysis = Analysis(config)
@@ -49,4 +56,8 @@ def main():
     ax.legend(title=f"{total_time.to('h'):.2f}")
     ax.set_ylim(2e-14, 2e-10)
 
-    fig.savefig("build/sensitivity.pdf")
+    fig.savefig(output)
+
+
+if __name__ == "__main__":
+    main(**vars(args))

@@ -5,18 +5,20 @@ CWD = "/fefs/aswg/workspace/noah.biederbeck/agn/mrk421/"
 
 from run_ids import mrk421
 from itertools import chain
+
 mrk421_run_ids = set(chain(*mrk421.values()))
 RUN_IDS = mrk421_run_ids
 
 lstchain_env = "lstchain-v0.9.3"
+gammapy_env = "agn-analysis"
 
 
 rule all:
     input:
         "build/plots/theta2.pdf",
-        "build/flux_points.pdf",
-        # "build/light_curve.pdf",  # TODO: currently fails
-        "build/observation_plots.pdf",
+        "build/plots/flux_points.pdf",
+        # "build/plots/light_curve.pdf",  # TODO: currently fails
+        "build/plots/observation_plots.pdf",
 
 
 rule theta2:
@@ -27,9 +29,9 @@ rule theta2:
         "configs/config.yaml",
         "configs/model_config.yaml",
     conda:
-        "agn-analysis"
+        gammapy_env
     shell:
-        "python analysis/scripts/theta2.py -o {output}"
+        "python scripts/theta2.py -o {output}"
 
 
 rule flux_points:
@@ -37,25 +39,25 @@ rule flux_points:
         "build/model-best-fit.yaml",
         "build/dl3/hdu-index.fits.gz",
     output:
-        "build/flux_points.pdf",
+        "build/plots/flux_points.pdf",
     conda:
-        "agn-analysis"
+        gammapy_env
     shell:
-        "python analysis/scripts/flux_points.py"
+        "python scripts/flux_points.py -o {output}"
 
 
 rule observation_plots:
     input:
         "build/dl3/hdu-index.fits.gz",
     output:
-        "build/observation_plots.pdf",
+        "build/plots/observation_plots.pdf",
     resources:
         mem_mb=32000,
         time=10,
     conda:
-        "agn-analysis"
+        gammapy_env
     shell:
-        "python analysis/scripts/events.py"
+        "python scripts/events.py -o {output}"
 
 
 rule sensitivity:
@@ -63,11 +65,11 @@ rule sensitivity:
         "build/model-best-fit.yaml",
         "build/dl3/hdu-index.fits.gz",
     output:
-        "build/sensitivity.pdf",
+        "build/plots/sensitivity.pdf",
     conda:
-        "agn-analysis"
+        gammapy_env
     shell:
-        "python analysis/scripts/sensitivity.py"
+        "python scripts/sensitivity.py -o {output}"
 
 
 rule light_curve:
@@ -75,11 +77,11 @@ rule light_curve:
         "build/model-best-fit.yaml",
         "build/dl3/hdu-index.fits.gz",
     output:
-        "build/light_curve.pdf",
+        "build/plots/light_curve.pdf",
     conda:
-        "agn-analysis"
+        gammapy_env
     shell:
-        "python analysis/scripts/light_curve.py"
+        "python scripts/light_curve.py -o {output}"
 
 
 rule model_best_fit:
@@ -89,9 +91,9 @@ rule model_best_fit:
     output:
         "build/model-best-fit.yaml",
     conda:
-        "agn-analysis"
+        gammapy_env
     shell:
-        "python analysis/analysis.py"
+        "python scripts/fit-model.py -o {output}"
 
 
 rule dataset:
@@ -101,9 +103,9 @@ rule dataset:
     output:
         "build/datasets.fits.gz",
     conda:
-        "agn-analysis"
+        gammapy_env
     shell:
-        "python analysis/scripts/write_datasets.py -c {input.config} -o {output}"
+        "python scripts/write_datasets.py -c {input.config} -o {output}"
 
 
 rule dl3_hdu_index:
