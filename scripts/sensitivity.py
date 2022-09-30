@@ -6,7 +6,6 @@ args = parser.parse_args()
 
 
 import matplotlib.pyplot as plt
-from astropy import units as u
 from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.datasets import Datasets
 from gammapy.estimators import SensitivityEstimator
