@@ -3,14 +3,17 @@
 MODELS_DIR = "/fefs/aswg/data/models/20200629_prod5_trans_80/zenith_20deg/south_pointing/20220215_v0.9.1_prod5_trans_80_local_tailcut_8_4/"
 CWD = "/fefs/aswg/workspace/noah.biederbeck/agn/mrk421/"
 
-from config import RUN_IDS
+from run_ids import mrk421
+from itertools import chain
+mrk421_run_ids = set(chain(*mrk421.values()))
+RUN_IDS = mrk421_run_ids
 
 lstchain_env = "lstchain-v0.9.3"
 
 
 rule all:
     input:
-        "build/theta2.pdf",
+        "build/plots/theta2.pdf",
         "build/flux_points.pdf",
         # "build/light_curve.pdf",  # TODO: currently fails
         "build/observation_plots.pdf",
@@ -18,7 +21,7 @@ rule all:
 
 rule theta2:
     output:
-        "build/theta2.pdf",
+        "build/plots/theta2.pdf",
     input:
         "build/dl3/hdu-index.fits.gz",
         "configs/config.yaml",
@@ -26,7 +29,7 @@ rule theta2:
     conda:
         "agn-analysis"
     shell:
-        "python analysis/scripts/theta2.py"
+        "python analysis/scripts/theta2.py -o {output}"
 
 
 rule flux_points:
