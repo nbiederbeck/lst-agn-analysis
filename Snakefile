@@ -21,17 +21,27 @@ rule all:
         "build/plots/observation_plots.pdf",
 
 
-rule theta2:
+rule calc_theta2:
     output:
-        "build/plots/theta2.pdf",
+        "build/dl4/theta2.fits.gz",
     input:
         "build/dl3/hdu-index.fits.gz",
-        "configs/config.yaml",
-        "configs/model_config.yaml",
+        config="configs/config.yaml",
     conda:
         gammapy_env
     shell:
-        "python scripts/theta2.py -o {output}"
+        "python scripts/calc_theta2.py -c {input.config} -o {output}"
+
+
+rule plot_theta2:
+    output:
+        "build/plots/theta2.pdf",
+    input:
+        "build/dl4/theta2.fits.gz",
+    conda:
+        gammapy_env
+    shell:
+        "python scripts/calc_theta2.py -i {input} -o {output} --preliminary"
 
 
 rule flux_points:
