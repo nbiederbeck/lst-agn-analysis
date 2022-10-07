@@ -6,6 +6,7 @@ args = parser.parse_args()
 
 
 from gammapy.analysis import Analysis, AnalysisConfig
+from gammapy.datasets import Datasets
 from matplotlib import pyplot as plt
 
 
@@ -13,10 +14,7 @@ def main(output):
     config = AnalysisConfig.read("configs/config.yaml")
 
     analysis = Analysis(config)
-    analysis.get_observations()
-
-    analysis.config.datasets.stack = False
-    analysis.get_datasets()
+    analysis.datasets = Datasets.read("build/datasets.fits.gz")
 
     analysis.read_models("build/model-best-fit.yaml")
 
