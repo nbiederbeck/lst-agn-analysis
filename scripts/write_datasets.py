@@ -7,18 +7,20 @@ parser.add_argument("--n-off-regions", default=1)
 args = parser.parse_args()
 
 
+from os import cpu_count
+
 from astropy.coordinates import SkyCoord
 from gammapy.analysis import Analysis, AnalysisConfig
-from gammapy.datasets import Datasets, SpectrumDataset
+from gammapy.datasets import MapDataset
 from gammapy.makers import (
+    DatasetsMaker,
     ReflectedRegionsBackgroundMaker,
     SafeMaskMaker,
     SpectrumDatasetMaker,
     WobbleRegionsFinder,
 )
-from gammapy.maps import Map, MapAxis, RegionGeom
+from gammapy.maps import MapAxis, RegionGeom
 from regions import PointSkyRegion
-from tqdm.auto import tqdm
 
 
 def main(config, output, n_off_regions):
@@ -49,19 +51,7 @@ def main(config, output, n_off_regions):
         interp="log",
         node_type="edges",
     )
-    energy_axis_true = MapAxis.from_bounds(
-        name="energy_true",
-        lo_bnd=config.datasets.geom.axes.energy_true.min.value,
-        hi_bnd=config.datasets.geom.axes.energy_true.max.to_value(
-            config.datasets.geom.axes.energy_true.min.unit
-        ),
-        nbin=config.datasets.geom.axes.energy_true.nbins,
-        unit=config.datasets.geom.axes.energy_true.min.unit,
-        interp="log",
-        node_type="edges",
-    )
     geom = RegionGeom.create(region=on_region, axes=[energy_axis])
-    dataset_empty = SpectrumDataset.create(geom=geom, energy_axis_true=energy_axis_true)
     dataset_maker = SpectrumDatasetMaker(
         containment_correction=False, selection=["counts", "exposure", "edisp"]
     )
@@ -70,19 +60,14 @@ def main(config, output, n_off_regions):
 
     # use the energy threshold specified in the DL3 files
     # TODO Test what influence this has
-    safe_mask_masker = SafeMaskMaker(methods=["aeff-default"])
+    safe_mask_maker = SafeMaskMaker(methods=["aeff-default"])
 
-    # Create datasets from each observation
-    datasets = Datasets()
-    counts = Map.create(skydir=target_position, width=3)
-    for observation in tqdm(analysis.observations):
-        dataset = dataset_maker.run(
-            dataset_empty.copy(name=str(observation.obs_id)), observation
-        )
-        counts.fill_events(observation.events)
-        dataset_on_off = bkg_maker.run(dataset, observation)
-        dataset_on_off = safe_mask_masker.run(dataset_on_off, observation)
-        datasets.append(dataset_on_off)
+    global_dataset = MapDataset.create(geom)
+
+    makers = [dataset_maker, safe_mask_maker, bkg_maker]
+
+    datasets_maker = DatasetsMaker(makers, stack_datasets=True, n_jobs=cpu_count())
+    datasets = datasets_maker.run(global_dataset, analysis.observations)
 
     datasets.write(output, overwrite=True)
 
