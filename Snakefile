@@ -41,7 +41,7 @@ rule plot_theta2:
     conda:
         gammapy_env
     shell:
-        "python scripts/calc_theta2.py -i {input} -o {output} --preliminary"
+        "python scripts/plot_theta2.py -i {input} -o {output} --preliminary"
 
 
 rule flux_points:
