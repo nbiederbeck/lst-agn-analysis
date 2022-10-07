@@ -17,7 +17,7 @@ rule all:
     input:
         "build/plots/theta2.pdf",
         "build/plots/flux_points.pdf",
-        # "build/plots/light_curve.pdf",  # TODO: currently fails
+        "build/plots/light_curve.pdf",
         "build/plots/observation_plots.pdf",
 
 
@@ -47,7 +47,7 @@ rule plot_theta2:
 rule flux_points:
     input:
         "build/model-best-fit.yaml",
-        "build/dl3/hdu-index.fits.gz",
+        "build/datasets.fits.gz",
     output:
         "build/plots/flux_points.pdf",
     conda:
@@ -63,7 +63,6 @@ rule observation_plots:
         "build/plots/observation_plots.pdf",
     resources:
         mem_mb=32000,
-        time=10,
     conda:
         gammapy_env
     shell:
@@ -85,7 +84,7 @@ rule sensitivity:
 rule light_curve:
     input:
         "build/model-best-fit.yaml",
-        "build/dl3/hdu-index.fits.gz",
+        "build/datasets.fits.gz",
     output:
         "build/plots/light_curve.pdf",
     conda:
@@ -112,6 +111,8 @@ rule dataset:
         config="configs/config.yaml",
     output:
         "build/datasets.fits.gz",
+    resources:
+        cpus=4,
     conda:
         gammapy_env
     shell:
@@ -143,7 +144,6 @@ rule dl3:
         irf="build/irf.fits.gz",
     resources:
         mem_mb="12G",
-        cpus=8,
     params:
         cwd=CWD,
         source="Mrk421",
@@ -167,7 +167,6 @@ rule dl3:
 rule dl2:
     resources:
         mem_mb="32G",
-        cpus=16,
     params:
         cwd=CWD,
         models=MODELS_DIR,
@@ -176,7 +175,7 @@ rule dl2:
     output:
         "build/dl2/dl2_LST-1.Run{run_id}.h5",
     input:
-        "dl1/dl1_LST-1.Run{run_id}.h5",
+        "build/dl1/dl1_LST-1.Run{run_id}.h5",
     conda:
         lstchain_env
     log:
@@ -194,7 +193,6 @@ rule dl2:
 rule irf:
     resources:
         mem_mb="8G",
-        cpus=2,
     output:
         "build/irf.fits.gz",
     input:
