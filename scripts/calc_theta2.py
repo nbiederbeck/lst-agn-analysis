@@ -43,7 +43,7 @@ def main(config, output):
         theta_squared_axis=theta2_axis,
     )
 
-    theta2_table.write(output)
+    theta2_table.write(output, overwrite=True)
 
 
 if __name__ == "__main__":
