@@ -44,16 +44,40 @@ rule plot_theta2:
         "python scripts/plot_theta2.py -i {input} -o {output} --preliminary"
 
 
-rule flux_points:
+rule calc_flux_points:
     input:
-        "build/model-best-fit.yaml",
         "build/datasets.fits.gz",
+        config="configs/config.yaml",
+        model="build/model-best-fit.yaml",
+    output:
+        "build/dl4/flux_points.fits.gz",
+    conda:
+        gammapy_env
+    shell:
+        """
+        python scripts/calc_flux_points.py \
+            -c {input.config} \
+            --dataset-path {input[0]} \
+            --best-model-path {input.model} \
+            -o {output}
+        """
+
+
+rule plot_flux_points:
+    input:
+        "build/dl4/flux_points.fits.gz",
+        model="build/model-best-fit.yaml",
     output:
         "build/plots/flux_points.pdf",
     conda:
         gammapy_env
     shell:
-        "python scripts/flux_points.py -o {output}"
+        """
+        python scripts/plot_flux_points.py \
+            -i {input[0]} \
+            --model-path {input.model} \
+            -o {output}
+        """
 
 
 rule observation_plots:
@@ -84,7 +108,6 @@ rule sensitivity:
 rule light_curve:
     input:
         "build/model-best-fit.yaml",
-        "build/datasets.fits.gz",
     output:
         "build/plots/light_curve.pdf",
     conda:
@@ -95,7 +118,6 @@ rule light_curve:
 
 rule model_best_fit:
     input:
-        "build/dl3/hdu-index.fits.gz",
         "build/datasets.fits.gz",
     output:
         "build/model-best-fit.yaml",
