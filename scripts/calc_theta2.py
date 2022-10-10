@@ -10,6 +10,9 @@ from astropy.coordinates import SkyCoord
 from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.makers.utils import make_theta_squared_table
 from gammapy.maps import MapAxis
+from gammapy.utils import pbar
+
+pbar.SHOW_PROGRESS_BAR = True
 
 
 def on_region_to_skyframe(on_region):
