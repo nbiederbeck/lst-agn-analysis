@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
-parser.add_argument("--model-path", required=True)
+parser.add_argument("--best-model-path", required=True)
 parser.add_argument("-o", "--output", required=True)
 args = parser.parse_args()
 
@@ -12,9 +12,9 @@ from gammapy.modeling.models import Models
 from matplotlib import pyplot as plt
 
 
-def main(input_path, model_path, output):
+def main(input_path, best_model_path, output):
     flux_points = FluxPointsDataset.read(input_path)
-    flux_points.models = Models.read(model_path)
+    flux_points.models = Models.read(best_model_path)
 
     fig, axes = plt.subplots(
         nrows=2,

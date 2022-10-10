@@ -75,7 +75,22 @@ rule plot_flux_points:
         """
         python scripts/plot_flux_points.py \
             -i {input[0]} \
-            --model-path {input.model} \
+            --best-model-path {input.model} \
+            -o {output}
+        """
+
+
+rule plot_light_curve:
+    input:
+        "build/dl4/light_curve.fits.gz",
+    output:
+        "build/plots/light_curve.pdf",
+    conda:
+        gammapy_env
+    shell:
+        """
+        python scripts/plot_light_curve.py \
+            -i {input} \
             -o {output}
         """
 
@@ -105,15 +120,23 @@ rule sensitivity:
         "python scripts/sensitivity.py -o {output}"
 
 
-rule light_curve:
+rule calc_light_curve:
     input:
-        "build/model-best-fit.yaml",
+        model="build/model-best-fit.yaml",
+        config="configs/config.yaml",
+        dataset="build/datasets.fits.gz",
     output:
-        "build/plots/light_curve.pdf",
+        "build/dl4/light_curve.fits.gz",
     conda:
         gammapy_env
     shell:
-        "python scripts/light_curve.py -o {output}"
+        """
+        python scripts/calc_light_curve.py \
+            -c {input.config} \
+            --dataset-path {input.dataset} \
+            --best-model-path {input.model} \
+            -o {output} \
+        """
 
 
 rule model_best_fit:
