@@ -66,7 +66,7 @@ def main(config, output, n_off_regions):
 
     makers = [dataset_maker, safe_mask_maker, bkg_maker]
 
-    datasets_maker = DatasetsMaker(makers, stack_datasets=True, n_jobs=cpu_count())
+    datasets_maker = DatasetsMaker(makers, stack_datasets=False, n_jobs=cpu_count())
     datasets = datasets_maker.run(global_dataset, analysis.observations)
 
     datasets.write(output, overwrite=True)
