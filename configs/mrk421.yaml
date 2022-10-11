@@ -3,14 +3,14 @@ general:
         level: info
 
 observations:
-    datastore: build/dl3/
+    datastore: build/dl3/mrk421/
     obs_time:
         start: null
         stop: null
     required_irf:
         - aeff
         - edisp
-    # obs_ids: [8360, 8350, 8118]
+    obs_ids: [8360, 8350, 8118, 7711, 8188]
 
 datasets:
     type: 1d

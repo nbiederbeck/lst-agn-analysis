@@ -15,18 +15,18 @@ gammapy_env = "agn-analysis"
 
 rule all:
     input:
-        "build/plots/theta2.pdf",
-        "build/plots/flux_points.pdf",
-        "build/plots/light_curve.pdf",
-        "build/plots/observation_plots.pdf",
+        "build/plots/mrk421/theta2.pdf",
+        "build/plots/mrk421/flux_points.pdf",
+        "build/plots/mrk421/light_curve.pdf",
+        "build/plots/mrk421/observation_plots.pdf",
 
 
 rule calc_theta2:
     output:
-        "build/dl4/theta2.fits.gz",
+        "build/dl4/{source}/theta2.fits.gz",
     input:
-        "build/dl3/hdu-index.fits.gz",
-        config="configs/config.yaml",
+        "build/dl3/{source}/hdu-index.fits.gz",
+        config="configs/{source}.yaml",
     conda:
         gammapy_env
     shell:
@@ -35,9 +35,9 @@ rule calc_theta2:
 
 rule plot_theta2:
     output:
-        "build/plots/theta2.pdf",
+        "build/plots/{source}/theta2.pdf",
     input:
-        "build/dl4/theta2.fits.gz",
+        "build/dl4/{source}/theta2.fits.gz",
     conda:
         gammapy_env
     shell:
@@ -46,11 +46,11 @@ rule plot_theta2:
 
 rule calc_flux_points:
     input:
-        "build/datasets.fits.gz",
-        config="configs/config.yaml",
-        model="build/model-best-fit.yaml",
+        "build/dl3/{source}/datasets.fits.gz",
+        config="configs/{source}.yaml",
+        model="build/dl4/{source}/model-best-fit.yaml",
     output:
-        "build/dl4/flux_points.fits.gz",
+        "build/dl4/{source}/flux_points.fits.gz",
     conda:
         gammapy_env
     shell:
@@ -65,10 +65,10 @@ rule calc_flux_points:
 
 rule plot_flux_points:
     input:
-        "build/dl4/flux_points.fits.gz",
-        model="build/model-best-fit.yaml",
+        "build/dl4/{source}/flux_points.fits.gz",
+        model="build/dl4/{source}/model-best-fit.yaml",
     output:
-        "build/plots/flux_points.pdf",
+        "build/plots/{source}/flux_points.pdf",
     conda:
         gammapy_env
     shell:
@@ -82,9 +82,9 @@ rule plot_flux_points:
 
 rule plot_light_curve:
     input:
-        "build/dl4/light_curve.fits.gz",
+        "build/dl4/{source}/light_curve.fits.gz",
     output:
-        "build/plots/light_curve.pdf",
+        "build/plots/{source}/light_curve.pdf",
     conda:
         gammapy_env
     shell:
@@ -97,15 +97,20 @@ rule plot_light_curve:
 
 rule observation_plots:
     input:
-        "build/dl3/hdu-index.fits.gz",
+        "build/dl3/{source}/hdu-index.fits.gz",
+        config="configs/{source}.yaml",
     output:
-        "build/plots/observation_plots.pdf",
+        "build/plots/{source}/observation_plots.pdf",
     resources:
         mem_mb=32000,
     conda:
         gammapy_env
     shell:
-        "python scripts/events.py -o {output}"
+        """
+        python scripts/events.py \
+            -c {input.config} \
+            -o {output} \
+        """
 
 
 rule sensitivity:
@@ -122,11 +127,11 @@ rule sensitivity:
 
 rule calc_light_curve:
     input:
-        model="build/model-best-fit.yaml",
-        config="configs/config.yaml",
-        dataset="build/datasets.fits.gz",
+        model="build/dl4/{source}/model-best-fit.yaml",
+        config="configs/{source}.yaml",
+        dataset="build/dl3/{source}/datasets.fits.gz",
     output:
-        "build/dl4/light_curve.fits.gz",
+        "build/dl4/{source}/light_curve.fits.gz",
     conda:
         gammapy_env
     shell:
@@ -141,21 +146,29 @@ rule calc_light_curve:
 
 rule model_best_fit:
     input:
-        "build/datasets.fits.gz",
+        config="configs/{source}.yaml",
+        dataset="build/dl3/{source}/datasets.fits.gz",
+        model="configs/model-{source}.yaml",
     output:
-        "build/model-best-fit.yaml",
+        "build/dl4/{source}/model-best-fit.yaml",
     conda:
         gammapy_env
     shell:
-        "python scripts/fit-model.py -o {output}"
+        """
+        python scripts/fit-model.py \
+            -c {input.config} \
+            --dataset-path {input.dataset} \
+            --model-config {input.model} \
+            -o {output} \
+        """
 
 
 rule dataset:
     input:
-        "build/dl3/hdu-index.fits.gz",
-        config="configs/config.yaml",
+        "build/dl3/{source}/hdu-index.fits.gz",
+        config="configs/{source}.yaml",
     output:
-        "build/datasets.fits.gz",
+        "build/dl3/{source}/datasets.fits.gz",
     resources:
         cpus=4,
     conda:
@@ -168,14 +181,14 @@ rule dl3_hdu_index:
     conda:
         lstchain_env
     output:
-        "build/dl3/hdu-index.fits.gz",
+        "build/dl3/{source}/hdu-index.fits.gz",
     input:
         expand("build/dl3/dl3_LST-1.Run{run_id:05d}.fits.gz", run_id=RUN_IDS),
     shell:
         """
         lstchain_create_dl3_index_files  \
             --input-dl3-dir build/dl3/  \
-            --output-index-path build/dl3/  \
+            --output-index-path $(dirname {output})  \
             --file-pattern dl3_*.fits.gz  \
             --overwrite \
         """

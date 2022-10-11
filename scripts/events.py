@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
+parser.add_argument("-c", "--config", required=True)
 parser.add_argument("-o", "--output", required=True)
 args = parser.parse_args()
 
@@ -19,8 +20,8 @@ def on_region_to_skyframe(on_region):
     return SkyCoord(frame=on_region.frame, b=on_region.lat, l=on_region.lon)
 
 
-def main(output):
-    config = AnalysisConfig.read("configs/config.yaml")
+def main(config, output):
+    config = AnalysisConfig.read(config)
 
     analysis = Analysis(config)
     analysis.get_observations()
