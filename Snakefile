@@ -1,3 +1,4 @@
+# vim: ft=snakemake nofoldenable
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 
 MODELS_DIR = "/fefs/aswg/data/models/20200629_prod5_trans_80/zenith_20deg/south_pointing/20220215_v0.9.1_prod5_trans_80_local_tailcut_8_4/"
