@@ -10,7 +10,7 @@ from itertools import chain
 mrk421_run_ids = set(chain(*mrk421.values()))
 RUN_IDS = mrk421_run_ids
 
-lstchain_env = "lstchain-v0.9.3"
+lstchain_env = "lstchain-v0.9.6"
 gammapy_env = "agn-analysis"
 
 
@@ -28,6 +28,8 @@ rule calc_theta2:
     input:
         "build/dl3/{source}/hdu-index.fits.gz",
         config="configs/{source}.yaml",
+    resources:
+        mem_mb=16000,
     conda:
         gammapy_env
     shell:
@@ -103,7 +105,7 @@ rule observation_plots:
     output:
         "build/plots/{source}/observation_plots.pdf",
     resources:
-        mem_mb=32000,
+        mem_mb=64000,
     conda:
         gammapy_env
     shell:
@@ -171,7 +173,8 @@ rule dataset:
     output:
         "build/dl3/{source}/datasets.fits.gz",
     resources:
-        cpus=4,
+        cpus=16,
+        mem_mb="32G",
     conda:
         gammapy_env
     shell:
