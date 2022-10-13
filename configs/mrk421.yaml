@@ -10,7 +10,7 @@ observations:
     required_irf:
         - aeff
         - edisp
-    obs_ids: [8360, 8350, 8118, 7711, 8188]
+    # obs_ids: [8360, 8350, 8118, 7711, 8188]
 
 datasets:
     type: 1d
@@ -25,12 +25,12 @@ datasets:
         axes:
             energy:
                 min: 20 GeV
-                max: 20 TeV
+                max: 10 TeV
                 nbins: 40
             energy_true:
                 min: 20 GeV
-                max: 20 TeV
-                nbins: 20
+                max: 10 TeV
+                nbins: 10
     background:
         method: "reflected"
         parameters: {min_distance_input: 10 deg}
@@ -38,12 +38,12 @@ datasets:
     containment_correction: false
 
 fit:
-    fit_range: {min: 20 GeV, max: 20 TeV}
+    fit_range: {min: 20 GeV, max: 10 TeV}
 
 flux_points:
-    energy: {min: 20 GeV, max: 20 TeV, nbins: 20}
+    energy: {min: 20 GeV, max: 10 TeV, nbins: 10}
     source: Mrk421
 
 light_curve:
-    energy_edges: {min: 20 GeV, max: 20 TeV, nbins: 1}
+    energy_edges: {min: 20 GeV, max: 10 TeV, nbins: 1}
     source: Mrk421
