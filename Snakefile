@@ -20,6 +20,20 @@ rule all:
         "build/plots/mrk421/flux_points.pdf",
         "build/plots/mrk421/light_curve.pdf",
         "build/plots/mrk421/observation_plots.pdf",
+        "build/plots/edisp.pdf",
+        "build/plots/gh_cut.pdf",
+        "build/plots/radmax_cut.pdf",
+
+
+rule plot_irf:
+    output:
+        "build/plots/{irf}.pdf",
+    input:
+        "build/irf.fits.gz",
+    conda:
+        gammapy_env
+    shell:
+        "python scripts/plot_{wildcards.irf}.py -i {input} -o {output}"
 
 
 rule calc_theta2:
