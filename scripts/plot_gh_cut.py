@@ -9,6 +9,8 @@ from astropy import units as u
 from astropy.table import Table
 from matplotlib import pyplot as plt
 
+energy_unit = u.TeV
+
 
 def main(input_path, output):
     gh_cuts = Table.read(input_path, hdu="GH_CUTS")
@@ -16,7 +18,7 @@ def main(input_path, output):
     fig, ax = plt.subplots()
 
     ax.errorbar(
-        gh_cuts["center"].quantity.to_value(u.TeV),
+        gh_cuts["center"].quantity.to_value(energy_unit),
         gh_cuts["cut"],
         xerr=(gh_cuts["center"] - gh_cuts["low"], gh_cuts["high"] - gh_cuts["center"]),
         ls="",
@@ -24,11 +26,11 @@ def main(input_path, output):
         # lw=2,
         color="black",
     )
-    ax.set_xlabel(f"$E_{{reco}} / {u.TeV}$")
+    ax.set_xlabel(f"$E_{{reco}} / {energy_unit}$")
     ax.set_ylabel("Gammaness")
 
     ax.bar(
-        gh_cuts["center"].quantity.to_value(u.TeV),
+        gh_cuts["center"].quantity.to_value(energy_unit),
         -(1 - gh_cuts["cut"]),
         bottom=1,
         width=gh_cuts["high"] - gh_cuts["low"],
