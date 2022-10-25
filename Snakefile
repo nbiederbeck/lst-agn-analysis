@@ -20,15 +20,15 @@ rule all:
         "build/plots/mrk421/flux_points.pdf",
         "build/plots/mrk421/light_curve.pdf",
         "build/plots/mrk421/observation_plots.pdf",
-        "build/plots/edisp.pdf",
-        "build/plots/gh_cut.pdf",
-        "build/plots/radmax_cut.pdf",
-        "build/plots/aeff.pdf",
+        "build/plots/irf/edisp.pdf",
+        "build/plots/irf/gh_cut.pdf",
+        "build/plots/irf/radmax_cut.pdf",
+        "build/plots/irf/aeff.pdf",
 
 
 rule plot_irf:
     output:
-        "build/plots/{irf}.pdf",
+        "build/plots/irf/{irf}.pdf",
     input:
         "build/irf.fits.gz",
     conda:
