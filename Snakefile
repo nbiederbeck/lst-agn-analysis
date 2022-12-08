@@ -10,8 +10,8 @@ from itertools import chain
 mrk421_run_ids = set(chain(*mrk421.values()))
 RUN_IDS = mrk421_run_ids
 
-lstchain_env = "lstchain-v0.9.6"
-gammapy_env = "agn-analysis"
+lstchain_env = "lstchain-v0.9.11"
+gammapy_env = "envs/environment.yml"
 
 
 rule all:
@@ -202,7 +202,7 @@ rule dl3_hdu_index:
     output:
         "build/dl3/{source}/hdu-index.fits.gz",
     input:
-        expand("build/dl3/dl3_LST-1.Run{run_id:05d}.fits.gz", run_id=RUN_IDS),
+        expand("build/dl3/dl3_LST-1.Run{run_id:05d}.fits", run_id=RUN_IDS),
     shell:
         """
         lstchain_create_dl3_index_files  \
@@ -215,7 +215,7 @@ rule dl3_hdu_index:
 
 rule dl3:
     output:
-        "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
+        "build/dl3/dl3_LST-1.Run{run_id}.fits",
     input:
         "build/dl2/dl2_LST-1.Run{run_id}.h5",
         irf="build/irf.fits.gz",

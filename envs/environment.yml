@@ -2,9 +2,9 @@ name: agn-analysis
 channels:
   - conda-forge
 dependencies:
-  - python=3.9
+  - python=3.10
   - astropy
   - matplotlib
-  - gammapy=0.20.1
+  - gammapy=1.0
   - iminuit
   - tqdm
