@@ -1,8 +1,7 @@
 # vim: ft=snakemake nofoldenable commentstring=#%s
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 
-MODELS_DIR = "/fefs/aswg/data/models/20200629_prod5_trans_80/zenith_20deg/south_pointing/20220215_v0.9.1_prod5_trans_80_local_tailcut_8_4/"
-CWD = "/fefs/aswg/workspace/noah.biederbeck/agn/mrk421/"
+MODELS_DIR = "/fefs/aswg/data/models/AllSky/20220523_allsky_std/dec_6676"
 
 from run_ids import mrk421
 from itertools import chain
@@ -202,68 +201,81 @@ rule dl3_hdu_index:
     output:
         "build/dl3/{source}/hdu-index.fits.gz",
     input:
-        expand("build/dl3/dl3_LST-1.Run{run_id:05d}.fits", run_id=RUN_IDS),
+        expand(
+            "build/dl3/{source}/dl3_LST-1.Run{run_id:05d}.fits.gz",
+            run_id=RUN_IDS,
+            source=["mrk421"],
+        ),
     shell:
         """
         lstchain_create_dl3_index_files  \
             --input-dl3-dir build/dl3/  \
             --output-index-path $(dirname {output})  \
-            --file-pattern dl3_*.fits.gz  \
+            --file-pattern dl3_*.fits  \
             --overwrite \
+        """
+
+
+rule select_small_offset:
+    output:
+        "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits.gz",
+    input:
+        "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
+    conda:
+        gammapy_env
+    log:
+        "build/logs/dl3/{run_id}-{source}.log",
+    shell:
+        """
+        python scripts/select_low_offset.py \
+            -i {input} -o {output} \
         """
 
 
 rule dl3:
     output:
-        "build/dl3/dl3_LST-1.Run{run_id}.fits",
+        "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
     input:
-        "build/dl2/dl2_LST-1.Run{run_id}.h5",
+        "build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
         irf="build/irf.fits.gz",
+        config="configs/irf_tool_config.json",
     resources:
         mem_mb="12G",
-    params:
-        cwd=CWD,
-        source="Mrk421",
-        gh=0.8,
-        outdir=f"{CWD}/build/dl3/",
     conda:
         lstchain_env
     log:
-        "build/logs/dl3/{run_id}.log",
+        "build/logs/dl3/{source}/{run_id}.log",
     shell:
         """
         lstchain_create_dl3_file  \
-            --input-dl2 {params.cwd}/{input[0]}  \
-            --output-dl3-path {params.outdir}  \
+            --input-dl2 {input[0]}  \
+            --output-dl3-path $(dirname $(realpath {output}))  \
             --input-irf {input.irf}  \
-            --source-name {params.source}  \
+            --source-name {wildcards.source}  \
+            --config {input.config} \
             --overwrite \
         """
 
 
 rule dl2:
     resources:
-        mem_mb="32G",
-    params:
-        cwd=CWD,
-        models=MODELS_DIR,
-        config="configs/lstchain.json",
-        outdir="build/dl2",
+        mem_mb="64G",
     output:
-        "build/dl2/dl2_LST-1.Run{run_id}.h5",
+        "build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
     input:
-        "build/dl1/dl1_LST-1.Run{run_id}.h5",
+        "build/dl1/{source}/dl1_LST-1.Run{run_id}.h5",
+        config=f"{MODELS_DIR}/lstchain_config_2022-05-23.json",
     conda:
         lstchain_env
     log:
-        "build/logs/dl2/{run_id}.log",
+        "build/logs/dl2/{run_id}-{source}.log",
     shell:
         """
         lstchain_dl1_to_dl2  \
-            --input-file {params.cwd}/{input}  \
-            --output-dir {params.cwd}/{params.outdir}  \
-            --path-models {params.models}  \
-            --config {params.cwd}/{params.config}  \
+            --input-file {input[0]}  \
+            --output-dir $(dirname $(realpath {output}))  \
+            --path-models $(dirname {input.config})  \
+            --config {input.config}  \
         """
 
 

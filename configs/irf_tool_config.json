@@ -3,7 +3,7 @@
     "max_gh_cut": 0.95,
     "min_gh_cut": 0.1,
     "gh_efficiency": 0.9,
-    "max_theta_cut": 0.5,
+    "max_theta_cut": 0.4,
     "min_theta_cut": 0.05,
     "theta_containment": 0.68
   },
