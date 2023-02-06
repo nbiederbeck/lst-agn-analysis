@@ -2,7 +2,7 @@ SOURCE?=Mrk421
 
 all: build/lst1-$(SOURCE)-runlist-checked.csv
 
-build/lst1-%-runlist-checked.csv: scripts/check_dl1.py build/lst1-%-runlist.csv
+build/lst1-%-runlist-checked.csv: scripts/check-dl1.py build/lst1-%-runlist.csv
 	python $^ $@
 
 build:
