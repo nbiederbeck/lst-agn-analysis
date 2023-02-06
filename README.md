@@ -9,3 +9,9 @@ Create the authentication file `lst1-authentication.json` (fill in username and 
     }
 }
 ```
+
+## Usage
+Provide a known source when running make:
+```
+SOURCE=Crab make
+```

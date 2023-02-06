@@ -1,4 +1,6 @@
-all: build/lst1-Mrk421-runlist-checked.csv
+SOURCE?=Mrk421
+
+all: build/lst1-$(SOURCE)-runlist-checked.csv
 
 build/lst1-%-runlist-checked.csv: scripts/check_dl1.py build/lst1-%-runlist.csv
 	python $^ $@
