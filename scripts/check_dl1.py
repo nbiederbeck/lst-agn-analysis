@@ -10,10 +10,6 @@ args = parser.parse_args()
 
 template = "/fefs/aswg/data/real/OSA/DL1DataCheck_LongTerm/v0.9/{night}/DL1_datacheck_{night}.h5"
 
-df = pd.read_csv(args.input_file)
-df["Result"] = False
-df["Reason"] = ""
-
 
 def check_dl1(item):
     filename = template.format(night=item["Date directory"])
@@ -21,8 +17,13 @@ def check_dl1(item):
     return True
 
 
-for idx, item in df.iterrows():
-    df.loc[idx, "Result"] = check_dl1(item)
+if __name__ == "__main__":
+    # set up dataframe
+    df = pd.read_csv(args.input_file)
+    df["Result"] = False
+    df["Reason"] = ""
 
+    for idx, item in df.iterrows():
+        df.loc[idx, "Result"] = check_dl1(item)
 
-df.to_csv(args.output_file, index=False)
+    df.to_csv(args.output_file, index=False)
