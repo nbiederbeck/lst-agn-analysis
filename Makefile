@@ -5,7 +5,7 @@ all: build/$(SOURCE)_runs.py
 data:
 	mkdir -p $@
 
-data/dl1-%-datachecks.h5: scripts/merge-datachecks.py build/lst1-%-runlist.csv
+data/dl1-%-datachecks.h5: scripts/merge-datachecks.py build/lst1-%-runlist.csv | data
 	python $^ $@
 
 build/%_runs.py: scripts/create-night-run-list.py build/lst1-$(SOURCE)-runlist-checked.csv
