@@ -31,4 +31,4 @@ clean:
 
 .PHONY: all archive clean
 
-.NOTINTERMEDIATE: data/dl1-%-datachecks.h5
+.NOTINTERMEDIATE: data/dl1-$(SOURCE)-datachecks.h5
