@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -67,7 +68,11 @@ if __name__ == "__main__":
     ]
 
     runsummary = vstack(
-        [read_table(filename, "/runsummary/table") for filename in track(filenames)],
+        [
+            read_table(filename, "/runsummary/table")
+            for filename in track(filenames)
+            if Path(filename).exists()
+        ],
         metadata_conflicts="silent",
     )
 
