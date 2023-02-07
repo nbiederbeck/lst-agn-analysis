@@ -6,7 +6,7 @@ import pandas as pd
 from astroplan.moon import moon_illumination
 from astropy import units as u
 from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon, get_sun
-from astropy.table import vstack
+from astropy.table import Table
 from astropy.time import Time
 from ctapipe.io import read_table
 from matplotlib import colors
@@ -15,6 +15,7 @@ from rich.progress import track
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
+parser.add_argument("datacheck_path")
 parser.add_argument("output_path")
 parser.add_argument("source_name")
 args = parser.parse_args()
@@ -67,14 +68,7 @@ if __name__ == "__main__":
         for night in sorted(np.unique(runs["Date directory"]))
     ]
 
-    runsummary = vstack(
-        [
-            read_table(filename, "/runsummary/table")
-            for filename in track(filenames)
-            if Path(filename).exists()
-        ],
-        metadata_conflicts="silent",
-    )
+    runsummary = Table.read(args.datacheck_path)
 
     time = Time(runsummary["time"], format="unix", scale="utc")
 
@@ -182,7 +176,7 @@ if __name__ == "__main__":
     ax.set_ylabel("Pedestal Charge Std.Dev. / p.e.")
     ax.set_xlabel("Altitude / deg")
 
-    fig.colorbar(im, ax=ax, label="Moon Illumination (only colored when above horizon)")
+    fig.colorbar(im, ax=ax, label="Moon Illumination")
 
     ax.legend()
 
