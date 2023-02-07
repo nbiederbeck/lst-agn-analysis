@@ -65,7 +65,6 @@ if __name__ == "__main__":
 
     run_ids = np.array(runs["Run ID"])
 
-    template = "data/DL1_datacheck_{night}.h5"
     filenames = [
         template.format(night=night)
         for night in sorted(np.unique(runs["Date directory"]))
