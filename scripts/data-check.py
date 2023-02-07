@@ -19,6 +19,8 @@ parser.add_argument("output_path")
 parser.add_argument("source_name")
 args = parser.parse_args()
 
+outdir = Path(args.output_path).parent
+
 template = (
     "/fefs/aswg/data/real/OSA/DL1DataCheck_LongTerm/"
     "v0.9/{night}/DL1_datacheck_{night}.h5"
@@ -188,7 +190,7 @@ if __name__ == "__main__":
 
     ax.legend()
 
-    None
+    fig.savefig(outdir / "ped_charge_stddev.pdf")
 
     mask_pedestal_charge = ped_std < 1.9
 
@@ -232,7 +234,7 @@ if __name__ == "__main__":
 
     ax.legend()
 
-    None
+    fig.savefig(outdir / "cosmics_rate.pdf")
 
     # 2.6e3 < cosmics rate < 7.8e3
 
@@ -297,7 +299,7 @@ if __name__ == "__main__":
 
     ax30.tick_params(axis="x", rotation=30)
 
-    None
+    fig.savefig(outdir / "cosmics_pulses_above.pdf")
 
     mask_above10 = get_mask(
         cosmics_rate_above10, *bounds_std(cosmics_rate_above10, n_sig)[::-1]
