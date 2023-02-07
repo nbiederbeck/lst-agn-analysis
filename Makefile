@@ -1,6 +1,9 @@
 SOURCE?=Mrk421
 
-all: build/lst1-$(SOURCE)-runlist-checked.csv
+all: build/$(SOURCE)_runs.py
+
+build/%_runs.py: scripts/create-night-run-list.py build/lst1-$(SOURCE)-runlist-checked.csv
+	python $^ $@
 
 archive: build/lst1-dl1-datachecks-$(SOURCE).tar.gz
 
