@@ -21,10 +21,7 @@ args = parser.parse_args()
 
 outdir = Path(args.output_path).parent
 
-template = (
-    "/fefs/aswg/data/real/OSA/DL1DataCheck_LongTerm/"
-    "v0.9/{night}/DL1_datacheck_{night}.h5"
-)
+template = "data/DL1_datacheck_{night}.h5"
 
 
 def get_mask(x, le=np.inf, ge=-np.inf):
