@@ -12,7 +12,10 @@ parser.add_argument("input_path")
 parser.add_argument("output_path")
 args = parser.parse_args()
 
-template = "data/DL1_datacheck_{night}.h5"
+template = (
+    "/fefs/aswg/data/real/OSA/DL1DataCheck_LongTerm/"
+    "v0.9/{night}/DL1_datacheck_{night}.h5"
+)
 
 
 if __name__ == "__main__":
