@@ -21,10 +21,10 @@ build/lst1-%-runlist-checked.csv: scripts/data-check.py build/lst1-%-runlist.csv
 build:
 	mkdir -p build
 
-build/lst1-runlist.html: | build
+build/lst1-runlist.html: lst1-authentication.json | build
 	https --check-status \
 		https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
-		--session-read-only=./lst1-authentication.json \
+		--session-read-only=./$< \
 		-o $@ || rm -f $@
 
 build/lst1-%-runlist.csv: scripts/select-data.py build/lst1-runlist.html
