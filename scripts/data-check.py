@@ -8,10 +8,8 @@ from astropy import units as u
 from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon, get_sun
 from astropy.table import Table
 from astropy.time import Time
-from ctapipe.io import read_table
 from matplotlib import colors
 from matplotlib import pyplot as plt
-from rich.progress import track
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
@@ -21,8 +19,6 @@ parser.add_argument("source_name")
 args = parser.parse_args()
 
 outdir = Path(args.output_path).parent
-
-template = "data/DL1_datacheck_{night}.h5"
 
 
 def get_mask(x, le=np.inf, ge=-np.inf):
@@ -62,11 +58,6 @@ if __name__ == "__main__":
     runs = pd.read_csv(args.input_path)
 
     run_ids = np.array(runs["Run ID"])
-
-    filenames = [
-        template.format(night=night)
-        for night in sorted(np.unique(runs["Date directory"]))
-    ]
 
     runsummary = Table.read(args.datacheck_path)
 
