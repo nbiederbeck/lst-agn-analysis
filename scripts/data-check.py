@@ -3,11 +3,10 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import tables
 from astroplan.moon import moon_illumination
 from astropy import units as u
 from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon, get_sun
-from astropy.table import Table, vstack
+from astropy.table import vstack
 from astropy.time import Time
 from ctapipe.io import read_table
 from matplotlib import colors
@@ -20,7 +19,10 @@ parser.add_argument("output_path")
 parser.add_argument("source_name")
 args = parser.parse_args()
 
-template = "/fefs/aswg/data/real/OSA/DL1DataCheck_LongTerm/v0.9/{night}/DL1_datacheck_{night}.h5"
+template = (
+    "/fefs/aswg/data/real/OSA/DL1DataCheck_LongTerm/"
+    "v0.9/{night}/DL1_datacheck_{night}.h5"
+)
 
 
 def get_mask(x, le=np.inf, ge=-np.inf):
