@@ -2,6 +2,9 @@ SOURCE?=Mrk421
 
 all: build/$(SOURCE)_runs.py
 
+data:
+	mkdir -p $@
+
 data/dl1-%-datachecks.h5: scripts/merge-datachecks.py build/lst1-%-runlist.csv
 	python $^ $@
 
