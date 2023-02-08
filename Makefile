@@ -11,6 +11,9 @@ data/dl1-%-datachecks.h5: scripts/merge-datachecks.py build/lst1-%-runlist.csv |
 build/%_runs.py: scripts/create-night-run-list.py build/lst1-$(SOURCE)-runlist-checked.csv
 	python $^ $@
 
+build/%_cosmics_pulses_above.pdf: build/%_ped_charge_stddev.pdf
+build/%_ped_charge_stddev.pdf: build/%_cosmics_rate.pdf
+build/%_cosmics_rate.pdf: build/lst1-%-runlist-checked.csv
 build/lst1-%-runlist-checked.csv: scripts/data-check.py build/lst1-%-runlist.csv data/dl1-%-datachecks.h5
 	python $^ $@ $*
 

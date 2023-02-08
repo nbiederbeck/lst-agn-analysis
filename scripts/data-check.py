@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
     ax.legend()
 
-    fig.savefig(outdir / "ped_charge_stddev.pdf")
+    fig.savefig(outdir / f"{args.source_name}_ped_charge_stddev.pdf")
 
     mask_pedestal_charge = ped_std < 1.9
 
@@ -215,7 +215,7 @@ if __name__ == "__main__":
 
     ax.legend()
 
-    fig.savefig(outdir / "cosmics_rate.pdf")
+    fig.savefig(outdir / f"{args.source_name}_cosmics_rate.pdf")
 
     # 2.6e3 < cosmics rate < 7.8e3
 
@@ -280,7 +280,7 @@ if __name__ == "__main__":
 
     ax30.tick_params(axis="x", rotation=30)
 
-    fig.savefig(outdir / "cosmics_pulses_above.pdf")
+    fig.savefig(outdir / f"{args.source_name}_cosmics_pulses_above.pdf")
 
     mask_above10 = get_mask(
         cosmics_rate_above10, *bounds_std(cosmics_rate_above10, n_sig)[::-1]
