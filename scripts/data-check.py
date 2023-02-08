@@ -152,17 +152,20 @@ if __name__ == "__main__":
     ax.set_xlim(-90, 80)
 
     ax.fill_between(
-        ax.get_xlim(),
+        (0, 1),
         *bounds_std(masked, n_sig),
         alpha=0.1,
         label=f"{n_sig} sigma mean",
+        transform=ax.get_yaxis_transform(),
     )
     ax.fill_between(
-        ax.get_xlim(),
+        (0, 1),
         *bounds_mad(masked, n_sig),
         alpha=0.1,
         label=f"{n_sig} sigma median",
+        transform=ax.get_yaxis_transform(),
     )
+    print(f"Bounds for pedestal charge std dev: {bounds_std(masked, n_sig)}")
 
     ax.set_ylabel("Pedestal Charge Std.Dev. / p.e.")
     ax.set_xlabel("Altitude / deg")
@@ -199,18 +202,23 @@ if __name__ == "__main__":
         ".",
     )
     n = 2
+    ax.set_xlim(ax.get_xlim())
     ax.fill_between(
-        time.datetime, *bounds_std(cosmics_rate, n), alpha=0.1, label=f"{n} sigma mean"
+        ax.get_xlim(),
+        *bounds_std(cosmics_rate, n),
+        alpha=0.1,
+        label=f"{n} sigma mean",
     )
     ax.fill_between(
-        time.datetime,
+        ax.get_xlim(),
         *bounds_mad(cosmics_rate, n),
         alpha=0.1,
         label=f"{n} sigma median",
     )
+    print(f"Bounds for cosmics: {bounds_std(cosmics_rate, n)}")
 
     ax.set_xlabel("Time")
-    ax.set_ylabel("Rate / /s")
+    ax.set_ylabel("Rate / 1/s")
     ax.tick_params(axis="x", rotation=30)
 
     ax.legend()
@@ -257,26 +265,30 @@ if __name__ == "__main__":
         label="Pulses > 30 p.e.",
     )
 
+    ax10.set_xlim(ax10.get_xlim())
+    ax30.set_xlim(ax30.get_xlim())
     ax10.fill_between(
-        time.datetime,
+        ax.get_xlim(),
         *bounds_std(cosmics_rate_above10, n_sig),
         alpha=0.1,
         label=f"{n_sig} sigma mean",
     )
     ax30.fill_between(
-        time.datetime,
+        ax.get_xlim(),
         *bounds_std(cosmics_rate_above30, n_sig),
         alpha=0.1,
         label=f"{n_sig} sigma mean",
     )
+    print(f"Bounds for cosmics above 10: {bounds_std(cosmics_rate_above10, n_sig)}")
+    print(f"Bounds for cosmics above 30: {bounds_std(cosmics_rate_above30, n_sig)}")
 
     ax10.legend()
     ax30.legend()
 
     ax30.set_xlabel("Time")
 
-    ax10.set_ylabel("Rate / /s")
-    ax30.set_ylabel("Rate / /s")
+    ax10.set_ylabel("Rate / 1/s")
+    ax30.set_ylabel("Rate / 1/s")
 
     ax30.tick_params(axis="x", rotation=30)
 
