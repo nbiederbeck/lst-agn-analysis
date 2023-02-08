@@ -18,7 +18,7 @@ template = (
 )
 
 
-if __name__ == "__main__":
+def main():
     runs = pd.read_csv(args.input_path)
 
     filenames = [
@@ -26,12 +26,21 @@ if __name__ == "__main__":
         for night in sorted(np.unique(runs["Date directory"]))
     ]
 
+    tables = [
+        read_table(filename, "/runsummary/table")
+        for filename in track(filenames)
+        if Path(filename).exists()
+    ]
+
+    if len(tables) == 0:
+        p = Path(args.output_path)
+        if not p.exists():
+            raise ValueError("Output path does not exist and no files to merge.")
+        p.touch()
+        return
+
     runsummary = vstack(
-        [
-            read_table(filename, "/runsummary/table")
-            for filename in track(filenames)
-            if Path(filename).exists()
-        ],
+        tables,
         metadata_conflicts="silent",
     )
 
@@ -42,3 +51,7 @@ if __name__ == "__main__":
         path="data",
         compression=True,
     )
+
+
+if __name__ == "__main__":
+    main()
