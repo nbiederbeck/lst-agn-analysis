@@ -1,6 +1,6 @@
 SNAKEMAKE_PROFILE?=slurm
 
-all:
+all: build/all-linked.txt
 	snakemake --profile=$(SNAKEMAKE_PROFILE)
 
 %:
