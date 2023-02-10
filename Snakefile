@@ -9,8 +9,9 @@ from itertools import chain
 mrk421_run_ids = set(chain(*mrk421.values()))
 RUN_IDS = mrk421_run_ids
 
-lstchain_env = "lstchain-v0.9.11"
-gammapy_env = "envs/environment.yml"
+lstchain_env = "lstchain-v0.9.13"
+# gammapy_env = "envs/environment.yml"
+gammapy_env = "gammapy-v1.0"
 
 
 rule all:
@@ -63,7 +64,7 @@ rule plot_theta2:
 
 rule calc_flux_points:
     input:
-        "build/dl3/{source}/datasets.fits.gz",
+        "build/dl4/{source}/datasets.fits.gz",
         config="configs/{source}.yaml",
         model="build/dl4/{source}/model-best-fit.yaml",
     output:
@@ -146,7 +147,7 @@ rule calc_light_curve:
     input:
         model="build/dl4/{source}/model-best-fit.yaml",
         config="configs/{source}.yaml",
-        dataset="build/dl3/{source}/datasets.fits.gz",
+        dataset="build/dl4/{source}/datasets.fits.gz",
     output:
         "build/dl4/{source}/light_curve.fits.gz",
     conda:
@@ -164,7 +165,7 @@ rule calc_light_curve:
 rule model_best_fit:
     input:
         config="configs/{source}.yaml",
-        dataset="build/dl3/{source}/datasets.fits.gz",
+        dataset="build/dl4/{source}/datasets.fits.gz",
         model="configs/model-{source}.yaml",
     output:
         "build/dl4/{source}/model-best-fit.yaml",
@@ -185,7 +186,7 @@ rule dataset:
         "build/dl3/{source}/hdu-index.fits.gz",
         config="configs/{source}.yaml",
     output:
-        "build/dl3/{source}/datasets.fits.gz",
+        "build/dl4/{source}/datasets.fits.gz",
     resources:
         cpus=16,
         mem_mb="32G",
@@ -237,7 +238,7 @@ rule dl3:
         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
     input:
         "build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
-        irf="build/irf.fits.gz",
+        irf="build/irf/{source}/irf_Run{run_id}.fits.gz",
         config="configs/irf_tool_config.json",
     resources:
         mem_mb="12G",
@@ -264,7 +265,7 @@ rule dl2:
         "build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
     input:
         "build/dl1/{source}/dl1_LST-1.Run{run_id}.h5",
-        config=f"{MODELS_DIR}/lstchain_config_2022-05-23.json",
+        config="build/models/{source}/model_Run{run_id}/lstchain_config.json",
     conda:
         lstchain_env
     log:
@@ -279,22 +280,22 @@ rule dl2:
         """
 
 
-rule irf:
-    resources:
-        mem_mb="8G",
-    output:
-        "build/irf.fits.gz",
-    input:
-        gammas="/fefs/aswg/data/mc/DL2/20200629_prod5_trans_80/gamma/zenith_20deg/south_pointing/20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf/off0.4deg/dl2_gamma_20deg_180deg_off0.4deg_20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf_testing.h5",
-        protons="/fefs/aswg/data/mc/DL2/20200629_prod5_trans_80/proton/zenith_20deg/south_pointing/20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf/dl2_proton_20deg_180deg_20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf_testing.h5",
-        config="configs/irf_tool_config.json",
-    conda:
-        lstchain_env
-    shell:
-        """
-        lstchain_create_irf_files \
-            -o {output} \
-            -g {input.gammas} \
-            -p {input.protons} \
-            --config {input.config} \
-        """
+# rule irf:
+#     resources:
+#         mem_mb="8G",
+#     output:
+#         "build/irf.fits.gz",
+#     input:
+#         gammas="/fefs/aswg/data/mc/DL2/20200629_prod5_trans_80/gamma/zenith_20deg/south_pointing/20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf/off0.4deg/dl2_gamma_20deg_180deg_off0.4deg_20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf_testing.h5",
+#         protons="/fefs/aswg/data/mc/DL2/20200629_prod5_trans_80/proton/zenith_20deg/south_pointing/20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf/dl2_proton_20deg_180deg_20220303_v0.9.3_prod5_trans_80_zen20az180_dl1ab_tuned_psf_testing.h5",
+#         config="configs/irf_tool_config.json",
+#     conda:
+#         lstchain_env
+#     shell:
+#         """
+#         lstchain_create_irf_files \
+#             -o {output} \
+#             -g {input.gammas} \
+#             -p {input.protons} \
+#             --config {input.config} \
+#         """
