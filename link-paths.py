@@ -1,32 +1,40 @@
-import re
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument("--prod", required=True)
+parser.add_argument("--dec", required=True)
+parser.add_argument("--runsummary", required=True)
+parser.add_argument("-o", "--output-path", required=True)
+args = parser.parse_args()
+
 from pathlib import Path
 
 import astropy.units as u
 import numpy as np
-import tables
 from astropy.coordinates import AltAz, EarthLocation
+from astropy.table import Table
 from astropy.time import Time
 from tqdm import tqdm
 
-from run_ids import mrk421, one_es1959
+from run_ids import mrk421
 
 sources = {
     "mrk421": mrk421,
-    "one_es1959": one_es1959,
 }
 
-outdir = "build/dl1/{source}/"
-filename = "dl1_LST-1.Run{run_id:05d}.h5"
-template_target = "/fefs/aswg/data/real/DL1/{night}/v0.9/tailcut84/" + filename
-template_linkname = outdir + filename
+outdir_dl1 = "build/dl1/{source}/"
+filename_dl1 = "dl1_LST-1.Run{run_id:05d}.h5"
+template_target_dl1 = "/fefs/aswg/data/real/DL1/{night}/v0.9/tailcut84/" + filename_dl1
+template_linkname_dl1 = outdir_dl1 + filename_dl1
 
-base_irf = Path("/fefs/aswg/data/mc/IRF/AllSky/")
-base_mc = Path("/fefs/aswg/data/models/AllSky/")
-template_irf = "{prod}/TestingDataset/{dec}/"
-template_mc = "{prod}/{dec}/"
-path = Path(
-    "/fefs/aswg/data/mc/IRF/AllSky/20221027_v0.9.9_crab_tuned/TestingDataset/dec_2276"
-)
+outdir_irf = "build/irf/{source}/"
+filename_irf = "irf_Run{run_id:05d}.fits.gz"
+template_target_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}/irf_{prod}_{node}.fits.gz"  # noqa
+template_linkname_irf = outdir_irf + filename_irf
+
+outdir_model = "build/models/{source}/model_Run{run_id:05d}/"
+template_target_model = "/fefs/aswg/data/models/AllSky/{prod}/{dec}/"
+template_linkname_model = outdir_model
 
 
 @u.quantity_input
@@ -55,64 +63,89 @@ def build_altaz(*, alt: u.deg = None, zd: u.deg = None, az: u.deg = None) -> Alt
     return AltAz(alt=alt, az=az, location=location, obstime=obstime)
 
 
-def get_pointing_of_run(path: Path) -> AltAz:
-    """Get the mean telescope position of a single run."""
-    with tables.open_file(
-        path, root_uep="/dl1/event/telescope/parameters", mode="r"
-    ) as f:
-        table = f.get_node("/LST_LSTCam")
-        zd_mean = u.Quantity(table.col("alt_tel").mean(), u.rad)
-        az_mean = u.Quantity(table.col("az_tel").mean(), u.rad)
-    return build_altaz(zd=zd_mean, az=az_mean)
+def get_theta_az_from_node(node: str) -> np.ndarray:
+    """Strip theta and az from name of node.
+
+    `node` must be of kind 'node_theta_10.0_az_102.199_'.
+    """
+    _, _, theta, _, az, _ = node.split("_")
+    return np.array([theta, az], dtype=float)
 
 
 def get_pointings_of_irfs(filelist) -> AltAz:
     """From the list of directory names with AllSky IRFs,
     build the AltAz frame with pointings.
 
-    The names are of kind 'node_theta_10.0_az_102.199_',
-    and the numbers are extracted via regex.
+    The names are of kind 'node_theta_10.0_az_102.199_'.
     """
-    decimal = re.compile(r"\d+.\d+")
-    theta, az = np.array([list(map(float, re.findall(decimal, f))) for f in filelist]).T
+    theta, az = np.array([get_theta_az_from_node(f) for f in filelist]).T
 
     return build_altaz(zd=theta * u.deg, az=az * u.deg)
 
 
 def main():
-    prod = "20221027_v0.9.9_crab_tuned"
-    dec = "dec_2276"
+    prod = args.prod
+    dec = args.dec
 
-    path = base_irf / template_irf.format(prod=prod, dec=dec)
-    filelist = [p.name for p in path.iterdir()]
+    runsummary = Table.read(args.runsummary)
+
+    path = Path(template_target_irf.format(prod=prod, dec=dec, node=""))
+    filelist = [p.name for p in path.parent.iterdir()]
     irf_pointings: AltAz = get_pointings_of_irfs(filelist)
 
-    verbose = False
-    for name, source in tqdm(sources.items(), disable=not verbose):
-        for night, run_ids in tqdm(source.items(), position=1, disable=not verbose):
-            for run_id in tqdm(run_ids, position=2, disable=not verbose):
-                target = template_target.format(night=night, run_id=run_id)
+    progress = tqdm()
 
-                pointing: AltAz = get_pointing_of_run(target)
+    for name, source in sources.items():
+        for night, run_ids in source.items():
+            for run_id in run_ids:
+                target_dl1 = Path(
+                    template_target_dl1.format(night=night, run_id=run_id)
+                )
+
+                run = runsummary[runsummary["runnumber"] == run_id]
+
+                pointing = build_altaz(
+                    alt=run["mean_altitude"] * u.rad,
+                    az=run["mean_azimuth"] * u.rad,
+                )
                 nearest_irf = pointing.separation(irf_pointings).argmin()
                 node = filelist[nearest_irf]
 
-                linkname = Path(
-                    template_linkname.format(
+                linkname_dl1 = Path(
+                    template_linkname_dl1.format(
                         night=night,
                         run_id=run_id,
                         source=name,
                     )
                 )
 
-                # link irf
-                # link model
+                target_irf = Path(
+                    template_target_irf.format(prod=prod, dec=dec, node=node)
+                )
+                linkname_irf = Path(
+                    template_linkname_irf.format(source=name, run_id=run_id)
+                )
 
-                if not linkname.is_file():
-                    # print(linkname)
-                    print(path / node)
-                    linkname.parent.mkdir(exist_ok=True, parents=True)
-                    linkname.symlink_to(target)
+                target_model = Path(template_target_model.format(prod=prod, dec=dec))
+                linkname_model = Path(
+                    template_linkname_model.format(source=name, run_id=run_id)
+                )
+
+                if not linkname_dl1.exists():
+                    linkname_dl1.parent.mkdir(exist_ok=True, parents=True)
+                    linkname_dl1.symlink_to(target_dl1)
+
+                if not linkname_irf.exists():
+                    linkname_irf.parent.mkdir(exist_ok=True, parents=True)
+                    linkname_irf.symlink_to(target_irf)
+
+                if not linkname_model.exists():
+                    linkname_model.parent.mkdir(exist_ok=True, parents=True)
+                    linkname_model.symlink_to(target_model)
+
+                progress.update()
+
+    Path(args.output_path).touch()
 
 
 if __name__ == "__main__":
