@@ -4,6 +4,7 @@ parser = ArgumentParser()
 parser.add_argument("-c", "--config", required=True)
 parser.add_argument("-o", "--output", required=True)
 parser.add_argument("--n-off-regions", default=1)
+parser.add_argument("-j", "--n-jobs", default=1, type=int)
 args = parser.parse_args()
 
 
@@ -23,12 +24,14 @@ from gammapy.maps import MapAxis, RegionGeom
 from regions import PointSkyRegion
 
 
-def main(config, output, n_off_regions):
+def main(config, output, n_off_regions, n_jobs):
     """
     Create dl4 datasets from a dl3 datastore for a pointlike analysis
     This can currently (Gammapy 0.20.1) not be done with the high-level interface
     as energy-dependent theta-cuts have just been added.
     """
+    if n_jobs == 0:
+        n_jobs = cpu_count()
     # Standard high-level interface stuff
     config = AnalysisConfig.read(config)
     analysis = Analysis(config)
@@ -66,7 +69,7 @@ def main(config, output, n_off_regions):
 
     makers = [dataset_maker, safe_mask_maker, bkg_maker]
 
-    datasets_maker = DatasetsMaker(makers, stack_datasets=False, n_jobs=cpu_count())
+    datasets_maker = DatasetsMaker(makers, stack_datasets=False, n_jobs=n_jobs)
     datasets = datasets_maker.run(global_dataset, analysis.observations)
 
     datasets.write(output, overwrite=True)
