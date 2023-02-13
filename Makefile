@@ -6,6 +6,9 @@ all: build/all-linked.txt
 %:
 	snakemake --profile=$(SNAKEMAKE_PROFILE) $@
 
+build:
+	mkdir -p $@
+
 build/all-linked.txt: data/dl1-Mrk421-datachecks.h5 link-paths.py | build
 	python \
 		link-paths.py \

@@ -1,8 +1,6 @@
 # vim: ft=snakemake nofoldenable commentstring=#%s
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 
-MODELS_DIR = "/fefs/aswg/data/models/AllSky/20220523_allsky_std/dec_6676"
-
 from run_ids import mrk421
 from itertools import chain
 
@@ -10,8 +8,7 @@ mrk421_run_ids = set(chain(*mrk421.values()))
 RUN_IDS = mrk421_run_ids
 
 lstchain_env = "lstchain-v0.9.13"
-# gammapy_env = "envs/environment.yml"
-gammapy_env = "gammapy-v1.0"
+gammapy_env = "envs/environment.yml"
 
 
 rule all:
@@ -20,21 +17,21 @@ rule all:
         "build/plots/mrk421/flux_points.pdf",
         "build/plots/mrk421/light_curve.pdf",
         "build/plots/mrk421/observation_plots.pdf",
-        "build/plots/irf/edisp.pdf",
-        "build/plots/irf/gh_cut.pdf",
-        "build/plots/irf/radmax_cut.pdf",
-        "build/plots/irf/aeff.pdf",
+        # "build/plots/irf/edisp.pdf",
+        # "build/plots/irf/gh_cut.pdf",
+        # "build/plots/irf/radmax_cut.pdf",
+        # "build/plots/irf/aeff.pdf",
 
 
-rule plot_irf:
-    output:
-        "build/plots/irf/{irf}.pdf",
-    input:
-        "build/irf.fits.gz",
-    conda:
-        gammapy_env
-    shell:
-        "python scripts/plot_{wildcards.irf}.py -i {input} -o {output}"
+# rule plot_irf:
+#     output:
+#         "build/plots/irf/{irf}.pdf",
+#     input:
+#         "build/irf.fits.gz",
+#     conda:
+#         gammapy_env
+#     shell:
+#         "python scripts/plot_{wildcards.irf}.py -i {input} -o {output}"
 
 
 rule calc_theta2:
@@ -181,6 +178,7 @@ rule model_best_fit:
         """
 
 
+localrules: dataset
 rule dataset:
     input:
         "build/dl3/{source}/hdu-index.fits.gz",
@@ -190,12 +188,14 @@ rule dataset:
     resources:
         cpus=16,
         mem_mb="32G",
+        time=30,
     conda:
         gammapy_env
     shell:
         "python scripts/write_datasets.py -c {input.config} -o {output}"
 
 
+localrules: dl3_hdu_index
 rule dl3_hdu_index:
     conda:
         lstchain_env
@@ -210,20 +210,23 @@ rule dl3_hdu_index:
     shell:
         """
         lstchain_create_dl3_index_files  \
-            --input-dl3-dir build/dl3/  \
-            --output-index-path $(dirname {output})  \
-            --file-pattern dl3_*.fits  \
+            --input-dl3-dir build/dl3/{wildcards.source}  \
+            --output-index-path build/dl3/{wildcards.source}  \
+            --file-pattern 'dl3_*.fits.gz'  \
             --overwrite \
         """
 
 
-rule select_small_offset:
+localrules: select_low_offset
+rule select_low_offset:
     output:
         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits.gz",
     input:
         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
     conda:
         gammapy_env
+    resources:
+        time=10,
     log:
         "build/logs/dl3/{run_id}-{source}.log",
     shell:
@@ -242,6 +245,7 @@ rule dl3:
         config="configs/irf_tool_config.json",
     resources:
         mem_mb="12G",
+        time=30,
     conda:
         lstchain_env
     log:
