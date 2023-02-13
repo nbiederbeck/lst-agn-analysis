@@ -5,6 +5,8 @@ dependencies:
   - python=3.10
   - astropy
   - matplotlib
-  - gammapy=1.0
+  - gammapy=1
+  - scipy<1.10
+  - numpy<1.23
   - iminuit
   - tqdm
