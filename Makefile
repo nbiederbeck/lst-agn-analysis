@@ -1,6 +1,4 @@
-SOURCE?=Mrk421
-
-all: build/$(SOURCE)_runs.json
+all: build/runs.json
 
 %:
 	snakemake -c1 --use-conda $@

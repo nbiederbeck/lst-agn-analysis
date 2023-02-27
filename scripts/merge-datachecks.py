@@ -5,13 +5,17 @@ import numpy as np
 import pandas as pd
 from astropy import units as u
 from astropy.table import vstack
+from config import Config
 from ctapipe.io import read_table
 from rich.progress import track
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
 parser.add_argument("output_path")
+parser.add_argument("-c", "--config", required=True)
 args = parser.parse_args()
+
+config = Config.parse_file(args.config)
 
 template = (
     "/fefs/aswg/data/real/OSA/DL1DataCheck_LongTerm/"

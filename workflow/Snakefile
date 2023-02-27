@@ -1,67 +1,72 @@
 env = "lstchain-v0.9.13"
+config = "config.json"
 
 
 rule all:
+    """Docstring comment for a rule."""
     input:
-        "build/Mrk421_runs.json",
+        "build/runs.json",
 
 
 rule download_runlist:
     input:
         "lst1-authentication.json",
     output:
-        "build/lst1-runlist.html",
+        "build/runlist.html",
     conda:
         env
     shell:
         "\
         https --check-status \
-        https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
-        --session-read-only=./{input} \
-        -o {output} || rm -f {output} \
+            https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
+            --session-read-only=./{input} \
+            -o {output} || rm -f {output} \
         "
 
 
 rule select_datasets:
     input:
-        "build/lst1-runlist.html",
+        "build/runlist.html",
+        config=config,
     output:
-        "build/lst1-{source}-runlist.csv",
+        "build/runlist.csv",
     conda:
         env
     shell:
-        "python scripts/select-data.py {input} {output} {wildcards.source}"
+        "python scripts/select-data.py {input[0]} {output} -c {input.config}"
 
 
 rule merge_datachecks:
     input:
-        "build/lst1-{source}-runlist.csv",
+        "build/runlist.csv",
+        config=config,
     output:
-        "build/dl1-{source}-datachecks.h5",
+        "build/dl1-datachecks.h5",
     conda:
         env
     shell:
-        "python scripts/merge-datachecks.py {input} {output}"
+        "python scripts/merge-datachecks.py {input[0]} {output} -c {input.config}"
 
 
 rule run_ids:
     output:
-        "build/{source}_runs.json",
+        "build/runs.json",
     input:
-        "build/lst1-{source}-runlist-checked.csv",
+        "build/runlist-checked.csv",
+        config=config,
     conda:
         env
     shell:
-        "python scripts/create-night-run-list.py {input} {output}"
+        "python scripts/create-night-run-list.py {input[0]} {output} -c {input.config}"
 
 
 rule data_check:
     input:
-        "build/lst1-{source}-runlist.csv",
-        "build/dl1-{source}-datachecks.h5",
-        "config.json",
+        "build/runlist.csv",
+        "build/dl1-datachecks.h5",
+        config=config,
     output:
-        "build/lst1-{source}-runlist-checked.csv",
+        "build/runlist-checked.csv",
     conda:
         env
     shell:
@@ -71,7 +76,7 @@ rule data_check:
             {input[0]} \
             {input[1]} \
             --output {output} \
-            --config {input[2]} \
+            --config {input.config} \
         "
 
 
