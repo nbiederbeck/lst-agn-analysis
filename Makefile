@@ -2,41 +2,8 @@ SOURCE?=Mrk421
 
 all: build/$(SOURCE)_runs.py
 
-data:
-	mkdir -p $@
-
-data/dl1-%-datachecks.h5: scripts/merge-datachecks.py build/lst1-%-runlist.csv | data
-	python $^ $@
-
-build/%_runs.py: scripts/create-night-run-list.py build/lst1-$(SOURCE)-runlist-checked.csv
-	python $^ $@
-
-build/%_cosmics_pulses_above.pdf: build/%_ped_charge_stddev.pdf
-build/%_ped_charge_stddev.pdf: build/%_cosmics_rate.pdf
-build/%_cosmics_rate.pdf: build/lst1-%-runlist-checked.csv
-build/lst1-%-runlist-checked.csv: scripts/data-check.py build/lst1-%-runlist.csv data/dl1-%-datachecks.h5 config.json
-	python \
-		scripts/data-check.py \
-		build/lst1-$*-runlist.csv \
-		data/dl1-$*-datachecks.h5 \
-		-o $@ \
-		-c config.json
-
-build:
-	mkdir -p $@
-
-build/lst1-runlist.html: lst1-authentication.json | build
-	https --check-status \
-		https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
-		--session-read-only=./$< \
-		-o $@ || rm -f $@
-
-build/lst1-%-runlist.csv: scripts/select-data.py build/lst1-runlist.html
-	python $^ $@ $*
+%:
+	snakemake -c1 --use-conda $@
 
 clean:
 	rm -rf build
-
-.PHONY: all archive clean
-
-.NOTINTERMEDIATE: data/dl1-$(SOURCE)-datachecks.h5

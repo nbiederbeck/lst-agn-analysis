@@ -1,0 +1,82 @@
+env = "lstchain-v0.9.13"
+
+
+rule all:
+    input:
+        "build/Mrk421_runs.py",
+
+
+rule download_runlist:
+    input:
+        "lst1-authentication.json",
+    output:
+        "build/lst1-runlist.html",
+    conda:
+        env
+    shell:
+        "\
+        https --check-status \
+        https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
+        --session-read-only=./{input} \
+        -o {output} || rm -f {output} \
+        "
+
+
+rule select_datasets:
+    input:
+        "build/lst1-runlist.html",
+    output:
+        "build/lst1-{source}-runlist.csv",
+    conda:
+        env
+    shell:
+        "python scripts/select-data.py {input} {output} {wildcards.source}"
+
+
+rule merge_datachecks:
+    input:
+        "build/lst1-{source}-runlist.csv",
+    output:
+        "build/dl1-{source}-datachecks.h5",
+    conda:
+        env
+    shell:
+        "python scripts/merge-datachecks.py {input} {output}"
+
+
+rule run_ids:
+    output:
+        "build/{source}_runs.py",
+    input:
+        "build/lst1-{source}-runlist-checked.csv",
+    conda:
+        env
+    shell:
+        "python scripts/create-night-run-list.py {input} {output}"
+
+
+rule data_check:
+    input:
+        "build/lst1-{source}-runlist.csv",
+        "build/dl1-{source}-datachecks.h5",
+        "config.json",
+    output:
+        "build/lst1-{source}-runlist-checked.csv",
+    conda:
+        env
+    shell:
+        "\
+        python \
+            scripts/data-check.py \
+            {input[0]} \
+            {input[1]} \
+            --output {output} \
+            --config {input[2]} \
+        "
+
+
+rule authentication:
+    output:
+        "lst1-authentication.json",
+    shell:
+        "echo 'Provide the file {output} as explained in README.md'"
