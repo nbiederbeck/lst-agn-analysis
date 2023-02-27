@@ -81,7 +81,6 @@ if __name__ == "__main__":
     tel_pointing = SkyCoord(
         ra=runsummary["mean_ra"],
         dec=runsummary["mean_dec"],
-        unit=u.deg,
     )
 
     # this should be 'configurable'

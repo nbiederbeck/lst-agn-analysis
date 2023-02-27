@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from astropy import units as u
 from astropy.table import vstack
 from ctapipe.io import read_table
 from rich.progress import track
@@ -43,6 +44,9 @@ def main():
         tables,
         metadata_conflicts="silent",
     )
+
+    runsummary["mean_ra"].unit = u.deg
+    runsummary["mean_dec"].unit = u.deg
 
     runsummary.write(
         args.output_path,
