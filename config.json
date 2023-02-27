@@ -1,0 +1,15 @@
+{
+    "source": "Mrk421",
+    "pedestal_ul": 1.9,
+    "pedestal_ll": "-Infinity",
+    "pedestal_sigma": 2,
+    "cosmics_ul": 7.8e3,
+    "cosmics_ll": 2.6e3,
+    "cosmics_sigma": 2,
+    "cosmics_10_ul": null,
+    "cosmics_10_ll": null,
+    "cosmics_10_sigma": 2,
+    "cosmics_30_ul": null,
+    "cosmics_30_ll": null,
+    "cosmics_30_sigma": 2
+}

@@ -2,3 +2,4 @@ build/
 lst1-authentication.json
 .ipynb_checkpoints/
 data/
+__pycache__/

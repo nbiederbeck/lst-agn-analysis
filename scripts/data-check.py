@@ -8,17 +8,20 @@ from astropy import units as u
 from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon, get_sun
 from astropy.table import Table
 from astropy.time import Time
+from config import Config
 from matplotlib import colors
 from matplotlib import pyplot as plt
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
 parser.add_argument("datacheck_path")
-parser.add_argument("output_path")
-parser.add_argument("source_name")
+parser.add_argument("-o", "--output_path", required=True)
+parser.add_argument("-c", "--config", required=True)
 args = parser.parse_args()
 
 outdir = Path(args.output_path).parent
+
+config = Config.parse_file(args.config)
 
 
 def get_mask(x, le=np.inf, ge=-np.inf):
@@ -82,7 +85,7 @@ if __name__ == "__main__":
     )
 
     # this should be 'configurable'
-    source_coordinates = SkyCoord.from_name(args.source_name)
+    source_coordinates = SkyCoord.from_name(config.source)
 
     separation = tel_pointing.separation(source_coordinates)
 
@@ -107,14 +110,6 @@ if __name__ == "__main__":
     # Exclude runs with high zenith (?)
     #
     # Better later.
-
-    zenith = u.Quantity(90, u.deg) - u.Quantity(runsummary["min_altitude"], unit=u.rad)
-    zenith_low = zenith < u.Quantity(35, u.deg)
-
-    print(
-        "I do not intend to remove runs depending on zenith distance here, "
-        "but rather do that on higher levels (e.g. DL3)."
-    )
 
     # Exclude runs with high pedestal charges.  Check first for impact of moon.
 
@@ -146,7 +141,7 @@ if __name__ == "__main__":
     )
 
     masked = ped_std[moon.alt.to_value(u.deg) < 0]
-    n_sig = 2
+    n_sig = config.pedestal_sigma
 
     ax.set_ylim(0)
     ax.set_xlim(-90, 80)
@@ -174,9 +169,11 @@ if __name__ == "__main__":
 
     ax.legend()
 
-    fig.savefig(outdir / f"{args.source_name}_ped_charge_stddev.pdf")
+    fig.savefig(outdir / f"{config.source}_ped_charge_stddev.pdf")
 
-    mask_pedestal_charge = ped_std < 1.9
+    mask_pedestal_charge = (config.pedestal_ll < ped_std) & (
+        ped_std < config.pedestal_ul
+    )
 
     mask = mask_pedestal_charge
     runsummary = runsummary[mask]
@@ -201,21 +198,21 @@ if __name__ == "__main__":
         cosmics_rate,
         ".",
     )
-    n = 2
+    n_sig = config.cosmics_sigma
     ax.set_xlim(ax.get_xlim())
     ax.fill_between(
         ax.get_xlim(),
-        *bounds_std(cosmics_rate, n),
+        *bounds_std(cosmics_rate, n_sig),
         alpha=0.1,
-        label=f"{n} sigma mean",
+        label=f"{n_sig} sigma mean",
     )
     ax.fill_between(
         ax.get_xlim(),
-        *bounds_mad(cosmics_rate, n),
+        *bounds_mad(cosmics_rate, n_sig),
         alpha=0.1,
-        label=f"{n} sigma median",
+        label=f"{n_sig} sigma median",
     )
-    print(f"Bounds for cosmics: {bounds_std(cosmics_rate, n)}")
+    print(f"Bounds for cosmics: {bounds_std(cosmics_rate, n_sig)}")
 
     ax.set_xlabel("Time")
     ax.set_ylabel("Rate / 1/s")
@@ -223,11 +220,9 @@ if __name__ == "__main__":
 
     ax.legend()
 
-    fig.savefig(outdir / f"{args.source_name}_cosmics_rate.pdf")
+    fig.savefig(outdir / f"{config.source}_cosmics_rate.pdf")
 
-    # 2.6e3 < cosmics rate < 7.8e3
-
-    mask_cosmics = get_mask(cosmics_rate, ge=2.6e3, le=7.8e3)
+    mask_cosmics = get_mask(cosmics_rate, ge=config.cosmics_ll, le=config.cosmics_ul)
 
     mask = mask_cosmics
     runsummary = runsummary[mask]
@@ -250,8 +245,6 @@ if __name__ == "__main__":
 
     fig, (ax10, ax30) = plt.subplots(nrows=2, sharex=True)
 
-    n_sig = 2
-
     ax10.plot(
         time.datetime,
         cosmics_rate_above10,
@@ -269,18 +262,24 @@ if __name__ == "__main__":
     ax30.set_xlim(ax30.get_xlim())
     ax10.fill_between(
         ax.get_xlim(),
-        *bounds_std(cosmics_rate_above10, n_sig),
+        *bounds_std(cosmics_rate_above10, config.cosmics_10_sigma),
         alpha=0.1,
-        label=f"{n_sig} sigma mean",
+        label=f"{config.cosmics_10_sigma} sigma mean",
     )
     ax30.fill_between(
         ax.get_xlim(),
-        *bounds_std(cosmics_rate_above30, n_sig),
+        *bounds_std(cosmics_rate_above30, config.cosmics_30_sigma),
         alpha=0.1,
-        label=f"{n_sig} sigma mean",
+        label=f"{config.cosmics_30_sigma} sigma mean",
     )
-    print(f"Bounds for cosmics above 10: {bounds_std(cosmics_rate_above10, n_sig)}")
-    print(f"Bounds for cosmics above 30: {bounds_std(cosmics_rate_above30, n_sig)}")
+    print(
+        "Bounds for cosmics above 10: "
+        f"{bounds_std(cosmics_rate_above10, config.cosmics_10_sigma)}"
+    )
+    print(
+        "Bounds for cosmics above 30: "
+        f"{bounds_std(cosmics_rate_above30, config.cosmics_30_sigma)}"
+    )
 
     ax10.legend()
     ax30.legend()
@@ -292,13 +291,15 @@ if __name__ == "__main__":
 
     ax30.tick_params(axis="x", rotation=30)
 
-    fig.savefig(outdir / f"{args.source_name}_cosmics_pulses_above.pdf")
+    fig.savefig(outdir / f"{config.source}_cosmics_pulses_above.pdf")
 
     mask_above10 = get_mask(
-        cosmics_rate_above10, *bounds_std(cosmics_rate_above10, n_sig)[::-1]
+        cosmics_rate_above10,
+        *bounds_std(cosmics_rate_above10, config.cosmics_10_sigma)[::-1],
     )
     mask_above30 = get_mask(
-        cosmics_rate_above30, *bounds_std(cosmics_rate_above30, n_sig)[::-1]
+        cosmics_rate_above30,
+        *bounds_std(cosmics_rate_above30, config.cosmics_30_sigma)[::-1],
     )
 
     mask = mask_above10 & mask_above30
