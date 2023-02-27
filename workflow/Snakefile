@@ -2,6 +2,9 @@ env = "lstchain-v0.9.13"
 config = "config.json"
 
 
+include: "rules/requirements.smk"
+
+
 rule all:
     """Docstring comment for a rule."""
     input:
@@ -10,17 +13,16 @@ rule all:
 
 rule download_runlist:
     input:
-        "lst1-authentication.json",
+        "lst1-authentication.txt",
     output:
         "build/runlist.html",
     conda:
         env
     shell:
         "\
-        https --check-status \
+        curl --user $(cat {input}) -s \
             https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
-            --session-read-only=./{input} \
-            -o {output} || rm -f {output} \
+            -o {output} \
         "
 
 
@@ -82,6 +84,6 @@ rule data_check:
 
 rule authentication:
     output:
-        "lst1-authentication.json",
+        "lst1-authentication.txt",
     shell:
         "echo 'Provide the file {output} as explained in README.md'"

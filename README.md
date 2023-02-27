@@ -1,25 +1,26 @@
 # lst-data-selection
 
-Create the authentication file `lst1-authentication.json` (fill in username and password):
-```json
-{
-    "auth": {
-        "raw_auth": "<username>:<password>",
-        "type": "basic"
-    }
-}
+Create the authentication file `lst1-authentication.txt` (fill in username and password):
+```
+<username>:<password>
 ```
 
 ## Usage
-Provide a known source when running make:
+
+To install some local requiremets, run:
 ```
-SOURCE=Crab make
+make install_requirements_with_pip
+```
+
+Then edit `config.json` to your liking and run snakemake via make:
+```
+make
 ```
 
 ### What happens?
 
 1. The most recent run list is downloaded from the LST server.
-2. The html-file is converted to a csv-file, only including runs of the provided `SOURCE`.
+2. The html-file is converted to a csv-file, only including runs of the configured source.
 3. Every DL1 data-check that happens to exist on the server on La Palma
    is listed.
 4. All existing data-checks are merged.
