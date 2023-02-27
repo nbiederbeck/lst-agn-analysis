@@ -3,7 +3,7 @@ env = "lstchain-v0.9.13"
 
 rule all:
     input:
-        "build/Mrk421_runs.py",
+        "build/Mrk421_runs.json",
 
 
 rule download_runlist:
@@ -46,7 +46,7 @@ rule merge_datachecks:
 
 rule run_ids:
     output:
-        "build/{source}_runs.py",
+        "build/{source}_runs.json",
     input:
         "build/lst1-{source}-runlist-checked.csv",
     conda:
