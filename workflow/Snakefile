@@ -64,18 +64,6 @@ rule calc_theta2:
         "python {input.script} -c {input.config} -o {output}"
 
 
-rule plot_theta2:
-    output:
-        "build/plots/{source}/theta2.pdf",
-    input:
-        data="build/dl4/{source}/theta2.fits.gz",
-        script="scripts/plot_theta2.py",
-    conda:
-        gammapy_env
-    shell:
-        "python {input.script} -i {input.data} -o {output} --preliminary"
-
-
 rule calc_flux_points:
     input:
         data="build/dl4/{source}/datasets.fits.gz",
@@ -96,6 +84,9 @@ rule calc_flux_points:
         """
 
 
+ruleorder: plot_flux_points > plot
+
+
 rule plot_flux_points:
     input:
         data="build/dl4/{source}/flux_points.fits.gz",
@@ -114,20 +105,16 @@ rule plot_flux_points:
         """
 
 
-rule plot_light_curve:
-    input:
-        data="build/dl4/{source}/light_curve.fits.gz",
-        script="scripts/plot_light_curve.py",
+rule plot:
     output:
-        "build/plots/{source}/light_curve.pdf",
+        "build/plots/{source}/{name}.pdf",
+    input:
+        data="build/dl4/{source}/{name}.fits.gz",
+        script="scripts/plot_{name}.py",
     conda:
         gammapy_env
     shell:
-        """
-        python {input.script} \
-            -i {input.data} \
-            -o {output}
-        """
+        "python {input.script} -i {input.data} -o {output}"
 
 
 rule observation_plots:
