@@ -20,7 +20,7 @@ def main():
     time = Time(runsummary["time"], format="unix", scale="utc")
     fig, ax = plt.subplots()
 
-    cosmics_rate = runsummary["num_cosmics"] / runsummary["elapsed_time"]
+    cosmics_rate = runsummary["cosmics_rate"]
 
     ax.plot(
         time.datetime,

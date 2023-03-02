@@ -20,9 +20,8 @@ def main():
     time = Time(runsummary["time"], format="unix", scale="utc")
     fig, (ax10, ax30) = plt.subplots(nrows=2, sharex=True)
 
-    cosmics_rate = runsummary["num_cosmics"] / runsummary["elapsed_time"]
-    cosmics_rate_above10 = cosmics_rate * runsummary["cosmics_fraction_pulses_above10"]
-    cosmics_rate_above30 = cosmics_rate * runsummary["cosmics_fraction_pulses_above30"]
+    cosmics_rate_above10 = runsummary["cosmics_rate_above10"]
+    cosmics_rate_above30 = runsummary["cosmics_rate_above30"]
 
     ax10.plot(
         time.datetime,

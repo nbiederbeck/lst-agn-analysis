@@ -51,6 +51,15 @@ def main():
 
     runsummary["mean_ra"].unit = u.deg
     runsummary["mean_dec"].unit = u.deg
+    runsummary["elapsed_time"].unit = u.s
+
+    runsummary["cosmics_rate"] = runsummary["num_cosmics"] / runsummary["elapsed_time"]
+    runsummary["cosmics_rate_above10"] = (
+        runsummary["cosmics_rate"] * runsummary["cosmics_fraction_pulses_above10"]
+    )
+    runsummary["cosmics_rate_above30"] = (
+        runsummary["cosmics_rate"] * runsummary["cosmics_fraction_pulses_above30"]
+    )
 
     runsummary.write(
         args.output_path,

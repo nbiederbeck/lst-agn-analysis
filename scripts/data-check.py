@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from astroplan.moon import moon_illumination
 from astropy import units as u
-from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon, get_sun
+from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon
 from astropy.table import Table
 from astropy.time import Time
 from config import Config
@@ -118,7 +118,6 @@ if __name__ == "__main__":
 
     altaz = AltAz(obstime=time[mask], location=location)
 
-    sun = get_sun(time[mask]).transform_to(altaz)
     moon = get_moon(time[mask], location=location).transform_to(altaz)
 
     moon_light = moon_illumination(time[mask])
@@ -148,7 +147,7 @@ if __name__ == "__main__":
 
     # Check cosmics rates
 
-    cosmics_rate = runsummary["num_cosmics"] / runsummary["elapsed_time"]
+    cosmics_rate = runsummary["cosmics_rate"]
 
     mask_cosmics = get_mask(cosmics_rate, ge=config.cosmics_ll, le=config.cosmics_ul)
 
@@ -164,8 +163,8 @@ if __name__ == "__main__":
     )
     print(s)
 
-    cosmics_rate_above10 = cosmics_rate * runsummary["cosmics_fraction_pulses_above10"]
-    cosmics_rate_above30 = cosmics_rate * runsummary["cosmics_fraction_pulses_above30"]
+    cosmics_rate_above10 = runsummary["cosmics_rate_above10"]
+    cosmics_rate_above30 = runsummary["cosmics_rate_above30"]
 
     mask_above10 = get_mask(
         cosmics_rate_above10,
@@ -187,9 +186,7 @@ if __name__ == "__main__":
     )
     print(s)
 
-    np.array(runsummary["runnumber"])
-
-    duration = u.Quantity(np.sum(runsummary["elapsed_time"][mask]), u.s).to(u.h)
+    duration = np.sum(runsummary["elapsed_time"][mask].quantity).to(u.h)
     s = (
         f"A selected total of {len(runsummary)} runs add to a "
         f"duration of {duration:.2f} of data."
@@ -200,4 +197,10 @@ if __name__ == "__main__":
 
     runs[mask].to_csv(args.output_runlist, index=False)
 
-    runsummary.write(args.output_datachecks, overwrite=True)
+    runsummary.write(
+        args.output_datachecks,
+        serialize_meta=True,
+        overwrite=True,
+        path="data",
+        compression=True,
+    )
