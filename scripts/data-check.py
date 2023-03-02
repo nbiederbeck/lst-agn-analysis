@@ -112,7 +112,11 @@ if __name__ == "__main__":
     #
     # Better later.
 
-    location = EarthLocation.of_site("lapalma")
+    location = EarthLocation.from_geodetic(
+        u.Quantity(-17.89139, u.deg),
+        u.Quantity(28.76139, u.deg),
+        height=u.Quantity(2184, u.m),
+    )
 
     altaz = AltAz(obstime=time[mask], location=location)
 
