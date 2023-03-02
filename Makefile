@@ -1,10 +1,11 @@
 SNAKEMAKE_PROFILE?=slurm
+PROFILE=--profile=workflow/profiles/$(SNAKEMAKE_PROFILE)
 
 all: build/all-linked.txt
-	snakemake --profile=$(SNAKEMAKE_PROFILE)
+	snakemake $(PROFILE)
 
 %:
-	snakemake --profile=$(SNAKEMAKE_PROFILE) $@
+	snakemake $(PROFILE) $@
 
 build:
 	mkdir -p $@

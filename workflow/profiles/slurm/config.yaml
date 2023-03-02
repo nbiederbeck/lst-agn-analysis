@@ -1,16 +1,15 @@
-cluster:
-  mkdir -p build/logs/{rule} &&
+cluster: mkdir -p build/logs/{rule} &&
   sbatch
-    --partition={resources.partition}
-    --cpus-per-task={resources.cpus}
-    --mem={resources.mem_mb}
-    --job-name={rule}
-    --time={resources.time}
-    --parsable
-    --output=build/logs/%j.out
-    --error=build/logs/%j.err
+  --partition={resources.partition}
+  --cpus-per-task={resources.cpus}
+  --mem={resources.mem_mb}
+  --job-name={rule}
+  --time={resources.time}
+  --parsable
+  --output=build/logs/%j.out
+  --error=build/logs/%j.err
 resources:
-    - cpus=60
+  - cpus=60
 default-resources:
   - partition=short
   - time=120
@@ -21,7 +20,7 @@ max-jobs-per-second: 10
 max-status-checks-per-second: 1
 local-cores: 1
 latency-wait: 1 # 60
-jobs: 100  # maximum number of simultaneously submitted jobs
+jobs: 100 # maximum number of simultaneously submitted jobs
 # keep-going: True
 rerun-incomplete: True
 printshellcmds: True

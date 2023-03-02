@@ -1,11 +1,19 @@
 # vim: ft=snakemake nofoldenable commentstring=#%s
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 
-from run_ids import mrk421
+import json
 from itertools import chain
 
-mrk421_run_ids = set(chain(*mrk421.values()))
-RUN_IDS = mrk421_run_ids
+with open("build/runs.json", "r") as f:
+    runs = json.load(f)
+
+run_ids = set(chain(*runs.values()))
+RUN_IDS = sorted(run_ids)[:5]
+
+
+localrules:
+    dl3,
+
 
 lstchain_env = "lstchain-v0.9.13"
 gammapy_env = "envs/environment.yml"
@@ -17,10 +25,12 @@ rule all:
         "build/plots/mrk421/flux_points.pdf",
         "build/plots/mrk421/light_curve.pdf",
         "build/plots/mrk421/observation_plots.pdf",
-        # "build/plots/irf/edisp.pdf",
-        # "build/plots/irf/gh_cut.pdf",
-        # "build/plots/irf/radmax_cut.pdf",
-        # "build/plots/irf/aeff.pdf",
+
+
+# "build/plots/irf/edisp.pdf",
+# "build/plots/irf/gh_cut.pdf",
+# "build/plots/irf/radmax_cut.pdf",
+# "build/plots/irf/aeff.pdf",
 
 
 # rule plot_irf:
@@ -178,7 +188,10 @@ rule model_best_fit:
         """
 
 
-localrules: dataset
+localrules:
+    dataset,
+
+
 rule dataset:
     input:
         "build/dl3/{source}/hdu-index.fits.gz",
@@ -195,7 +208,10 @@ rule dataset:
         "python scripts/write_datasets.py -c {input.config} -o {output}"
 
 
-localrules: dl3_hdu_index
+localrules:
+    dl3_hdu_index,
+
+
 rule dl3_hdu_index:
     conda:
         lstchain_env
@@ -203,7 +219,7 @@ rule dl3_hdu_index:
         "build/dl3/{source}/hdu-index.fits.gz",
     input:
         expand(
-            "build/dl3/{source}/dl3_LST-1.Run{run_id:05d}.fits.gz",
+            "build/dl3/{source}/dl3_LST-1.Run{run_id:05d}.fits",
             run_id=RUN_IDS,
             source=["mrk421"],
         ),
@@ -212,28 +228,28 @@ rule dl3_hdu_index:
         lstchain_create_dl3_index_files  \
             --input-dl3-dir build/dl3/{wildcards.source}  \
             --output-index-path build/dl3/{wildcards.source}  \
-            --file-pattern 'dl3_*.fits.gz'  \
+            --file-pattern 'dl3_*.fits'  \
             --overwrite \
         """
 
 
-localrules: select_low_offset
-rule select_low_offset:
-    output:
-        "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits.gz",
-    input:
-        "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
-    conda:
-        gammapy_env
-    resources:
-        time=10,
-    log:
-        "build/logs/dl3/{run_id}-{source}.log",
-    shell:
-        """
-        python scripts/select_low_offset.py \
-            -i {input} -o {output} \
-        """
+# localrules: select_low_offset
+# rule select_low_offset:
+#     output:
+#         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits.gz",
+#     input:
+#         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
+#     conda:
+#         gammapy_env
+#     resources:
+#         time=10,
+#     log:
+#         "build/logs/dl3/{run_id}-{source}.log",
+#     shell:
+#         """
+#         python scripts/select_low_offset.py \
+#             -i {input} -o {output} \
+#         """
 
 
 rule dl3:
