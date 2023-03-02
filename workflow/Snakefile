@@ -33,45 +33,49 @@ rule all:
 
 rule select_datasets:
     input:
-        "build/runlist.html",
+        data="build/runlist.html",
         config=config,
+        script="scripts/select-data.py",
     output:
         "build/runlist.csv",
     conda:
         env
     shell:
-        "python scripts/select-data.py {input[0]} {output} -c {input.config}"
+        "python {input.script} {input.data} {output} -c {input.config}"
 
 
 rule merge_datachecks:
     input:
-        "build/runlist.csv",
+        data="build/runlist.csv",
         config=config,
+        script="scripts/merge-datachecks.py",
     output:
         "build/dl1-datachecks-merged.h5",
     conda:
         env
     shell:
-        "python scripts/merge-datachecks.py {input[0]} {output} -c {input.config}"
+        "python {input.script} {input.data} {output} -c {input.config}"
 
 
 rule run_ids:
     output:
         "build/runs.json",
     input:
-        "build/runlist-checked.csv",
+        data="build/runlist-checked.csv",
         config=config,
+        script="scripts/create-night-run-list.py",
     conda:
         env
     shell:
-        "python scripts/create-night-run-list.py {input[0]} {output} -c {input.config}"
+        "python {input.script} {input.data} {output} -c {input.config}"
 
 
 rule data_check:
     input:
-        "build/runlist.csv",
-        "build/dl1-datachecks-merged.h5",
+        runlist="build/runlist.csv",
+        datachecks="build/dl1-datachecks-merged.h5",
         config=config,
+        script="scripts/data-check.py",
     output:
         runlist="build/runlist-checked.csv",
         datachecks="build/dl1-datachecks-masked.h5",
@@ -80,9 +84,9 @@ rule data_check:
     shell:
         "\
         python \
-            scripts/data-check.py \
-            {input[0]} \
-            {input[1]} \
+            {input.script} \
+            {input.runlist} \
+            {input.datachecks} \
             --output-runlist {output.runlist} \
             --output-datachecks {output.datachecks} \
             --config {input.config} \
