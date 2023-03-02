@@ -12,25 +12,29 @@ RUN_IDS = sorted(run_ids)[:5]
 
 
 localrules:
+    dataset,
+    dl3_hdu_index,
     dl3,
 
 
 lstchain_env = "lstchain-v0.9.13"
 gammapy_env = "envs/environment.yml"
 
+plots = [
+    "build/plots/mrk421/theta2.pdf",
+    "build/plots/mrk421/flux_points.pdf",
+    "build/plots/mrk421/light_curve.pdf",
+    "build/plots/mrk421/observation_plots.pdf",
+    # "build/plots/irf/edisp.pdf",
+    # "build/plots/irf/gh_cut.pdf",
+    # "build/plots/irf/radmax_cut.pdf",
+    # "build/plots/irf/aeff.pdf",
+]
+
 
 rule all:
     input:
-        "build/plots/mrk421/theta2.pdf",
-        "build/plots/mrk421/flux_points.pdf",
-        "build/plots/mrk421/light_curve.pdf",
-        "build/plots/mrk421/observation_plots.pdf",
-
-
-# "build/plots/irf/edisp.pdf",
-# "build/plots/irf/gh_cut.pdf",
-# "build/plots/irf/radmax_cut.pdf",
-# "build/plots/irf/aeff.pdf",
+        plots,
 
 
 # rule plot_irf:
@@ -38,51 +42,55 @@ rule all:
 #         "build/plots/irf/{irf}.pdf",
 #     input:
 #         "build/irf.fits.gz",
+#         script="scripts/plot_{irf}.py",
 #     conda:
 #         gammapy_env
 #     shell:
-#         "python scripts/plot_{wildcards.irf}.py -i {input} -o {output}"
+#         "python {input.script} -i {input} -o {output}"
 
 
 rule calc_theta2:
     output:
         "build/dl4/{source}/theta2.fits.gz",
     input:
-        "build/dl3/{source}/hdu-index.fits.gz",
+        data="build/dl3/{source}/hdu-index.fits.gz",
         config="configs/{source}.yaml",
+        script="scripts/calc_theta2.py",
     resources:
         mem_mb=16000,
     conda:
         gammapy_env
     shell:
-        "python scripts/calc_theta2.py -c {input.config} -o {output}"
+        "python {input.script} -c {input.config} -o {output}"
 
 
 rule plot_theta2:
     output:
         "build/plots/{source}/theta2.pdf",
     input:
-        "build/dl4/{source}/theta2.fits.gz",
+        data="build/dl4/{source}/theta2.fits.gz",
+        script="scripts/plot_theta2.py",
     conda:
         gammapy_env
     shell:
-        "python scripts/plot_theta2.py -i {input} -o {output} --preliminary"
+        "python {input.script} -i {input.data} -o {output} --preliminary"
 
 
 rule calc_flux_points:
     input:
-        "build/dl4/{source}/datasets.fits.gz",
+        data="build/dl4/{source}/datasets.fits.gz",
         config="configs/{source}.yaml",
         model="build/dl4/{source}/model-best-fit.yaml",
+        script="scripts/calc_flux_points.py",
     output:
         "build/dl4/{source}/flux_points.fits.gz",
     conda:
         gammapy_env
     shell:
         """
-        python scripts/calc_flux_points.py \
+        python {input.script} \
             -c {input.config} \
-            --dataset-path {input[0]} \
+            --dataset-path {input.data} \
             --best-model-path {input.model} \
             -o {output}
         """
@@ -90,16 +98,17 @@ rule calc_flux_points:
 
 rule plot_flux_points:
     input:
-        "build/dl4/{source}/flux_points.fits.gz",
+        data="build/dl4/{source}/flux_points.fits.gz",
         model="build/dl4/{source}/model-best-fit.yaml",
+        script="scripts/plot_flux_points.py",
     output:
         "build/plots/{source}/flux_points.pdf",
     conda:
         gammapy_env
     shell:
         """
-        python scripts/plot_flux_points.py \
-            -i {input[0]} \
+        python {input.script} \
+            -i {input.data} \
             --best-model-path {input.model} \
             -o {output}
         """
@@ -107,15 +116,16 @@ rule plot_flux_points:
 
 rule plot_light_curve:
     input:
-        "build/dl4/{source}/light_curve.fits.gz",
+        data="build/dl4/{source}/light_curve.fits.gz",
+        script="scripts/plot_light_curve.py",
     output:
         "build/plots/{source}/light_curve.pdf",
     conda:
         gammapy_env
     shell:
         """
-        python scripts/plot_light_curve.py \
-            -i {input} \
+        python {input.script} \
+            -i {input.data} \
             -o {output}
         """
 
@@ -124,6 +134,7 @@ rule observation_plots:
     input:
         "build/dl3/{source}/hdu-index.fits.gz",
         config="configs/{source}.yaml",
+        script="scripts/events.py",
     output:
         "build/plots/{source}/observation_plots.pdf",
     resources:
@@ -132,7 +143,7 @@ rule observation_plots:
         gammapy_env
     shell:
         """
-        python scripts/events.py \
+        python {input.script} \
             -c {input.config} \
             -o {output} \
         """
@@ -142,12 +153,13 @@ rule sensitivity:
     input:
         "build/model-best-fit.yaml",
         "build/dl3/hdu-index.fits.gz",
+        script="scripts/sensitivity.py",
     output:
         "build/plots/sensitivity.pdf",
     conda:
         gammapy_env
     shell:
-        "python scripts/sensitivity.py -o {output}"
+        "python {input.script} -o {output}"
 
 
 rule calc_light_curve:
@@ -155,13 +167,14 @@ rule calc_light_curve:
         model="build/dl4/{source}/model-best-fit.yaml",
         config="configs/{source}.yaml",
         dataset="build/dl4/{source}/datasets.fits.gz",
+        script="scripts/calc_light_curve.py",
     output:
         "build/dl4/{source}/light_curve.fits.gz",
     conda:
         gammapy_env
     shell:
         """
-        python scripts/calc_light_curve.py \
+        python {input.script} \
             -c {input.config} \
             --dataset-path {input.dataset} \
             --best-model-path {input.model} \
@@ -174,13 +187,14 @@ rule model_best_fit:
         config="configs/{source}.yaml",
         dataset="build/dl4/{source}/datasets.fits.gz",
         model="configs/model-{source}.yaml",
+        script="scripts/fit-model.py",
     output:
         "build/dl4/{source}/model-best-fit.yaml",
     conda:
         gammapy_env
     shell:
         """
-        python scripts/fit-model.py \
+        python {input.script} \
             -c {input.config} \
             --dataset-path {input.dataset} \
             --model-config {input.model} \
@@ -188,14 +202,11 @@ rule model_best_fit:
         """
 
 
-localrules:
-    dataset,
-
-
 rule dataset:
     input:
-        "build/dl3/{source}/hdu-index.fits.gz",
+        data="build/dl3/{source}/hdu-index.fits.gz",
         config="configs/{source}.yaml",
+        script="scripts/write_datasets.py",
     output:
         "build/dl4/{source}/datasets.fits.gz",
     resources:
@@ -205,11 +216,7 @@ rule dataset:
     conda:
         gammapy_env
     shell:
-        "python scripts/write_datasets.py -c {input.config} -o {output}"
-
-
-localrules:
-    dl3_hdu_index,
+        "python {input.script} -c {input.config} -o {output}"
 
 
 rule dl3_hdu_index:
@@ -233,7 +240,6 @@ rule dl3_hdu_index:
         """
 
 
-# localrules: select_low_offset
 # rule select_low_offset:
 #     output:
 #         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits.gz",
@@ -256,7 +262,7 @@ rule dl3:
     output:
         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
     input:
-        "build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
+        data="build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
         irf="build/irf/{source}/irf_Run{run_id}.fits.gz",
         config="configs/irf_tool_config.json",
     resources:
@@ -269,7 +275,7 @@ rule dl3:
     shell:
         """
         lstchain_create_dl3_file  \
-            --input-dl2 {input[0]}  \
+            --input-dl2 {input.data}  \
             --output-dl3-path $(dirname $(realpath {output}))  \
             --input-irf {input.irf}  \
             --source-name {wildcards.source}  \
@@ -284,7 +290,7 @@ rule dl2:
     output:
         "build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
     input:
-        "build/dl1/{source}/dl1_LST-1.Run{run_id}.h5",
+        data="build/dl1/{source}/dl1_LST-1.Run{run_id}.h5",
         config="build/models/{source}/model_Run{run_id}/lstchain_config.json",
     conda:
         lstchain_env
@@ -293,7 +299,7 @@ rule dl2:
     shell:
         """
         lstchain_dl1_to_dl2  \
-            --input-file {input[0]}  \
+            --input-file {input.data}  \
             --output-dir $(dirname $(realpath {output}))  \
             --path-models $(dirname {input.config})  \
             --config {input.config}  \
