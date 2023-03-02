@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -15,11 +14,10 @@ from matplotlib import pyplot as plt
 parser = ArgumentParser()
 parser.add_argument("input_path")
 parser.add_argument("datacheck_path")
-parser.add_argument("-o", "--output_path", required=True)
+parser.add_argument("--output-runlist", required=True)
+parser.add_argument("--output-datachecks", required=True)
 parser.add_argument("-c", "--config", required=True)
 args = parser.parse_args()
-
-outdir = Path(args.output_path).parent
 
 config = Config.parse_file(args.config)
 
@@ -94,8 +92,12 @@ if __name__ == "__main__":
 
     mask = mask_pedestals_ok & mask_run_id & mask_time & mask_separation_low
 
-    runsummary = runsummary[mask]
-    time = time[mask]
+    runsummary["mask_run_id"] = mask_run_id
+    runsummary["mask_time"] = mask_time
+    runsummary["mask_separation_low"] = mask_separation_low
+    runsummary["mask_pedestals_ok"] = mask_pedestals_ok
+
+    runsummary["mask_run_selection"] = mask
 
     after_pedestals_run_id_time_separation = np.count_nonzero(mask)
     s = (
@@ -114,12 +116,12 @@ if __name__ == "__main__":
 
     location = EarthLocation.of_site("lapalma")
 
-    altaz = AltAz(obstime=time, location=location)
+    altaz = AltAz(obstime=time[mask], location=location)
 
-    sun = get_sun(time).transform_to(altaz)
-    moon = get_moon(time, location=location).transform_to(altaz)
+    sun = get_sun(time[mask]).transform_to(altaz)
+    moon = get_moon(time[mask], location=location).transform_to(altaz)
 
-    moon_light = moon_illumination(time)
+    moon_light = moon_illumination(time[mask])
     moon_light[moon.alt.to_value(u.deg) < 0] = 1
 
     cmap = plt.cm.afmhot
@@ -127,56 +129,14 @@ if __name__ == "__main__":
 
     ped_std = runsummary["ped_charge_stddev"]
 
-    fig, ax = plt.subplots()
-
-    im = ax.scatter(
-        moon.alt.to_value(u.deg),
+    mask_pedestal_charge = get_mask(
         ped_std,
-        label="moon",
-        c=moon_light,
-        cmap=cmap,
-        norm=norm,
-        edgecolor="k",
+        ge=config.pedestal_ll,
+        le=config.pedestal_ul,
     )
 
-    masked = ped_std[moon.alt.to_value(u.deg) < 0]
-    n_sig = config.pedestal_sigma
-
-    ax.set_ylim(0)
-    ax.set_xlim(-90, 80)
-
-    ax.fill_between(
-        (0, 1),
-        *bounds_std(masked, n_sig),
-        alpha=0.1,
-        label=f"{n_sig} sigma mean",
-        transform=ax.get_yaxis_transform(),
-    )
-    ax.fill_between(
-        (0, 1),
-        *bounds_mad(masked, n_sig),
-        alpha=0.1,
-        label=f"{n_sig} sigma median",
-        transform=ax.get_yaxis_transform(),
-    )
-    print(f"Bounds for pedestal charge std dev: {bounds_std(masked, n_sig)}")
-
-    ax.set_ylabel("Pedestal Charge Std.Dev. / p.e.")
-    ax.set_xlabel("Altitude / deg")
-
-    fig.colorbar(im, ax=ax, label="Moon Illumination")
-
-    ax.legend()
-
-    fig.savefig(outdir / f"{config.source}_ped_charge_stddev.pdf")
-
-    mask_pedestal_charge = (config.pedestal_ll < ped_std) & (
-        ped_std < config.pedestal_ul
-    )
-
-    mask = mask_pedestal_charge
-    runsummary = runsummary[mask]
-    time = time[mask]
+    runsummary["mask_pedestal_charge"] = mask_pedestal_charge & mask
+    mask = runsummary["mask_pedestal_charge"] & mask
 
     after_pedestal_charge = np.count_nonzero(mask)
     s = (
@@ -190,42 +150,11 @@ if __name__ == "__main__":
 
     cosmics_rate = runsummary["num_cosmics"] / runsummary["elapsed_time"]
 
-    fig, ax = plt.subplots()
-
-    ax.plot(
-        time.datetime,
-        cosmics_rate,
-        ".",
-    )
-    n_sig = config.cosmics_sigma
-    ax.set_xlim(ax.get_xlim())
-    ax.fill_between(
-        ax.get_xlim(),
-        *bounds_std(cosmics_rate, n_sig),
-        alpha=0.1,
-        label=f"{n_sig} sigma mean",
-    )
-    ax.fill_between(
-        ax.get_xlim(),
-        *bounds_mad(cosmics_rate, n_sig),
-        alpha=0.1,
-        label=f"{n_sig} sigma median",
-    )
-    print(f"Bounds for cosmics: {bounds_std(cosmics_rate, n_sig)}")
-
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Rate / 1/s")
-    ax.tick_params(axis="x", rotation=30)
-
-    ax.legend()
-
-    fig.savefig(outdir / f"{config.source}_cosmics_rate.pdf")
-
     mask_cosmics = get_mask(cosmics_rate, ge=config.cosmics_ll, le=config.cosmics_ul)
 
-    mask = mask_cosmics
-    runsummary = runsummary[mask]
-    time = time[mask]
+    runsummary["mask_cosmics"] = mask_cosmics
+
+    mask = runsummary["mask_cosmics"] & mask
 
     after_cosmics = np.count_nonzero(mask)
     s = (
@@ -235,62 +164,8 @@ if __name__ == "__main__":
     )
     print(s)
 
-    cosmics_rate_above10 = (
-        cosmics_rate[mask] * runsummary["cosmics_fraction_pulses_above10"]
-    )
-    cosmics_rate_above30 = (
-        cosmics_rate[mask] * runsummary["cosmics_fraction_pulses_above30"]
-    )
-
-    fig, (ax10, ax30) = plt.subplots(nrows=2, sharex=True)
-
-    ax10.plot(
-        time.datetime,
-        cosmics_rate_above10,
-        ".",
-        label="Pulses > 10 p.e.",
-    )
-    ax30.plot(
-        time.datetime,
-        cosmics_rate_above30,
-        ".",
-        label="Pulses > 30 p.e.",
-    )
-
-    ax10.set_xlim(ax10.get_xlim())
-    ax30.set_xlim(ax30.get_xlim())
-    ax10.fill_between(
-        ax.get_xlim(),
-        *bounds_std(cosmics_rate_above10, config.cosmics_10_sigma),
-        alpha=0.1,
-        label=f"{config.cosmics_10_sigma} sigma mean",
-    )
-    ax30.fill_between(
-        ax.get_xlim(),
-        *bounds_std(cosmics_rate_above30, config.cosmics_30_sigma),
-        alpha=0.1,
-        label=f"{config.cosmics_30_sigma} sigma mean",
-    )
-    print(
-        "Bounds for cosmics above 10: "
-        f"{bounds_std(cosmics_rate_above10, config.cosmics_10_sigma)}"
-    )
-    print(
-        "Bounds for cosmics above 30: "
-        f"{bounds_std(cosmics_rate_above30, config.cosmics_30_sigma)}"
-    )
-
-    ax10.legend()
-    ax30.legend()
-
-    ax30.set_xlabel("Time")
-
-    ax10.set_ylabel("Rate / 1/s")
-    ax30.set_ylabel("Rate / 1/s")
-
-    ax30.tick_params(axis="x", rotation=30)
-
-    fig.savefig(outdir / f"{config.source}_cosmics_pulses_above.pdf")
+    cosmics_rate_above10 = cosmics_rate * runsummary["cosmics_fraction_pulses_above10"]
+    cosmics_rate_above30 = cosmics_rate * runsummary["cosmics_fraction_pulses_above30"]
 
     mask_above10 = get_mask(
         cosmics_rate_above10,
@@ -301,9 +176,9 @@ if __name__ == "__main__":
         *bounds_std(cosmics_rate_above30, config.cosmics_30_sigma)[::-1],
     )
 
-    mask = mask_above10 & mask_above30
-    runsummary = runsummary[mask]
-    time = time[mask]
+    mask_above = mask_above10 & mask_above30
+    runsummary["mask_cosmics_above"] = mask_above
+    mask = runsummary["mask_cosmics_above"] & mask
 
     after_cosmics_above_n = np.count_nonzero(mask)
     s = (
@@ -314,13 +189,15 @@ if __name__ == "__main__":
 
     np.array(runsummary["runnumber"])
 
-    duration = u.Quantity(np.sum(runsummary["elapsed_time"]), u.s).to(u.h)
+    duration = u.Quantity(np.sum(runsummary["elapsed_time"][mask]), u.s).to(u.h)
     s = (
         f"A selected total of {len(runsummary)} runs add to a "
         f"duration of {duration:.2f} of data."
     )
     print(s)
 
-    mask = np.in1d(runs["Run ID"], runsummary["runnumber"])
+    mask = np.in1d(runs["Run ID"], runsummary["runnumber"][mask])
 
-    runs[mask].to_csv(args.output_path, index=False)
+    runs[mask].to_csv(args.output_runlist, index=False)
+
+    runsummary.write(args.output_datachecks, overwrite=True)

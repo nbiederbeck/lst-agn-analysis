@@ -1,3 +1,5 @@
+# vim: nofoldenable
+
 env = "lstchain-v0.9.13"
 config = "config.json"
 
@@ -9,21 +11,24 @@ rule all:
     """Docstring comment for a rule."""
     input:
         "build/runs.json",
+        "build/moon-illumination.pdf",
+        "build/cosmics.pdf",
+        "build/cosmics-above.pdf",
 
 
-rule download_runlist:
-    input:
-        "lst1-authentication.txt",
-    output:
-        "build/runlist.html",
-    conda:
-        env
-    shell:
-        "\
-        curl --user $(cat {input}) -s \
-            https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
-            -o {output} \
-        "
+# rule download_runlist:
+#     input:
+#         "lst1-authentication.txt",
+#     output:
+#         "build/runlist.html",
+#     conda:
+#         env
+#     shell:
+#         "\
+#         curl --user $(cat {input}) -s \
+#             https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
+#             -o {output} \
+#         "
 
 
 rule select_datasets:
@@ -43,7 +48,7 @@ rule merge_datachecks:
         "build/runlist.csv",
         config=config,
     output:
-        "build/dl1-datachecks.h5",
+        "build/dl1-datachecks-merged.h5",
     conda:
         env
     shell:
@@ -65,10 +70,11 @@ rule run_ids:
 rule data_check:
     input:
         "build/runlist.csv",
-        "build/dl1-datachecks.h5",
+        "build/dl1-datachecks-merged.h5",
         config=config,
     output:
-        "build/runlist-checked.csv",
+        runlist="build/runlist-checked.csv",
+        datachecks="build/dl1-datachecks-masked.h5",
     conda:
         env
     shell:
@@ -77,7 +83,8 @@ rule data_check:
             scripts/data-check.py \
             {input[0]} \
             {input[1]} \
-            --output {output} \
+            --output-runlist {output.runlist} \
+            --output-datachecks {output.datachecks} \
             --config {input.config} \
         "
 
@@ -87,3 +94,16 @@ rule authentication:
         "lst1-authentication.txt",
     shell:
         "echo 'Provide the file {output} as explained in README.md'"
+
+
+rule plot:
+    input:
+        data="build/dl1-datachecks-masked.h5",
+        config=config,
+        script="scripts/plot-{name}.py",
+    output:
+        "build/{name}.pdf",
+    conda:
+        env
+    shell:
+        "python {input.script} {input.data} -c {input.config} -o {output}"

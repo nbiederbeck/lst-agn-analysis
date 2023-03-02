@@ -1,6 +1,7 @@
 # lst-data-selection
 
 Create the authentication file `lst1-authentication.txt` (fill in username and password):
+
 ```
 <username>:<password>
 ```
@@ -8,11 +9,13 @@ Create the authentication file `lst1-authentication.txt` (fill in username and p
 ## Usage
 
 To install some local requiremets, run:
+
 ```
 make install_requirements_with_pip
 ```
 
 Then edit `config.json` to your liking and run snakemake via make:
+
 ```
 make
 ```
