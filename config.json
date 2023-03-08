@@ -1,5 +1,7 @@
 {
   "source": "Mrk421",
+  "source_ra_deg": 166.114,
+  "source_dec_deg": 38.209,
   "pedestal_ul": 1.9,
   "pedestal_ll": 0,
   "pedestal_sigma": 2,

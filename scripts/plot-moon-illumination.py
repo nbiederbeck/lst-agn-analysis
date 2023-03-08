@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 from astroplan.moon import moon_illumination
 from astropy import units as u
-from astropy.coordinates import AltAz, EarthLocation, get_moon, get_sun
+from astropy.coordinates import AltAz, EarthLocation, get_moon
 from astropy.table import Table
 from astropy.time import Time
 from config import Config
@@ -32,7 +32,6 @@ def main():
 
     altaz = AltAz(obstime=time, location=location)
 
-    get_sun(time).transform_to(altaz)
     moon = get_moon(time, location=location).transform_to(altaz)
 
     moon_light = moon_illumination(time)

@@ -2,14 +2,11 @@ from argparse import ArgumentParser
 
 import numpy as np
 import pandas as pd
-from astroplan.moon import moon_illumination
 from astropy import units as u
-from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon
+from astropy.coordinates import AltAz, EarthLocation, SkyCoord
 from astropy.table import Table
 from astropy.time import Time
 from config import Config
-from matplotlib import colors
-from matplotlib import pyplot as plt
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
@@ -81,8 +78,11 @@ if __name__ == "__main__":
         dec=runsummary["mean_dec"],
     )
 
-    # this should be 'configurable'
-    source_coordinates = SkyCoord.from_name(config.source)
+    source_coordinates = SkyCoord(
+        ra=config.source_ra_deg,
+        dec=config.source_dec_deg,
+        unit=u.deg,
+    )
 
     separation = tel_pointing.separation(source_coordinates)
 
@@ -112,19 +112,13 @@ if __name__ == "__main__":
     #
     # Better later.
 
-    # Exclude runs with high pedestal charges.  Check first for impact of moon.
-
-    location = EarthLocation.of_site("lapalma")
+    location = EarthLocation.from_geodetic(
+        u.Quantity(-17.89139, u.deg),
+        u.Quantity(28.76139, u.deg),
+        height=u.Quantity(2184, u.m),
+    )
 
     altaz = AltAz(obstime=time[mask], location=location)
-
-    moon = get_moon(time[mask], location=location).transform_to(altaz)
-
-    moon_light = moon_illumination(time[mask])
-    moon_light[moon.alt.to_value(u.deg) < 0] = 1
-
-    cmap = plt.cm.afmhot
-    norm = colors.Normalize(0, 1)
 
     ped_std = runsummary["ped_charge_stddev"]
 
@@ -168,11 +162,13 @@ if __name__ == "__main__":
 
     mask_above10 = get_mask(
         cosmics_rate_above10,
-        *bounds_std(cosmics_rate_above10, config.cosmics_10_sigma)[::-1],
+        le=config.cosmics_10_ul,
+        ge=config.cosmics_10_ll,
     )
     mask_above30 = get_mask(
         cosmics_rate_above30,
-        *bounds_std(cosmics_rate_above30, config.cosmics_30_sigma)[::-1],
+        le=config.cosmics_30_ul,
+        ge=config.cosmics_30_ll,
     )
 
     mask_above = mask_above10 & mask_above30
