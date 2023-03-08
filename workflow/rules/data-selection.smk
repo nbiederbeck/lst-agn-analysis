@@ -1,6 +1,3 @@
-include: "../../lst-data-selection/workflow/Snakefile"
-
-
 localrules:
     link_paths,
 
@@ -12,7 +9,7 @@ rule link_paths:
         "lstchain-v0.9.13"
     input:
         runs="build/runs.json",
-        datacheck="build/dl1-datachecks-merged.h5",
+        datacheck="build/dl1-datachecks-masked.h5",
         script="link-paths.py",
     params:
         production="20230127_v0.9.12_base_prod_az_tel",
