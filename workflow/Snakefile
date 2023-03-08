@@ -16,24 +16,9 @@ rule all:
         "build/cosmics-above.pdf",
 
 
-# rule download_runlist:
-#     input:
-#         "lst1-authentication.txt",
-#     output:
-#         "build/runlist.html",
-#     conda:
-#         env
-#     shell:
-#         "\
-#         curl --user $(cat {input}) -s \
-#             https://lst1.iac.es/datacheck/lstosa/LST_source_catalog.html \
-#             -o {output} \
-#         "
-
-
 rule select_datasets:
     input:
-        data="build/runlist.html",
+        data="runlist.html",
         config=config,
         script="scripts/select-data.py",
     output:
@@ -93,9 +78,9 @@ rule data_check:
         "
 
 
-rule authentication:
+rule runlist:
     output:
-        "lst1-authentication.txt",
+        "runlist.html",
     shell:
         "echo 'Provide the file {output} as explained in README.md'"
 
