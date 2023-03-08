@@ -13,7 +13,7 @@ build/all-linked.txt: build/runs.json
 build/runs.json: lst-data-selection/build/runs.json
 	cp $< $@
 
-lst-data-selection/%:
+lst-data-selection/%: FORCE
 	make -C lst-data-selection $*
 
 build/%: FORCE
