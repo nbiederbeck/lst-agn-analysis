@@ -29,6 +29,11 @@ filename_dl1 = "dl1_LST-1.Run{run_id:05d}.h5"
 template_target_dl1 = "/fefs/aswg/data/real/DL1/{night}/v0.9/tailcut84/" + filename_dl1
 template_linkname_dl1 = outdir_dl1 + filename_dl1
 
+outdir_dl2 = "build/dl2/test/{source}/"
+filename_dl2 = "dl2_LST-1.Run{run_id:05d}.h5"
+template_target_dl2 = "/fefs/aswg/data/mc/DL2/AllSky/{prod}/TestingDataset/{dec}/{node}/dl2_{prod}_{node}_merged.h5"  # noqa
+template_linkname_dl2 = outdir_dl2 + filename_dl2
+
 outdir_irf = "build/irf/{source}/"
 filename_irf = "irf_Run{run_id:05d}.fits.gz"
 template_target_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}/irf_{prod}_{node}.fits.gz"  # noqa
@@ -133,9 +138,20 @@ def main() -> None:
                     template_linkname_model.format(source=name, run_id=run_id)
                 )
 
+                target_dl2 = Path(
+                    template_target_dl2.format(prod=prod, dec=dec, node=node)
+                )
+                linkname_dl2 = Path(
+                    template_linkname_dl2.format(source=name, run_id=run_id)
+                )
+
                 if not linkname_dl1.exists():
                     linkname_dl1.parent.mkdir(exist_ok=True, parents=True)
                     linkname_dl1.symlink_to(target_dl1)
+
+                if not linkname_dl2.exists():
+                    linkname_dl2.parent.mkdir(exist_ok=True, parents=True)
+                    linkname_dl2.symlink_to(target_dl2)
 
                 if not linkname_irf.exists():
                     linkname_irf.parent.mkdir(exist_ok=True, parents=True)
