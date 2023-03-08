@@ -15,6 +15,7 @@ localrules:
     dataset,
     dl3_hdu_index,
     dl3,
+    plot_irf,
 
 
 lstchain_env = "lstchain-v0.9.13"
@@ -28,25 +29,30 @@ plots = [
     # "build/plots/irf/edisp.pdf",
     # "build/plots/irf/gh_cut.pdf",
     # "build/plots/irf/radmax_cut.pdf",
-    "build/plots/mrk421/irf/aeff_Run03218.pdf",
+]
+irf_plots = [
+    f"build/plots/mrk421/irf/{irf}_Run{run_id:05d}.pdf"
+    for irf in ("aeff", "edisp")
+    for run_id in RUN_IDS
 ]
 
 
 rule all:
     input:
         plots,
+        irf_plots,
 
 
 rule plot_irf:
     output:
         "build/plots/{source}/irf/{irf}_Run{run_id}.pdf",
     input:
-        "build/irf/{source}/irf_Run{run_id}.fits.gz",
+        data="build/irf/{source}/irf_Run{run_id}.fits.gz",
         script="scripts/plot_irf_{irf}.py",
     conda:
         gammapy_env
     shell:
-        "python {input.script} -i {input} -o {output}"
+        "python {input.script} -i {input.data} -o {output}"
 
 
 rule calc_theta2:

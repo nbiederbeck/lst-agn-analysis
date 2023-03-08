@@ -1,12 +1,6 @@
+import json
 from argparse import ArgumentParser
-
-parser = ArgumentParser()
-parser.add_argument("--prod", required=True)
-parser.add_argument("--dec", required=True)
-parser.add_argument("--runsummary", required=True)
-parser.add_argument("-o", "--output-path", required=True)
-args = parser.parse_args()
-
+from itertools import chain
 from pathlib import Path
 
 import astropy.units as u
@@ -16,11 +10,19 @@ from astropy.table import Table
 from astropy.time import Time
 from tqdm import tqdm
 
-from run_ids import mrk421
+parser = ArgumentParser()
+parser.add_argument("--runs", required=True)
+parser.add_argument("--prod", required=True)
+parser.add_argument("--dec", required=True)
+parser.add_argument("--runsummary", required=True)
+parser.add_argument("-o", "--output-path", required=True)
+args = parser.parse_args()
 
-sources = {
-    "mrk421": mrk421,
-}
+with open(args.runs, "r") as f:
+    runs = json.load(f)
+n_runs = len(set(chain(*runs.values())))
+
+sources = {"mrk421": runs}
 
 outdir_dl1 = "build/dl1/{source}/"
 filename_dl1 = "dl1_LST-1.Run{run_id:05d}.h5"
@@ -83,7 +85,7 @@ def get_pointings_of_irfs(filelist) -> AltAz:
     return build_altaz(zd=theta * u.deg, az=az * u.deg)
 
 
-def main():
+def main() -> None:
     prod = args.prod
     dec = args.dec
 
@@ -93,7 +95,7 @@ def main():
     filelist = [p.name for p in path.parent.iterdir()]
     irf_pointings: AltAz = get_pointings_of_irfs(filelist)
 
-    progress = tqdm()
+    progress = tqdm(total=n_runs)
 
     for name, source in sources.items():
         for night, run_ids in source.items():

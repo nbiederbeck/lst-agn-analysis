@@ -6,3 +6,5 @@ __pycache__/
 poetry.lock
 Untitled*.ipynb
 *.log
+.ruff_cache/
+.mypy_cache/
