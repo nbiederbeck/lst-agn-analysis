@@ -1,13 +1,13 @@
 from argparse import ArgumentParser
 
+from astropy import units as u
+from astropy.table import Table
+from matplotlib import pyplot as plt
+
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output", required=True)
 args = parser.parse_args()
-
-from astropy import units as u
-from astropy.table import Table
-from matplotlib import pyplot as plt
 
 energy_unit = u.TeV
 

@@ -1,15 +1,15 @@
 from argparse import ArgumentParser
 
-parser = ArgumentParser()
-parser.add_argument("-i", "--input-path", required=True)
-parser.add_argument("-o", "--output", required=True)
-args = parser.parse_args()
-
 import numpy as np
 from astropy import units as u
 from astropy.table import Table
 from gammapy.maps import MapAxis
 from matplotlib import pyplot as plt
+
+parser = ArgumentParser()
+parser.add_argument("-i", "--input-path", required=True)
+parser.add_argument("-o", "--output", required=True)
+args = parser.parse_args()
 
 
 def main(input_path, output):

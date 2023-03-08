@@ -1,12 +1,12 @@
 from argparse import ArgumentParser
 
+from gammapy.irf import load_irf_dict_from_file
+from matplotlib import pyplot as plt
+
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output", required=True)
 args = parser.parse_args()
-
-from gammapy.irf import load_irf_dict_from_file
-from matplotlib import pyplot as plt
 
 
 def main(input_path, output):

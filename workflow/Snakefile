@@ -28,7 +28,7 @@ plots = [
     # "build/plots/irf/edisp.pdf",
     # "build/plots/irf/gh_cut.pdf",
     # "build/plots/irf/radmax_cut.pdf",
-    # "build/plots/irf/aeff.pdf",
+    "build/plots/mrk421/irf/aeff_Run03218.pdf",
 ]
 
 
@@ -37,16 +37,16 @@ rule all:
         plots,
 
 
-# rule plot_irf:
-#     output:
-#         "build/plots/irf/{irf}.pdf",
-#     input:
-#         "build/irf.fits.gz",
-#         script="scripts/plot_{irf}.py",
-#     conda:
-#         gammapy_env
-#     shell:
-#         "python {input.script} -i {input} -o {output}"
+rule plot_irf:
+    output:
+        "build/plots/{source}/irf/{irf}_Run{run_id}.pdf",
+    input:
+        "build/irf/{source}/irf_Run{run_id}.fits.gz",
+        script="scripts/plot_irf_{irf}.py",
+    conda:
+        gammapy_env
+    shell:
+        "python {input.script} -i {input} -o {output}"
 
 
 rule calc_theta2:
