@@ -13,4 +13,4 @@ before_script:
 
 dry-run:
     script:
-        - SNAKEMAKE --dry-run
+        - $SNAKEMAKE --dry-run
