@@ -5,11 +5,12 @@ image: mambaorg/micromamba:latest
 
 variables:
     MAMBA: micromamba --yes --quiet
+    SNAKEMAKE: snakemake --cores=1
 
 before_script:
     - $MAMBA install -c conda-forge -c bioconda snakemake
+    - $SNAKEMAKE --lint
 
-build:
+dry-run:
     script:
-        - snakemake --lint
-        - snakemake -nc1
+        - SNAKEMAKE --dry-run
