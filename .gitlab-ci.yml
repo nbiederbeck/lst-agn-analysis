@@ -1,3 +1,6 @@
+# This is a good template, but disabled for now
+# "Settings>General: Visibility, project features, permissions -> Repositry: CI"
+
 image: mambaorg/micromamba:latest
 
 variables:
