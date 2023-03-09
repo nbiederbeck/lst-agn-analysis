@@ -1,7 +1,10 @@
 image: mambaorg/micromamba:latest
 
+variables:
+    MAMBA: micromamba --yes --quiet
+
 before_script:
-    - micromamba --quiet install -c conda-forge -c bioconda snakemake
+    - $MAMBA install -c conda-forge -c bioconda snakemake
 
 build:
     script:
