@@ -41,6 +41,9 @@ rule plot_irf:
     input:
         data="build/irf/calculated/{source}/irf_Run{run_id}.fits.gz",
         script="scripts/plot_irf_{irf}.py",
+    resources:
+        mem_mb=1000,
+        time=5,  # minutes
     conda:
         gammapy_env
     shell:
@@ -197,7 +200,7 @@ rule dataset:
     resources:
         cpus=16,
         mem_mb="32G",
-        time=30,
+        time=30,  # minutes
     conda:
         gammapy_env
     shell:
@@ -215,6 +218,8 @@ rule dl3_hdu_index:
             run_id=RUN_IDS,
             source=["mrk421"],
         ),
+    resources:
+        time=15,
     shell:
         """
         lstchain_create_dl3_index_files  \
