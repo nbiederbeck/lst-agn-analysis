@@ -29,15 +29,15 @@ def main(input_path, output):
     ax.set_xlabel(f"$E_{{reco}} / {energy_unit}$")
     ax.set_ylabel("Gammaness")
 
-    ax.bar(
-        gh_cuts["center"].quantity.to_value(energy_unit),
-        -(1 - gh_cuts["cut"]),
-        bottom=1,
-        width=gh_cuts["high"] - gh_cuts["low"],
-        color="gray",
-        alpha=0.1,
-        label="Selected Events",
-    )
+    # ax.bar(
+    #     gh_cuts["center"].quantity.to_value(energy_unit),
+    #     -(1 - gh_cuts["cut"]),
+    #     bottom=1,
+    #     width=gh_cuts["high"] - gh_cuts["low"],
+    #     color="gray",
+    #     alpha=0.1,
+    #     label="Selected Events",
+    # )
 
     ax.legend()
 

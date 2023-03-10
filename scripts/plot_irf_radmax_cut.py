@@ -39,14 +39,14 @@ def main(input_path, output):
         label="Rad Max",
     )
 
-    ax.bar(
-        energy_axis.center,
-        rmax**2,
-        width=energy_axis.edges_max - energy_axis.edges_min,
-        color="gray",
-        alpha=0.1,
-        label="Selected Events",
-    )
+    # ax.bar(
+    #     energy_axis.center,
+    #     rmax**2,
+    #     width=energy_axis.edges_max - energy_axis.edges_min,
+    #     color="gray",
+    #     alpha=0.1,
+    #     label="Selected Events",
+    # )
 
     ax.set_xscale("log")
     ax.legend()
