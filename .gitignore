@@ -9,3 +9,6 @@ Untitled*.ipynb
 *.log
 .ruff_cache/
 .mypy_cache/
+
+# local script for syncing local and La Palma cluster
+lapalma.sh
