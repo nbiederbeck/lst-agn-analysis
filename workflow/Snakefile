@@ -35,6 +35,10 @@ rule all:
         irf_plots,
 
 
+localrules:
+    plot_irf,
+
+
 rule plot_irf:
     output:
         "build/plots/{source}/irf/{irf}_Run{run_id}.pdf",
@@ -204,7 +208,7 @@ rule dataset:
     conda:
         gammapy_env
     shell:
-        "python {input.script} -c {input.config} -o {output}"
+        "python {input.script} -j0 -c {input.config} -o {output} --n-off-regions=5"
 
 
 rule dl3_hdu_index:
@@ -299,6 +303,7 @@ rule dl2:
 rule irf:
     resources:
         mem_mb="8G",
+        time=10,
     output:
         "build/irf/calculated/{source}/irf_Run{run_id}.fits.gz",
     input:
