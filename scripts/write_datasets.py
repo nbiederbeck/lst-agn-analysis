@@ -1,13 +1,4 @@
 from argparse import ArgumentParser
-
-parser = ArgumentParser()
-parser.add_argument("-c", "--config", required=True)
-parser.add_argument("-o", "--output", required=True)
-parser.add_argument("--n-off-regions", default=1)
-parser.add_argument("-j", "--n-jobs", default=1, type=int)
-args = parser.parse_args()
-
-
 from os import cpu_count
 
 from astropy.coordinates import SkyCoord
@@ -22,6 +13,13 @@ from gammapy.makers import (
 )
 from gammapy.maps import MapAxis, RegionGeom
 from regions import PointSkyRegion
+
+parser = ArgumentParser()
+parser.add_argument("-c", "--config", required=True)
+parser.add_argument("-o", "--output", required=True)
+parser.add_argument("--n-off-regions", default=1, type=int)
+parser.add_argument("-j", "--n-jobs", default=1, type=int)
+args = parser.parse_args()
 
 
 def main(config, output, n_off_regions, n_jobs):
@@ -43,20 +41,20 @@ def main(config, output, n_off_regions, n_jobs):
     target_position = SkyCoord(frame=on_region.frame, b=on_region.lat, l=on_region.lon)
 
     on_region = PointSkyRegion(target_position)
+    energy_axis_config = config.datasets.geom.axes.energy
     energy_axis = MapAxis.from_bounds(
         name="energy",
-        lo_bnd=config.datasets.geom.axes.energy.min.value,
-        hi_bnd=config.datasets.geom.axes.energy.max.to_value(
-            config.datasets.geom.axes.energy.min.unit
-        ),
-        nbin=config.datasets.geom.axes.energy.nbins,
-        unit=config.datasets.geom.axes.energy.min.unit,
+        lo_bnd=energy_axis_config.min.value,
+        hi_bnd=energy_axis_config.max.to_value(energy_axis_config.min.unit),
+        nbin=energy_axis_config.nbins,
+        unit=energy_axis_config.min.unit,
         interp="log",
         node_type="edges",
     )
     geom = RegionGeom.create(region=on_region, axes=[energy_axis])
     dataset_maker = SpectrumDatasetMaker(
-        containment_correction=False, selection=["counts", "exposure", "edisp"]
+        containment_correction=False,
+        selection=["counts", "exposure", "edisp"],
     )
     region_finder = WobbleRegionsFinder(n_off_regions=n_off_regions)
     bkg_maker = ReflectedRegionsBackgroundMaker(region_finder=region_finder)
@@ -67,10 +65,21 @@ def main(config, output, n_off_regions, n_jobs):
 
     global_dataset = MapDataset.create(geom)
 
-    makers = [dataset_maker, safe_mask_maker, bkg_maker]
+    makers = [
+        dataset_maker,
+        safe_mask_maker,
+        bkg_maker,
+    ]
 
     datasets_maker = DatasetsMaker(makers, stack_datasets=False, n_jobs=n_jobs)
-    datasets = datasets_maker.run(global_dataset, analysis.observations)
+    datasets = datasets_maker.run(
+        global_dataset,
+        analysis.observations,
+        [
+            MapDataset.create(geom, name=str(obs.obs_id))
+            for obs in analysis.observations
+        ],
+    )
 
     datasets.write(output, overwrite=True)
 
