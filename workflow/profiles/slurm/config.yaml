@@ -9,7 +9,7 @@ cluster: mkdir -p build/logs/{rule} &&
   --output=build/logs/%j.out
   --error=build/logs/%j.err
 resources:
-  - cpus=60
+  - cpus=100
 default-resources:
   - partition=short
   - time=120
