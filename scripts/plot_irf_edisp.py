@@ -23,12 +23,12 @@ def main(input_path, output):
         edisp.data[..., 0].T,
         cmap="binary",
     )
-    ax.set_xlabel(rf"$E_{{true}}$ / {energy_unit}")
+    ax.set_xlabel(rf"$E_{{\mathrm{{true}}}}$ / {energy_unit}")
     ax.set_ylabel(r"Migration Ratio $\mu$")
     ax.set_xscale("log")
     ax.set_yscale("log")
 
-    ax.axhline(1, color="C1", linestyle="dashed")
+    ax.axhline(1, color="C1")
 
     ax.set_ylim(0.1, 10)
 

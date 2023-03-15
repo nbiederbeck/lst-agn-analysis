@@ -32,8 +32,11 @@ def main(input_path, output):
 
     ax.errorbar(
         energy_axis.center,
-        rmax**2,
-        xerr=energy_axis.bin_width / 2,
+        rmax,
+        xerr=(
+            energy_axis.center - energy_axis.edges_min,
+            energy_axis.edges_max - energy_axis.center,
+        ),
         ls="",
         color="black",
         label="Rad Max",
@@ -41,17 +44,18 @@ def main(input_path, output):
 
     # ax.bar(
     #     energy_axis.center,
-    #     rmax**2,
+    #     rmax,
     #     width=energy_axis.edges_max - energy_axis.edges_min,
     #     color="gray",
     #     alpha=0.1,
     #     label="Selected Events",
     # )
 
+    ax.set_ylim(0, 0.5)
+
     ax.set_xscale("log")
-    ax.legend()
-    ax.set_xlabel(f"$E_{{reco}}$ / {energy_unit}")
-    ax.set_ylabel(f"$Theta^2$ / {angle_unit ** 2}")
+    ax.set_xlabel(f"$E_{{\\mathrm{{reco}}}}$ / {energy_unit}")
+    ax.set_ylabel(f"$\theta$ / {angle_unit}")
 
     fig.savefig(output)
 

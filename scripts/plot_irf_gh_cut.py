@@ -26,7 +26,7 @@ def main(input_path, output):
         # lw=2,
         color="black",
     )
-    ax.set_xlabel(f"$E_{{reco}} / {energy_unit}$")
+    ax.set_xlabel(f"$E_{{\\mathrm{{reco}}}} / {energy_unit}$")
     ax.set_ylabel("Gammaness")
 
     # ax.bar(
@@ -38,8 +38,6 @@ def main(input_path, output):
     #     alpha=0.1,
     #     label="Selected Events",
     # )
-
-    ax.legend()
 
     ax.set_ylim(0, 1)
 

@@ -36,8 +36,6 @@ def main(input_path, output):
     ax.set_xlabel(rf"$E_{{\mathrm{{true}}}}$ / {e_true.center.unit}")
     ax.set_ylabel(f"Effective Area / {aeff.unit}")
 
-    ax.legend()
-
     ax.set_xscale("log")
     ax.set_yscale("log")
 
