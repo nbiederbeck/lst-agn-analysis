@@ -14,13 +14,16 @@ lstchain_env = "lstchain-v0.9.13"
 gammapy_env = "envs/environment.yml"
 
 plots = [
-    "build/plots/mrk421/theta2.pdf",
-    "build/plots/mrk421/flux_points.pdf",
-    "build/plots/mrk421/light_curve.pdf",
-    "build/plots/mrk421/observation_plots.pdf",
-    # "build/plots/irf/edisp.pdf",
-    # "build/plots/irf/gh_cut.pdf",
-    # "build/plots/irf/radmax_cut.pdf",
+    "build/plots/mrk421/total/theta2.pdf",
+    "build/plots/mrk421/total/flux_points.pdf",
+    "build/plots/mrk421/total/light_curve.pdf",
+    "build/plots/mrk421/total/observation_plots.pdf",
+    "build/plots/mrk421/2021/theta2.pdf",
+    "build/plots/mrk421/2021/flux_points.pdf",
+    "build/plots/mrk421/2021/light_curve.pdf",
+    "build/plots/mrk421/2022/theta2.pdf",
+    "build/plots/mrk421/2022/flux_points.pdf",
+    "build/plots/mrk421/2022/light_curve.pdf",
 ]
 irf_plots = [
     f"build/plots/mrk421/irf/{irf}_Run{run_id:05d}.pdf"
@@ -36,6 +39,7 @@ rule all:
 
 
 localrules:
+    irf,
     plot_irf,
 
 
@@ -56,10 +60,10 @@ rule plot_irf:
 
 rule calc_theta2:
     output:
-        "build/dl4/{source}/theta2.fits.gz",
+        "build/dl4/{source}/{analysis}/theta2.fits.gz",
     input:
         data="build/dl3/{source}/hdu-index.fits.gz",
-        config="configs/{source}.yaml",
+        config="configs/{source}-{analysis}.yaml",
         script="scripts/calc_theta2.py",
     resources:
         mem_mb=16000,
@@ -71,12 +75,12 @@ rule calc_theta2:
 
 rule calc_flux_points:
     input:
-        data="build/dl4/{source}/datasets.fits.gz",
-        config="configs/{source}.yaml",
-        model="build/dl4/{source}/model-best-fit.yaml",
+        data="build/dl4/{source}/{analysis}/datasets.fits.gz",
+        config="configs/{source}-{analysis}.yaml",
+        model="build/dl4/{source}/{analysis}/model-best-fit.yaml",
         script="scripts/calc_flux_points.py",
     output:
-        "build/dl4/{source}/flux_points.fits.gz",
+        "build/dl4/{source}/{analysis}/flux_points.fits.gz",
     conda:
         gammapy_env
     shell:
@@ -94,11 +98,11 @@ ruleorder: plot_flux_points > plot
 
 rule plot_flux_points:
     input:
-        data="build/dl4/{source}/flux_points.fits.gz",
-        model="build/dl4/{source}/model-best-fit.yaml",
+        data="build/dl4/{source}/{analysis}/flux_points.fits.gz",
+        model="build/dl4/{source}/{analysis}/model-best-fit.yaml",
         script="scripts/plot_flux_points.py",
     output:
-        "build/plots/{source}/flux_points.pdf",
+        "build/plots/{source}/{analysis}/flux_points.pdf",
     conda:
         gammapy_env
     shell:
@@ -125,10 +129,10 @@ rule plot:
 rule observation_plots:
     input:
         "build/dl3/{source}/hdu-index.fits.gz",
-        config="configs/{source}.yaml",
+        config="configs/{source}-{analysis}.yaml",
         script="scripts/events.py",
     output:
-        "build/plots/{source}/observation_plots.pdf",
+        "build/plots/{source}/{analysis}/observation_plots.pdf",
     resources:
         mem_mb=64000,
     conda:
@@ -156,12 +160,12 @@ rule sensitivity:
 
 rule calc_light_curve:
     input:
-        model="build/dl4/{source}/model-best-fit.yaml",
-        config="configs/{source}.yaml",
-        dataset="build/dl4/{source}/datasets.fits.gz",
+        model="build/dl4/{source}/{analysis}/model-best-fit.yaml",
+        config="configs/{source}-{analysis}.yaml",
+        dataset="build/dl4/{source}/{analysis}/datasets.fits.gz",
         script="scripts/calc_light_curve.py",
     output:
-        "build/dl4/{source}/light_curve.fits.gz",
+        "build/dl4/{source}/{analysis}/light_curve.fits.gz",
     conda:
         gammapy_env
     shell:
@@ -176,12 +180,12 @@ rule calc_light_curve:
 
 rule model_best_fit:
     input:
-        config="configs/{source}.yaml",
-        dataset="build/dl4/{source}/datasets.fits.gz",
-        model="configs/model-{source}.yaml",
+        config="configs/{source}-{analysis}.yaml",
+        dataset="build/dl4/{source}/{analysis}/datasets.fits.gz",
+        model="configs/model-{source}-{analysis}.yaml",
         script="scripts/fit-model.py",
     output:
-        "build/dl4/{source}/model-best-fit.yaml",
+        "build/dl4/{source}/{analysis}/model-best-fit.yaml",
     conda:
         gammapy_env
     shell:
@@ -197,10 +201,10 @@ rule model_best_fit:
 rule dataset:
     input:
         data="build/dl3/{source}/hdu-index.fits.gz",
-        config="configs/{source}.yaml",
+        config="configs/{source}-{analysis}.yaml",
         script="scripts/write_datasets.py",
     output:
-        "build/dl4/{source}/datasets.fits.gz",
+        "build/dl4/{source}/{analysis}/datasets.fits.gz",
     resources:
         cpus=16,
         mem_mb="32G",
@@ -208,7 +212,7 @@ rule dataset:
     conda:
         gammapy_env
     shell:
-        "python {input.script} -j0 -c {input.config} -o {output} --n-off-regions=5"
+        "python {input.script} -j16 -c {input.config} -o {output} --n-off-regions=1"
 
 
 rule dl3_hdu_index:
