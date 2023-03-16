@@ -61,7 +61,8 @@ def main(config, output, n_off_regions, n_jobs):
 
     # use the energy threshold specified in the DL3 files
     # TODO Test what influence this has
-    safe_mask_maker = SafeMaskMaker(methods=["aeff-default"])
+    # according to docs most of these discard energy migration -> bad
+    safe_mask_maker = SafeMaskMaker(methods=[])
 
     global_dataset = MapDataset.create(geom)
 
