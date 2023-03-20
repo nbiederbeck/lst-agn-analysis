@@ -14,19 +14,19 @@ lstchain_env = "lstchain-v0.9.13"
 gammapy_env = "envs/environment.yml"
 
 plots = [
-    "build/plots/mrk421/total/theta2.pdf",
-    "build/plots/mrk421/total/flux_points.pdf",
-    "build/plots/mrk421/total/light_curve.pdf",
-    "build/plots/mrk421/total/observation_plots.pdf",
-    "build/plots/mrk421/2021/theta2.pdf",
-    "build/plots/mrk421/2021/flux_points.pdf",
-    "build/plots/mrk421/2021/light_curve.pdf",
-    "build/plots/mrk421/2022/theta2.pdf",
-    "build/plots/mrk421/2022/flux_points.pdf",
-    "build/plots/mrk421/2022/light_curve.pdf",
+    "build/plots/mrk421-total/theta2.pdf",
+    "build/plots/mrk421-total/flux_points.pdf",
+    "build/plots/mrk421-total/light_curve.pdf",
+    "build/plots/mrk421-total/observation_plots.pdf",
+    "build/plots/mrk421-2021/theta2.pdf",
+    "build/plots/mrk421-2021/flux_points.pdf",
+    "build/plots/mrk421-2021/light_curve.pdf",
+    "build/plots/mrk421-2022/theta2.pdf",
+    "build/plots/mrk421-2022/flux_points.pdf",
+    "build/plots/mrk421-2022/light_curve.pdf",
 ]
 irf_plots = [
-    f"build/plots/mrk421/irf/{irf}_Run{run_id:05d}.pdf"
+    f"build/plots/irf/{irf}_Run{run_id:05d}.pdf"
     for irf in ("aeff", "edisp", "gh_cut", "radmax_cut")
     for run_id in RUN_IDS
 ]
@@ -45,9 +45,9 @@ localrules:
 
 rule plot_irf:
     output:
-        "build/plots/{source}/irf/{irf}_Run{run_id}.pdf",
+        "build/plots/irf/{irf}_Run{run_id}.pdf",
     input:
-        data="build/irf/calculated/{source}/irf_Run{run_id}.fits.gz",
+        data="build/irf/calculated/irf_Run{run_id}.fits.gz",
         script="scripts/plot_irf_{irf}.py",
     resources:
         mem_mb=1000,
@@ -60,10 +60,10 @@ rule plot_irf:
 
 rule calc_theta2:
     output:
-        "build/dl4/{source}/{analysis}/theta2.fits.gz",
+        "build/dl4/{analysis}/theta2.fits.gz",
     input:
-        data="build/dl3/{source}/hdu-index.fits.gz",
-        config="configs/{source}-{analysis}.yaml",
+        data="build/dl3/hdu-index.fits.gz",
+        config="configs/{analysis}.yaml",
         script="scripts/calc_theta2.py",
     resources:
         mem_mb=16000,
@@ -75,12 +75,12 @@ rule calc_theta2:
 
 rule calc_flux_points:
     input:
-        data="build/dl4/{source}/{analysis}/datasets.fits.gz",
-        config="configs/{source}-{analysis}.yaml",
-        model="build/dl4/{source}/{analysis}/model-best-fit.yaml",
+        data="build/dl4/{analysis}/datasets.fits.gz",
+        config="configs/{analysis}.yaml",
+        model="build/dl4/{analysis}/model-best-fit.yaml",
         script="scripts/calc_flux_points.py",
     output:
-        "build/dl4/{source}/{analysis}/flux_points.fits.gz",
+        "build/dl4/{analysis}/flux_points.fits.gz",
     conda:
         gammapy_env
     shell:
@@ -98,11 +98,11 @@ ruleorder: plot_flux_points > plot
 
 rule plot_flux_points:
     input:
-        data="build/dl4/{source}/{analysis}/flux_points.fits.gz",
-        model="build/dl4/{source}/{analysis}/model-best-fit.yaml",
+        data="build/dl4/{analysis}/flux_points.fits.gz",
+        model="build/dl4/{analysis}/model-best-fit.yaml",
         script="scripts/plot_flux_points.py",
     output:
-        "build/plots/{source}/{analysis}/flux_points.pdf",
+        "build/plots/{analysis}/flux_points.pdf",
     conda:
         gammapy_env
     shell:
@@ -116,9 +116,9 @@ rule plot_flux_points:
 
 rule plot:
     output:
-        "build/plots/{source}/{name}.pdf",
+        "build/plots/{analysis}/{name}.pdf",
     input:
-        data="build/dl4/{source}/{name}.fits.gz",
+        data="build/dl4/{analysis}/{name}.fits.gz",
         script="scripts/plot_{name}.py",
     conda:
         gammapy_env
@@ -128,11 +128,11 @@ rule plot:
 
 rule observation_plots:
     input:
-        "build/dl3/{source}/hdu-index.fits.gz",
-        config="configs/{source}-{analysis}.yaml",
+        "build/dl3/hdu-index.fits.gz",
+        config="configs/{analysis}.yaml",
         script="scripts/events.py",
     output:
-        "build/plots/{source}/{analysis}/observation_plots.pdf",
+        "build/plots/{analysis}/observation_plots.pdf",
     resources:
         mem_mb=64000,
     conda:
@@ -160,12 +160,12 @@ rule sensitivity:
 
 rule calc_light_curve:
     input:
-        model="build/dl4/{source}/{analysis}/model-best-fit.yaml",
-        config="configs/{source}-{analysis}.yaml",
-        dataset="build/dl4/{source}/{analysis}/datasets.fits.gz",
+        model="build/dl4/{analysis}/model-best-fit.yaml",
+        config="configs/{analysis}.yaml",
+        dataset="build/dl4/{analysis}/datasets.fits.gz",
         script="scripts/calc_light_curve.py",
     output:
-        "build/dl4/{source}/{analysis}/light_curve.fits.gz",
+        "build/dl4/{analysis}/light_curve.fits.gz",
     conda:
         gammapy_env
     shell:
@@ -180,12 +180,12 @@ rule calc_light_curve:
 
 rule model_best_fit:
     input:
-        config="configs/{source}-{analysis}.yaml",
-        dataset="build/dl4/{source}/{analysis}/datasets.fits.gz",
-        model="configs/model-{source}-{analysis}.yaml",
+        config="configs/{analysis}.yaml",
+        dataset="build/dl4/{analysis}/datasets.fits.gz",
+        model="configs/model-{analysis}.yaml",
         script="scripts/fit-model.py",
     output:
-        "build/dl4/{source}/{analysis}/model-best-fit.yaml",
+        "build/dl4/{analysis}/model-best-fit.yaml",
     conda:
         gammapy_env
     shell:
@@ -200,11 +200,11 @@ rule model_best_fit:
 
 rule dataset:
     input:
-        data="build/dl3/{source}/hdu-index.fits.gz",
-        config="configs/{source}-{analysis}.yaml",
+        data="build/dl3/hdu-index.fits.gz",
+        config="configs/{analysis}.yaml",
         script="scripts/write_datasets.py",
     output:
-        "build/dl4/{source}/{analysis}/datasets.fits.gz",
+        "build/dl4/{analysis}/datasets.fits.gz",
     resources:
         cpus=16,
         mem_mb="32G",
@@ -219,10 +219,10 @@ rule dl3_hdu_index:
     conda:
         lstchain_env
     output:
-        "build/dl3/{source}/hdu-index.fits.gz",
+        "build/dl3/hdu-index.fits.gz",
     input:
         expand(
-            "build/dl3/{source}/dl3_LST-1.Run{run_id:05d}.fits",
+            "build/dl3/dl3_LST-1.Run{run_id:05d}.fits.gz",
             run_id=RUN_IDS,
             source=["mrk421"],
         ),
@@ -231,8 +231,8 @@ rule dl3_hdu_index:
     shell:
         """
         lstchain_create_dl3_index_files  \
-            --input-dl3-dir build/dl3/{wildcards.source}  \
-            --output-index-path build/dl3/{wildcards.source}  \
+            --input-dl3-dir build/dl3/  \
+            --output-index-path build/dl3/  \
             --file-pattern 'dl3_*.fits'  \
             --overwrite \
         """
@@ -240,15 +240,15 @@ rule dl3_hdu_index:
 
 # rule select_low_offset:
 #     output:
-#         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits.gz",
+#         "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
 #     input:
-#         "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
+#         "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
 #     conda:
 #         gammapy_env
 #     resources:
 #         time=10,
 #     log:
-#         "build/logs/dl3/{run_id}-{source}.log",
+#         "build/logs/dl3/{run_id}.log",
 #     shell:
 #         """
 #         python scripts/select_low_offset.py \
@@ -258,10 +258,10 @@ rule dl3_hdu_index:
 
 rule dl3:
     output:
-        "build/dl3/{source}/dl3_LST-1.Run{run_id}.fits",
+        "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
     input:
-        data="build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
-        irf="build/irf/calculated/{source}/irf_Run{run_id}.fits.gz",
+        data="build/dl2/dl2_LST-1.Run{run_id}.h5",
+        irf="build/irf/calculated/irf_Run{run_id}.fits.gz",
         config="configs/irf_tool_config.json",
     resources:
         mem_mb="12G",
@@ -269,7 +269,7 @@ rule dl3:
     conda:
         lstchain_env
     log:
-        "build/logs/dl3/{source}/{run_id}.log",
+        "build/logs/dl3/{run_id}.log",
     shell:
         """
         lstchain_create_dl3_file  \
@@ -286,14 +286,14 @@ rule dl2:
     resources:
         mem_mb="64G",
     output:
-        "build/dl2/{source}/dl2_LST-1.Run{run_id}.h5",
+        "build/dl2/dl2_LST-1.Run{run_id}.h5",
     input:
-        data="build/dl1/{source}/dl1_LST-1.Run{run_id}.h5",
-        config="build/models/{source}/model_Run{run_id}/lstchain_config.json",
+        data="build/dl1/dl1_LST-1.Run{run_id}.h5",
+        config="build/models/model_Run{run_id}/lstchain_config.json",
     conda:
         lstchain_env
     log:
-        "build/logs/dl2/{run_id}-{source}.log",
+        "build/logs/dl2/{run_id}.log",
     shell:
         """
         lstchain_dl1_to_dl2  \
@@ -309,9 +309,9 @@ rule irf:
         mem_mb="8G",
         time=10,
     output:
-        "build/irf/calculated/{source}/irf_Run{run_id}.fits.gz",
+        "build/irf/calculated/irf_Run{run_id}.fits.gz",
     input:
-        gammas="build/dl2/test/{source}/dl2_LST-1.Run{run_id}.h5",
+        gammas="build/dl2/test/dl2_LST-1.Run{run_id}.h5",
         config="configs/irf_tool_config.json",
     conda:
         lstchain_env
