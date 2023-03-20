@@ -13,5 +13,9 @@
     "energy_dependent_gh": true,
     "point_like": true,
     "overwrite": true
+  },
+  "DataReductionFITSWriter": {
+    "source_ra": "166.114 deg",
+    "source_dec": "38.209 deg"
   }
 }
