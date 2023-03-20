@@ -276,8 +276,8 @@ rule dl3:
             --input-dl2 {input.data}  \
             --output-dl3-path $(dirname $(realpath {output}))  \
             --input-irf {input.irf}  \
-            --source-name {wildcards.source}  \
             --config {input.config} \
+            --gzip \
             --overwrite \
         """
 
