@@ -4,9 +4,6 @@ env = "lst-data-selection"
 config = "config.json"
 
 
-include: "rules/requirements.smk"
-
-
 rule all:
     """Docstring comment for a rule."""
     input:
