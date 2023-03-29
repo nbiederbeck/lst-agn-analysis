@@ -14,5 +14,6 @@ dependencies:
   - pandas
   - numpy
   - astropy
+  - pre-commit
   - pip:
     - lstchain~=0.9.13
