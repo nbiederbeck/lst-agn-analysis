@@ -7,6 +7,7 @@ from astropy.coordinates import AltAz, EarthLocation, SkyCoord
 from astropy.table import Table
 from astropy.time import Time
 from config import Config
+from log import setup_logging
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
@@ -14,9 +15,11 @@ parser.add_argument("datacheck_path")
 parser.add_argument("--output-runlist", required=True)
 parser.add_argument("--output-datachecks", required=True)
 parser.add_argument("-c", "--config", required=True)
+parser.add_argument("--log-file", required=False)
 args = parser.parse_args()
 
 config = Config.parse_file(args.config)
+log = setup_logging(logfile=args.log_file)
 
 
 def get_mask(x, le=np.inf, ge=-np.inf):
@@ -68,6 +71,10 @@ if __name__ == "__main__":
     )
 
     mask_run_id = np.in1d(np.array(runsummary["runnumber"]), run_ids)
+    log.info(
+        "Runs observing the source: "
+        f"{np.count_nonzero(mask_run_id)} / {len(runsummary)} "
+    )
 
     mask_pedestals_ok = np.isfinite(runsummary["num_pedestals"])
 
@@ -102,11 +109,10 @@ if __name__ == "__main__":
     after_pedestals_run_id_time_separation = np.count_nonzero(mask)
     s = (
         "After selecting the time of the dataset used in AGN Zoo Paper, "
-        "after removing runs with problems in pedestals and "
-        "after selecting runs that are close to the observed target, "
-        f"{after_pedestals_run_id_time_separation} runs are kept."
+        "after removing runs with problems in pedestals and after removing "
+        f"mispointed runs, {after_pedestals_run_id_time_separation} runs are kept."
     )
-    print(s)
+    log.info(s)
 
     # Exclude runs with high zenith (?)
     #
@@ -137,7 +143,7 @@ if __name__ == "__main__":
         "possibly dependent on the moon elevation and illumination, "
         f"{after_pedestal_charge} runs are kept."
     )
-    print(s)
+    log.info(s)
 
     # Check cosmics rates
 
@@ -155,7 +161,7 @@ if __name__ == "__main__":
         "based on AGN Zoo Paper cuts, "
         f"{after_cosmics} runs are kept."
     )
-    print(s)
+    log.info(s)
 
     cosmics_rate_above10 = runsummary["cosmics_rate_above10"]
     cosmics_rate_above30 = runsummary["cosmics_rate_above30"]
@@ -180,14 +186,14 @@ if __name__ == "__main__":
         "After cutting on the rate of cosmics with more than 10 p.e. "
         f"(resp. 30 p.e.) {after_cosmics_above_n} runs are kept."
     )
-    print(s)
+    log.info(s)
 
     duration = np.sum(runsummary["elapsed_time"][mask].quantity).to(u.h)
     s = (
-        f"A selected total of {len(runsummary)} runs add to a "
-        f"duration of {duration:.2f} of data."
+        f"Selected a total of {duration:.2f} from the runlist containing."
+        f"{len(runsummary)} runs."
     )
-    print(s)
+    log.info(s)
 
     mask = np.in1d(runs["Run ID"], runsummary["runnumber"][mask])
 
