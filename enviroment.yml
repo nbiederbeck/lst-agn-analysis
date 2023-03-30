@@ -1,11 +1,9 @@
 name: lst-data-selection
 channels:
-  - default
-  - bioconda
   - conda-forge
 dependencies:
   - python=3.8
-  - snakemake
+  - bioconda::snakemake
   - pip
   - lxml
   - astroplan
@@ -14,6 +12,7 @@ dependencies:
   - pandas
   - numpy
   - astropy
+  - nodejs
   - pre-commit
   - pip:
-    - lstchain~=0.9.13
+      - lstchain~=0.9.13
