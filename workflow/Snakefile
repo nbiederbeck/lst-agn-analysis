@@ -64,6 +64,7 @@ rule data_check:
     output:
         runlist="build/runlist-checked.csv",
         datachecks="build/dl1-datachecks-masked.h5",
+        log="build/datacheck.log",
     conda:
         env
     shell:
@@ -75,6 +76,7 @@ rule data_check:
             --output-runlist {output.runlist} \
             --output-datachecks {output.datachecks} \
             --config {input.config} \
+            --log-file {output.log} \
         "
 
 

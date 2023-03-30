@@ -26,7 +26,7 @@ def setup_logging(logfile=None, verbose=False):
     if logfile is not None:
         file_handler = logging.FileHandler(logfile)
         file_formatter = logging.Formatter(
-            fmt="%(asctime)s|%(levelname)s|%(name)s|\n%(message)s",
+            fmt="%(asctime)s|%(levelname)s|%(name)s|%(message)s",
             datefmt="%Y-%m-%dT%H:%M:%S",
         )
         file_handler.setFormatter(file_formatter)

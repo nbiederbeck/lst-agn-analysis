@@ -1,3 +1,4 @@
+import logging
 from argparse import ArgumentParser
 
 import numpy as np
@@ -19,7 +20,6 @@ parser.add_argument("--log-file", required=False)
 args = parser.parse_args()
 
 config = Config.parse_file(args.config)
-log = setup_logging(logfile=args.log_file)
 
 
 def get_mask(x, le=np.inf, ge=-np.inf):
@@ -57,6 +57,8 @@ def bounds_mad(x, n_sig=1):
 
 if __name__ == "__main__":
     runs = pd.read_csv(args.input_path)
+    setup_logging(logfile=args.log_file, verbose=False)
+    log = logging.getLogger("data-check")
 
     run_ids = np.array(runs["Run ID"])
 
