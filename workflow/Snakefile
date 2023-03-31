@@ -1,10 +1,7 @@
 # vim: nofoldenable
 
-env = "lstchain-v0.9.13"
+env = "lst-data-selection"
 config = "config.json"
-
-
-include: "rules/requirements.smk"
 
 
 rule all:

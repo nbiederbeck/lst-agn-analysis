@@ -10,10 +10,11 @@ curl --user <username>:<password> \
 
 ## Usage
 
-To install some local requirements, run:
+To install some local requirements, create the enviroment using conda/mamba:
 
 ```
-make install_requirements_with_pip
+mamba env create -f enviroment.yml
+mamba activate lst-data-selection
 ```
 
 Then edit `config.json` to your liking and run snakemake via make:
