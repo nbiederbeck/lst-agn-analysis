@@ -29,14 +29,13 @@ rule select_datasets:
 rule merge_datachecks:
     input:
         data="build/runlist.csv",
-        config=config,
         script="scripts/merge-datachecks.py",
     output:
         "build/dl1-datachecks-merged.h5",
     conda:
         env
     shell:
-        "python {input.script} {input.data} {output} -c {input.config}"
+        "python {input.script} {input.data} {output}"
 
 
 rule run_ids:
