@@ -1,6 +1,6 @@
 # vim: nofoldenable
 
-env = "lst-data-selection"
+env = "environment.yml"
 config = "config.json"
 
 
