@@ -76,7 +76,7 @@ if __name__ == "__main__":
     mask_run_id = np.in1d(np.array(runsummary["runnumber"]), run_ids)
     log.info(
         "Runs observing the source: "
-        f"{np.count_nonzero(mask_run_id)} / {len(runsummary)} "
+        f"{np.count_nonzero(mask_run_id)} / {len(runsummary)} ",
     )
 
     mask_pedestals_ok = np.isfinite(runsummary["num_pedestals"])
@@ -97,7 +97,10 @@ if __name__ == "__main__":
     separation = tel_pointing.separation(source_coordinates)
 
     mask_separation_low = np.isclose(
-        u.Quantity(0.4, u.deg), separation, rtol=0, atol=0.15
+        u.Quantity(0.4, u.deg),
+        separation,
+        rtol=0,
+        atol=0.15,
     )
 
     mask = mask_pedestals_ok & mask_run_id & mask_time & mask_separation_low
