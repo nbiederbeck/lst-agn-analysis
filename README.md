@@ -22,3 +22,19 @@ Then edit `config.json` to your liking and run snakemake via make:
 ```
 make
 ```
+
+## Local Usage
+
+If you have run snakemake on the cluster, you can create the plots and tex files locally.
+First, you need to download `build/dl1-datacheck-masked.h5`, e.g.:
+
+```
+mkdir -p build
+scp <host>:<path-to>/lst-data-selection/build/dl1-datachecks-masked.h5 build/
+```
+
+Afterwards:
+
+```
+make -f local.mk
+```
