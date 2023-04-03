@@ -13,7 +13,7 @@ curl --user <username>:<password> \
 To install some local requirements, create the enviroment using conda/mamba:
 
 ```
-mamba env create -f enviroment.yml
+mamba env create -f environment.yml
 mamba activate lst-data-selection
 ```
 
