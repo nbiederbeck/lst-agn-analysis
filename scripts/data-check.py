@@ -16,7 +16,8 @@ parser.add_argument("datacheck_path")
 parser.add_argument("--output-runlist", required=True)
 parser.add_argument("--output-datachecks", required=True)
 parser.add_argument("-c", "--config", required=True)
-parser.add_argument("--log-file", required=False)
+parser.add_argument("--log-file")
+parser.add_argument("-v", "--verbose", action="store_true")
 args = parser.parse_args()
 
 config = Config.parse_file(args.config)
@@ -57,7 +58,7 @@ def bounds_mad(x, n_sig=1):
 
 if __name__ == "__main__":
     runs = pd.read_csv(args.input_path)
-    setup_logging(logfile=args.log_file, verbose=False)
+    setup_logging(logfile=args.log_file, verbose=args.verbose)
     log = logging.getLogger("data-check")
 
     run_ids = np.array(runs["Run ID"])
