@@ -193,8 +193,8 @@ if __name__ == "__main__":
 
     duration = np.sum(runsummary["elapsed_time"][mask].quantity).to(u.h)
     s = (
-        f"Selected a total of {duration:.2f} from the runlist containing."
-        f"{len(runsummary)} runs."
+        f"Selected a total of {np.count_nonzero(mask)} runs "
+        f"with observation time of {duration:.2f}"
     )
     log.info(s)
 
