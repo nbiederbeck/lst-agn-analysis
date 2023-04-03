@@ -69,8 +69,8 @@ if __name__ == "__main__":
 
     mask_time = get_mask(
         time,
-        ge=Time("2020-12-12", scale="utc"),
-        le=Time("2022-05-24", scale="utc"),
+        ge=config.time_start,
+        le=config.time_stop,
     )
 
     mask_run_id = np.in1d(np.array(runsummary["runnumber"]), run_ids)
