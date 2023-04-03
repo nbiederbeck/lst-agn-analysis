@@ -13,5 +13,7 @@
   "cosmics_10_sigma": 2,
   "cosmics_30_ul": 5.9,
   "cosmics_30_ll": 1.6,
-  "cosmics_30_sigma": 2
+  "cosmics_30_sigma": 2,
+  "time_start": "2020-12-12",
+  "time_stop": "2022-05-24"
 }

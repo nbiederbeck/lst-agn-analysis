@@ -1,6 +1,17 @@
 from typing import Union
 
+from astropy.time import Time
 from pydantic import BaseModel
+
+
+class TimeType(Time):  # from Gammapy
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        return Time(v)
 
 
 class Config(BaseModel):
@@ -19,3 +30,5 @@ class Config(BaseModel):
     cosmics_30_ul: float
     cosmics_30_ll: float
     cosmics_30_sigma: Union[int, None]
+    time_start: Union[TimeType, None]
+    time_stop: Union[TimeType, None]
