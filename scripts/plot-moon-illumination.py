@@ -23,7 +23,6 @@ def main():
     runsummary = runsummary[runsummary["mask_run_selection"]]
     time = Time(runsummary["time"], format="unix", scale="utc")
 
-    cmap = plt.cm.afmhot
     norm = colors.Normalize(0, 1)
 
     location = EarthLocation.of_site("lapalma")
@@ -44,7 +43,6 @@ def main():
         ped_std,
         label="Runs",
         c=moon_light,
-        cmap=cmap,
         norm=norm,
         edgecolor="k",
     )
