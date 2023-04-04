@@ -52,13 +52,14 @@ rule plot_irf:
     input:
         data="build/irf/calculated/irf_Run{run_id}.fits.gz",
         script="scripts/plot_irf_{irf}.py",
+        rc=os.environ.get("MATPLOTLIBRC", "configs/matplotlibrc"),
     resources:
         mem_mb=1000,
         time=5,  # minutes
     conda:
         gammapy_env
     shell:
-        "python {input.script} -i {input.data} -o {output}"
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
 rule calc_theta2:
