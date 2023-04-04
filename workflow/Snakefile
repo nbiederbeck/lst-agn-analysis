@@ -96,7 +96,7 @@ rule calc_flux_points:
         """
 
 
-# ruleorder: plot_flux_points > plot
+ruleorder: plot_flux_points > plot
 
 
 rule plot_flux_points:
