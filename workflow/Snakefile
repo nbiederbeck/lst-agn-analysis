@@ -32,6 +32,9 @@ irf_plots = [
 ]
 
 
+include: "local.smk"
+
+
 rule all:
     input:
         plots,
@@ -112,18 +115,6 @@ rule plot_flux_points:
             --best-model-path {input.model} \
             -o {output}
         """
-
-
-rule plot:
-    output:
-        "build/plots/{analysis}/{name}.pdf",
-    input:
-        data="build/dl4/{analysis}/{name}.fits.gz",
-        script="scripts/plot_{name}.py",
-    conda:
-        gammapy_env
-    shell:
-        "python {input.script} -i {input.data} -o {output}"
 
 
 rule observation_plots:
