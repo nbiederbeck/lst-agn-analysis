@@ -29,6 +29,8 @@ rule link_paths:
 
 
 rule gather_test_nodes:
+    output:
+        "build/allsky-mc/test-nodes.csv",
     conda:
         env
     input:
@@ -44,6 +46,8 @@ rule gather_test_nodes:
 
 
 rule gather_run_pointings:
+    output:
+        "build/allsky-mc/run-pointings.csv",
     conda:
         env
     input:

@@ -84,6 +84,7 @@ def main() -> None:
     )
     table["alt"] = pointings.alt
     table["zen"] = pointings.zen
+    table["run_id"] = runsummary[mask]["runnumber"]
     table.write(args.output_path, overwrite=True)
 
 
