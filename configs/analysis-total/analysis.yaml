@@ -3,7 +3,7 @@ general:
     level: info
 
 observations:
-  datastore: build/dl3/mrk421/
+  datastore: build/dl3
   obs_time:
     start: null
     stop: null
