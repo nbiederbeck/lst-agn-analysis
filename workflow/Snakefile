@@ -225,7 +225,7 @@ rule dl3_hdu_index:
         lstchain_create_dl3_index_files  \
             --input-dl3-dir build/dl3/  \
             --output-index-path build/dl3/  \
-            --file-pattern 'dl3_*.fits'  \
+            --file-pattern 'dl3_*.fits.gz'  \
             --overwrite \
         """
 
