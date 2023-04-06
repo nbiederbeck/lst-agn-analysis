@@ -3,10 +3,10 @@ general:
     level: info
 
 observations:
-  datastore: build/dl3/mrk421/
+  datastore: build/dl3
   obs_time:
-    start: null
-    stop: null
+    start: "2020-09-01"
+    stop: "2021-08-01"
   required_irf:
     - aeff
     - edisp

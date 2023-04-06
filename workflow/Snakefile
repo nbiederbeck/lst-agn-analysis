@@ -13,18 +13,6 @@ RUN_IDS = sorted(set(chain(*runs.values())))
 lstchain_env = "lstchain-v0.9.13"
 gammapy_env = "envs/environment.yml"
 
-plots = [
-    "build/plots/mrk421-total/theta2.pdf",
-    "build/plots/mrk421-total/flux_points.pdf",
-    "build/plots/mrk421-total/light_curve.pdf",
-    "build/plots/mrk421-total/observation_plots.pdf",
-    "build/plots/mrk421-2021/theta2.pdf",
-    "build/plots/mrk421-2021/flux_points.pdf",
-    "build/plots/mrk421-2021/light_curve.pdf",
-    "build/plots/mrk421-2022/theta2.pdf",
-    "build/plots/mrk421-2022/flux_points.pdf",
-    "build/plots/mrk421-2022/light_curve.pdf",
-]
 irf_plots = [
     f"build/plots/irf/{irf}_Run{run_id:05d}.pdf"
     for irf in ("aeff", "edisp", "gh_cut", "radmax_cut")
@@ -67,7 +55,7 @@ rule calc_theta2:
         "build/dl4/{analysis}/theta2.fits.gz",
     input:
         data="build/dl3/hdu-index.fits.gz",
-        config="configs/{analysis}.yaml",
+        config="configs/{analysis}/analysis.yaml",
         script="scripts/calc_theta2.py",
     resources:
         mem_mb=16000,
@@ -80,7 +68,7 @@ rule calc_theta2:
 rule calc_flux_points:
     input:
         data="build/dl4/{analysis}/datasets.fits.gz",
-        config="configs/{analysis}.yaml",
+        config="configs/{analysis}/analysis.yaml",
         model="build/dl4/{analysis}/model-best-fit.yaml",
         script="scripts/calc_flux_points.py",
     output:
@@ -121,7 +109,7 @@ rule plot_flux_points:
 rule observation_plots:
     input:
         "build/dl3/hdu-index.fits.gz",
-        config="configs/{analysis}.yaml",
+        config="configs/{analysis}/analysis.yaml",
         script="scripts/events.py",
     output:
         "build/plots/{analysis}/observation_plots.pdf",
@@ -153,7 +141,7 @@ rule sensitivity:
 rule calc_light_curve:
     input:
         model="build/dl4/{analysis}/model-best-fit.yaml",
-        config="configs/{analysis}.yaml",
+        config="configs/{analysis}/analysis.yaml",
         dataset="build/dl4/{analysis}/datasets.fits.gz",
         script="scripts/calc_light_curve.py",
     output:
@@ -172,9 +160,9 @@ rule calc_light_curve:
 
 rule model_best_fit:
     input:
-        config="configs/{analysis}.yaml",
+        config="configs/{analysis}/analysis.yaml",
         dataset="build/dl4/{analysis}/datasets.fits.gz",
-        model="configs/model-{analysis}.yaml",
+        model="configs/{analysis}/models.yaml",
         script="scripts/fit-model.py",
     output:
         "build/dl4/{analysis}/model-best-fit.yaml",
@@ -193,7 +181,7 @@ rule model_best_fit:
 rule dataset:
     input:
         data="build/dl3/hdu-index.fits.gz",
-        config="configs/{analysis}.yaml",
+        config="configs/{analysis}/analysis.yaml",
         script="scripts/write_datasets.py",
     output:
         "build/dl4/{analysis}/datasets.fits.gz",
@@ -216,7 +204,6 @@ rule dl3_hdu_index:
         expand(
             "build/dl3/dl3_LST-1.Run{run_id:05d}.fits.gz",
             run_id=RUN_IDS,
-            source=["mrk421"],
         ),
     resources:
         time=15,
@@ -225,7 +212,7 @@ rule dl3_hdu_index:
         lstchain_create_dl3_index_files  \
             --input-dl3-dir build/dl3/  \
             --output-index-path build/dl3/  \
-            --file-pattern 'dl3_*.fits'  \
+            --file-pattern 'dl3_*.fits.gz'  \
             --overwrite \
         """
 
