@@ -1,12 +1,22 @@
+from pathlib import Path
+
 gammapy_env = "envs/environment.yml"  # keep in sync with Snakefile
+
+analyses = [
+    x.name
+    for x in Path("configs").iterdir()
+    if x.name.startswith("analysis") and x.is_dir()
+]
+plots = [
+    f"build/plots/{analysis}/{plot}.pdf"
+    for analysis in analyses
+    for plot in ["theta2", "light_curve", "flux_points", "observation_plots"]
+]
 
 
 rule plots:
     input:
-        "build/plots/mrk421-2021/theta2.pdf",
-        "build/plots/mrk421-2021/light_curve.pdf",
-        "build/plots/mrk421-2022/theta2.pdf",
-        "build/plots/mrk421-2022/light_curve.pdf",
+        plots,
 
 
 rule plot:
