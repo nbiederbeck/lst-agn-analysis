@@ -2,9 +2,12 @@ localrules:
     link_paths,
 
 
-PRODUCTION = "20230127_v0.9.12_base_prod_az_tel"
-DECLINATION = "dec_3476"
-env = "lstchain-v0.9.13"
+with open("configs/lst_agn.json", "r") as f:
+    config = json.load(f)
+
+env = config.get("lstchain_enviroment", "lstchain-v0.9.13")
+PRODUCTION = config.get("production", "20230127_v0.9.12_base_prod_az_tel")
+DECLINATION = config.get("declination", "dec_3476")
 
 
 rule link_paths:

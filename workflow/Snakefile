@@ -9,8 +9,11 @@ with open("build/runs.json", "r") as f:
 
 RUN_IDS = sorted(set(chain(*runs.values())))
 
+with open("configs/lst_agn.json", "r") as f:
+    config = json.load(f)
 
-lstchain_env = "lstchain-v0.9.13"
+lstchain_env = config.get("lstchain_enviroment", "lstchain-v0.9.13")
+
 gammapy_env = "envs/environment.yml"
 
 irf_plots = [
