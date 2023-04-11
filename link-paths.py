@@ -35,7 +35,6 @@ template_linkname_dl2 = outdir_dl2 + filename_dl2
 outdir_irf = "build/irf/"
 filename_irf = "irf_Run{run_id:05d}.fits.gz"
 template_target_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}/irf_{prod}_{node}.fits.gz"  # noqa
-template_linkname_irf = outdir_irf + filename_irf
 
 outdir_model = "build/models/model_Run{run_id:05d}/"
 template_target_model = "/fefs/aswg/data/models/AllSky/{prod}/{dec}/"
@@ -120,9 +119,6 @@ def main() -> None:
                 )
             )
 
-            target_irf = Path(template_target_irf.format(prod=prod, dec=dec, node=node))
-            linkname_irf = Path(template_linkname_irf.format(run_id=run_id))
-
             target_model = Path(template_target_model.format(prod=prod, dec=dec))
             linkname_model = Path(template_linkname_model.format(run_id=run_id))
 
@@ -136,10 +132,6 @@ def main() -> None:
             if not linkname_dl2.exists():
                 linkname_dl2.parent.mkdir(exist_ok=True, parents=True)
                 linkname_dl2.symlink_to(target_dl2)
-
-            if not linkname_irf.exists():
-                linkname_irf.parent.mkdir(exist_ok=True, parents=True)
-                linkname_irf.symlink_to(target_irf)
 
             if not linkname_model.exists():
                 linkname_model.parent.mkdir(exist_ok=True, parents=True)
