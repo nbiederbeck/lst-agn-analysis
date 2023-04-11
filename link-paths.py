@@ -22,24 +22,22 @@ with open(args.runs, "r") as f:
     runs = json.load(f)
 n_runs = len(set(chain(*runs.values())))
 
-sources = {"mrk421": runs}
-
-outdir_dl1 = "build/dl1/{source}/"
+outdir_dl1 = "build/dl1/"
 filename_dl1 = "dl1_LST-1.Run{run_id:05d}.h5"
 template_target_dl1 = "/fefs/aswg/data/real/DL1/{night}/v0.9/tailcut84/" + filename_dl1
 template_linkname_dl1 = outdir_dl1 + filename_dl1
 
-outdir_dl2 = "build/dl2/test/{source}/"
+outdir_dl2 = "build/dl2/test/"
 filename_dl2 = "dl2_LST-1.Run{run_id:05d}.h5"
 template_target_dl2 = "/fefs/aswg/data/mc/DL2/AllSky/{prod}/TestingDataset/{dec}/{node}/dl2_{prod}_{node}_merged.h5"  # noqa
 template_linkname_dl2 = outdir_dl2 + filename_dl2
 
-outdir_irf = "build/irf/{source}/"
+outdir_irf = "build/irf/"
 filename_irf = "irf_Run{run_id:05d}.fits.gz"
 template_target_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}/irf_{prod}_{node}.fits.gz"  # noqa
 template_linkname_irf = outdir_irf + filename_irf
 
-outdir_model = "build/models/{source}/model_Run{run_id:05d}/"
+outdir_model = "build/models/model_Run{run_id:05d}/"
 template_target_model = "/fefs/aswg/data/models/AllSky/{prod}/{dec}/"
 template_linkname_model = outdir_model
 
@@ -102,66 +100,52 @@ def main() -> None:
 
     progress = tqdm(total=n_runs)
 
-    for name, source in sources.items():
-        for night, run_ids in source.items():
-            for run_id in run_ids:
-                target_dl1 = Path(
-                    template_target_dl1.format(night=night, run_id=run_id)
+    for night, run_ids in runs.items():
+        for run_id in run_ids:
+            target_dl1 = Path(template_target_dl1.format(night=night, run_id=run_id))
+
+            run = runsummary[runsummary["runnumber"] == run_id]
+
+            pointing = build_altaz(
+                alt=run["mean_altitude"] * u.rad,
+                az=run["mean_azimuth"] * u.rad,
+            )
+            nearest_irf = pointing.separation(irf_pointings).argmin()
+            node = filelist[nearest_irf]
+
+            linkname_dl1 = Path(
+                template_linkname_dl1.format(
+                    night=night,
+                    run_id=run_id,
                 )
+            )
 
-                run = runsummary[runsummary["runnumber"] == run_id]
+            target_irf = Path(template_target_irf.format(prod=prod, dec=dec, node=node))
+            linkname_irf = Path(template_linkname_irf.format(run_id=run_id))
 
-                pointing = build_altaz(
-                    alt=run["mean_altitude"] * u.rad,
-                    az=run["mean_azimuth"] * u.rad,
-                )
-                nearest_irf = pointing.separation(irf_pointings).argmin()
-                node = filelist[nearest_irf]
+            target_model = Path(template_target_model.format(prod=prod, dec=dec))
+            linkname_model = Path(template_linkname_model.format(run_id=run_id))
 
-                linkname_dl1 = Path(
-                    template_linkname_dl1.format(
-                        night=night,
-                        run_id=run_id,
-                        source=name,
-                    )
-                )
+            target_dl2 = Path(template_target_dl2.format(prod=prod, dec=dec, node=node))
+            linkname_dl2 = Path(template_linkname_dl2.format(run_id=run_id))
 
-                target_irf = Path(
-                    template_target_irf.format(prod=prod, dec=dec, node=node)
-                )
-                linkname_irf = Path(
-                    template_linkname_irf.format(source=name, run_id=run_id)
-                )
+            if not linkname_dl1.exists():
+                linkname_dl1.parent.mkdir(exist_ok=True, parents=True)
+                linkname_dl1.symlink_to(target_dl1)
 
-                target_model = Path(template_target_model.format(prod=prod, dec=dec))
-                linkname_model = Path(
-                    template_linkname_model.format(source=name, run_id=run_id)
-                )
+            if not linkname_dl2.exists():
+                linkname_dl2.parent.mkdir(exist_ok=True, parents=True)
+                linkname_dl2.symlink_to(target_dl2)
 
-                target_dl2 = Path(
-                    template_target_dl2.format(prod=prod, dec=dec, node=node)
-                )
-                linkname_dl2 = Path(
-                    template_linkname_dl2.format(source=name, run_id=run_id)
-                )
+            if not linkname_irf.exists():
+                linkname_irf.parent.mkdir(exist_ok=True, parents=True)
+                linkname_irf.symlink_to(target_irf)
 
-                if not linkname_dl1.exists():
-                    linkname_dl1.parent.mkdir(exist_ok=True, parents=True)
-                    linkname_dl1.symlink_to(target_dl1)
+            if not linkname_model.exists():
+                linkname_model.parent.mkdir(exist_ok=True, parents=True)
+                linkname_model.symlink_to(target_model)
 
-                if not linkname_dl2.exists():
-                    linkname_dl2.parent.mkdir(exist_ok=True, parents=True)
-                    linkname_dl2.symlink_to(target_dl2)
-
-                if not linkname_irf.exists():
-                    linkname_irf.parent.mkdir(exist_ok=True, parents=True)
-                    linkname_irf.symlink_to(target_irf)
-
-                if not linkname_model.exists():
-                    linkname_model.parent.mkdir(exist_ok=True, parents=True)
-                    linkname_model.symlink_to(target_model)
-
-                progress.update()
+            progress.update()
 
     Path(args.output_path).touch()
 
