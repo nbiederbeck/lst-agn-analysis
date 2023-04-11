@@ -33,7 +33,7 @@ template_target_dl2 = "/fefs/aswg/data/mc/DL2/AllSky/{prod}/TestingDataset/{dec}
 template_linkname_dl2 = outdir_dl2 + filename_dl2
 
 filename_irf = "irf_Run{run_id:05d}.fits.gz"
-template_target_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}/irf_{prod}_{node}.fits.gz"  # noqa
+template_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}/irf_{prod}_{node}.fits.gz"  # noqa
 
 outdir_model = "build/models/model_Run{run_id:05d}/"
 template_target_model = "/fefs/aswg/data/models/AllSky/{prod}/{dec}/"
@@ -92,7 +92,7 @@ def main() -> None:
 
     runsummary = Table.read(args.runsummary)
 
-    path = Path(template_target_irf.format(prod=prod, dec=dec, node=""))
+    path = Path(template_irf.format(prod=prod, dec=dec, node=""))
     filelist = [p.name for p in path.parent.iterdir()]
     irf_pointings: AltAz = get_pointings_of_irfs(filelist)
 
