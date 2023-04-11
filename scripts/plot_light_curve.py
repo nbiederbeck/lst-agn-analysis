@@ -24,11 +24,7 @@ def main(input_path, output):
     y = getattr(lc, sed_type)
     y_errn, y_errp = lc._plot_get_flux_err(sed_type=sed_type)
     # This might be a bit overkill
-    if (
-        np.count_nonzero(~np.isnan(y) > 0)
-        or np.count_nonzero(~np.isnan(y_errn) > 0)
-        or np.count_nonzero(~np.isnan(y_errp) > 0)
-    ):
+    if np.any(~np.isnan(y)) or np.any(~np.isnan(y_errn)) or np.any(~np.isnan(y_errp)):
         lc.plot(ax=ax, sed_type=sed_type)
 
     #    ax.set_ylabel(

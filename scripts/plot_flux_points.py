@@ -22,16 +22,12 @@ def main(input_path, best_model_path, output):
     sed_type = flux_points.data.sed_type_plot_default
     y = getattr(flux_points.data, sed_type)
     y_errn, y_errp = flux_points.data._plot_get_flux_err(sed_type=sed_type)
-    if (
-        np.count_nonzero(~np.isnan(y) > 0)
-        or np.count_nonzero(~np.isnan(y_errn) > 0)
-        or np.count_nonzero(~np.isnan(y_errp) > 0)
-    ):
+    if np.any(~np.isnan(y)) or np.any(~np.isnan(y_errn)) or np.any(~np.isnan(y_errp)):
         # If everything is an upper limit, residuals will be all nan
         # This will fail because gammapy sets the yaxis limit in the
         # residual plot based on the max residual, so we need at least one
         # We can still plot the spectrum and flux points otherwise
-        if np.count_nonzero(flux_points.data.is_ul) > 0:
+        if np.any(flux_points.data.is_ul.data.flatten()):
             fig, axes = plt.subplots(
                 nrows=2,
                 sharex=True,
