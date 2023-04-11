@@ -32,7 +32,6 @@ filename_dl2 = "dl2_LST-1.Run{run_id:05d}.h5"
 template_target_dl2 = "/fefs/aswg/data/mc/DL2/AllSky/{prod}/TestingDataset/{dec}/{node}/dl2_{prod}_{node}_merged.h5"  # noqa
 template_linkname_dl2 = outdir_dl2 + filename_dl2
 
-outdir_irf = "build/irf/"
 filename_irf = "irf_Run{run_id:05d}.fits.gz"
 template_target_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}/irf_{prod}_{node}.fits.gz"  # noqa
 
