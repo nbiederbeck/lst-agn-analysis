@@ -55,7 +55,7 @@ rule plot_irf:
 
 rule calc_theta2:
     output:
-        "build/dl4/{analysis}/theta2.h5",
+        "build/dl4/{analysis}/theta2.fits.gz",
     input:
         data="build/dl3/hdu-index.fits.gz",
         config="configs/{analysis}/analysis.yaml",
