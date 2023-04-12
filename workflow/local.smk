@@ -10,7 +10,13 @@ analyses = [
 plots = [
     f"build/plots/{analysis}/{plot}.pdf"
     for analysis in analyses
-    for plot in ["theta2", "light_curve", "flux_points", "observation_plots"]
+    for plot in [
+        "theta2",
+        "dl4_diagnostics",
+        "light_curve",
+        "flux_points",
+        "observation_plots",
+    ]
 ]
 
 
