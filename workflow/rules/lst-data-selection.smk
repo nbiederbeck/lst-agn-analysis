@@ -11,7 +11,7 @@ localrules:
     merge_datachecks,
     run_ids,
     data_check,
-    plot,
+    plot_data_selection,
     numbers,
 
 
