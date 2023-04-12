@@ -1,17 +1,15 @@
 from argparse import ArgumentParser
 
 import numpy as np
+from gammapy.datasets import FluxPointsDataset
+from gammapy.modeling.models import Models
+from matplotlib import pyplot as plt
 
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("--best-model-path", required=True)
 parser.add_argument("-o", "--output", required=True)
 args = parser.parse_args()
-
-
-from gammapy.datasets import FluxPointsDataset
-from gammapy.modeling.models import Models
-from matplotlib import pyplot as plt
 
 
 def main(input_path, best_model_path, output):
