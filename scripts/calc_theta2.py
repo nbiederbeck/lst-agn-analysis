@@ -70,7 +70,7 @@ def main(config, output):  # noqa: PLR0915
     )
 
     # For calculating a significance. Could be configurable or be taken from irf
-    threshold = 0.2 * u.deg
+    threshold = (0.2 * u.deg) ** 2
     # Here we could add more edges in principle, but these are guaranteed
     # to not overlap, so we can get the full histogram for free afterwards
     # as the sum of these, so I advocate to instead add further ones later
