@@ -1,6 +1,6 @@
 from pathlib import Path
 
-gammapy_env = "envs/environment.yml"  # keep in sync with Snakefile
+gammapy_env = "envs/agn-analysis.yml"  # keep in sync with Snakefile
 
 analyses = [
     x.name
@@ -14,12 +14,12 @@ plots = [
 ]
 
 
-rule plots_local:
+rule plots:
     input:
         plots,
 
 
-rule plot_local:
+rule plot:
     output:
         "build/plots/{analysis}/{name}.pdf",
     input:
