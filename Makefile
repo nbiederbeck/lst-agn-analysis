@@ -1,7 +1,7 @@
 SNAKEMAKE_PROFILE?=slurm
 PROFILE=--profile=workflow/profiles/$(SNAKEMAKE_PROFILE)
 
-all: build/all-linked.txt
+all: build/all-linked.txt build/runs.json
 	snakemake $(PROFILE)
 
 build/all-linked.txt: build/runs.json build/dl1-datachecks-masked.h5
@@ -26,3 +26,9 @@ build:
 	mkdir -p build
 
 FORCE:
+
+%:
+	snakemake -call --use-conda $@
+
+clean:
+	rm -rf build

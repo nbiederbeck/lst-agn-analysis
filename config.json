@@ -1,0 +1,19 @@
+{
+  "source": "Mrk421",
+  "source_ra_deg": 166.114,
+  "source_dec_deg": 38.209,
+  "pedestal_ul": 1.9,
+  "pedestal_ll": 0,
+  "pedestal_sigma": 2,
+  "cosmics_ul": 7.8e3,
+  "cosmics_ll": 2.6e3,
+  "cosmics_sigma": 2,
+  "cosmics_10_ul": 37.6,
+  "cosmics_10_ll": 17.7,
+  "cosmics_10_sigma": 2,
+  "cosmics_30_ul": 5.9,
+  "cosmics_30_ll": 1.6,
+  "cosmics_30_sigma": 2,
+  "time_start": "2020-12-12",
+  "time_stop": "2022-05-24"
+}

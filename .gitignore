@@ -3,9 +3,15 @@ _build
 *.h5
 __pycache__/
 .ipynb_checkpoints/
+data/
+__pycache__/
 .snakemake/
 poetry.lock
 Untitled*.ipynb
 *.log
 .ruff_cache/
 .mypy_cache/
+build/
+runlist.html
+.ipynb_checkpoints/
+.snakemake/
