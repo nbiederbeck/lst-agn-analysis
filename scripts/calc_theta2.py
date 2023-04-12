@@ -3,11 +3,13 @@ from argparse import ArgumentParser
 import astropy.units as u
 import numpy as np
 from astropy.coordinates import Angle, SkyCoord
+from astropy.io import fits
 from astropy.table import Table
 from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.maps import MapAxis
 from gammapy.stats import WStatCountsStatistic
 from gammapy.utils import pbar
+from rich.progress import track
 
 parser = ArgumentParser()
 parser.add_argument("-c", "--config", required=True)
@@ -32,9 +34,8 @@ def create_empty_table(theta_squared_axis, position):
     table["counts_off"] = 0
     table["acceptance"] = 0.0
     table["acceptance_off"] = 0.0
-    table.meta["Threshold Significance"] = 0
-    table.meta["Threshold Counts On"] = 0
-    table.meta["Threshold Counts Off"] = 0
+    table.meta["NON_THR"] = 0
+    table.meta["NOFF_THR"] = 0
     table.meta["ON_RA"] = position.icrs.ra
     table.meta["ON_DEC"] = position.icrs.dec
     return table
@@ -82,7 +83,7 @@ def main(config, output):  # noqa: PLR0915
     energy_lower = energy_axis.edges_min
     energy_upper = energy_axis.edges_max
     theta_table_all_energies = create_empty_table(theta_squared_axis, position)
-    theta_table_all_energies.meta["Energy Range"] = "All energies"
+    theta_table_all_energies.meta["ERANGE"] = "All energies"
     theta_tables = [
         create_empty_table(theta_squared_axis, position) for bin in energy_lower
     ]
@@ -91,11 +92,9 @@ def main(config, output):  # noqa: PLR0915
     # Unfortunately gammapy does not allow energy slices, so we would need to
     # create new observations every time
     # This also allows to add some comments for the future :)
-    np.zeros(theta_squared_axis.nbin)
-    np.zeros(theta_squared_axis.nbin)
     alpha_tot = 0
     livetime_tot = 0
-    for obs in analysis.observations:
+    for obs in track(analysis.observations):
         pos_angle = obs.pointing_radec.position_angle(position)
         sep_angle = obs.pointing_radec.separation(position)
         position_off = obs.pointing_radec.directional_offset_by(
@@ -136,7 +135,7 @@ def main(config, output):  # noqa: PLR0915
                 ehigh = high.to(u.TeV)
             else:
                 ehigh = high.to(u.GeV)
-            table.meta["Energy Range"] = f"{elow}:.2f - {ehigh:.2f}"
+            table.meta["ERANGE"] = f"{elow:.2f} - {ehigh:.2f}"
 
             mask_energy = np.ones(len(obs.events.energy), dtype=bool)
             mask_energy &= obs.events.energy > elow
@@ -155,12 +154,13 @@ def main(config, output):  # noqa: PLR0915
             table["acceptance_off"] += acceptance_off
             for t in (table, theta_table_all_energies):
                 t["counts"] += counts
-                t["counts_off"] += counts
-                t.meta["Threshold Counts On"] += np.count_nonzero(mask_on)
-                t.meta["Threshold Counts Off"] += np.count_nonzero(mask_off)
+                t["counts_off"] += counts_off
+                t.meta["NON_THR"] += np.count_nonzero(mask_on)
+                t.meta["NOFF_THR"] += np.count_nonzero(mask_off)
 
     alpha_tot /= livetime_tot
-    for i, t in enumerate([[theta_table_all_energies] + theta_tables]):
+    hdulist = [fits.PrimaryHDU()]
+    for i, t in enumerate([theta_table_all_energies] + theta_tables):
         t["alpha"] = alpha_tot
         stat = WStatCountsStatistic(t["counts"], t["counts_off"], t["alpha"])
         t["excess"] = stat.n_sig
@@ -170,10 +170,9 @@ def main(config, output):  # noqa: PLR0915
 
         t.meta["ON_RA"] = position.icrs.ra
         t.meta["ON_DEC"] = position.icrs.dec
-        if i == 0:
-            t.write(output, f"/{i}", overwrite=True)
-        else:
-            t.write(output, f"/{i}", append=True)
+        hdulist.append(fits.table_to_hdu(t))
+
+    fits.HDUList(hdulist).writeto(output, overwrite=True)
 
 
 if __name__ == "__main__":
