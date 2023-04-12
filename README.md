@@ -2,6 +2,8 @@
 
 With `snakemake` installed, run `make` and wait.
 
+If you want to build something specific, e.g. `make build/plots/analysis-one/flux_points.pdf`, and you (think you) changed something in the data selection part, run `make link` first.
+
 # lst-data-selection
 
 Download the LST Source Catalog (runlist), replace `<username>` and `<password>`:
