@@ -14,12 +14,12 @@ plots = [
 ]
 
 
-rule plots:
+rule plots_local:
     input:
         plots,
 
 
-rule plot:
+rule plot_local:
     output:
         "build/plots/{analysis}/{name}.pdf",
     input:
