@@ -1,16 +1,23 @@
 from argparse import ArgumentParser
 
+import matplotlib
+import numpy as np
+import tables
+from astropy.table import Table
+from gammapy.maps import MapAxis
+from matplotlib import pyplot as plt
+
+if matplotlib.get_backend() == "pgf":
+    from matplotlib.backends.backend_pgf import PdfPages
+else:
+    from matplotlib.backends.backend_pdf import PdfPages
+
+
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output", required=True)
 parser.add_argument("--preliminary", action="store_true")
 args = parser.parse_args()
-
-
-import numpy as np
-from astropy.table import Table
-from gammapy.maps import MapAxis
-from matplotlib import pyplot as plt
 
 
 def plot_theta_squared_table(table, *, preliminary=False, ylim=None):
@@ -79,9 +86,21 @@ def plot_theta_squared_table(table, *, preliminary=False, ylim=None):
 
 
 def main(input_path, output, preliminary):
-    table = Table.read(input_path)
-    fig, ax = plot_theta_squared_table(table, preliminary=preliminary)
-    fig.savefig(output)
+    figures = []
+    with tables.File(input_path) as f:
+        paths = [f"/{x.name}" for x in f.list_nodes("/")]
+    for path in paths:
+        table = Table.read(input_path, path)
+        fig, ax = plot_theta_squared_table(table, preliminary=preliminary)
+        ax.set_title(table.meta["Energy Range"])
+        figures.append(fig)
+
+    if output is None:
+        plt.show()
+    else:
+        with PdfPages(output) as pdf:
+            for fig in figures:
+                pdf.savefig(fig)
 
 
 if __name__ == "__main__":

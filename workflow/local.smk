@@ -23,9 +23,11 @@ rule plot:
     output:
         "build/plots/{analysis}/{name}.pdf",
     input:
-        data="build/dl4/{analysis}/{name}.fits.gz",
+        data="build/dl4/{analysis}/{name}.{filetype}",
         script="scripts/plot_{name}.py",
         rc=os.environ.get("MATPLOTLIBRC", "configs/matplotlibrc"),
+    wildcard_constraints:
+        filetype="fits.gz|h5",
     conda:
         gammapy_env
     shell:
