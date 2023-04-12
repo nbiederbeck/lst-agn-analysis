@@ -195,7 +195,7 @@ rule dataset:
     conda:
         gammapy_env
     shell:
-        "python {input.script} -j16 -c {input.config} -o {output} --n-off-regions=1"
+        "python {input.script} -j{resources.cpus} -c {input.config} -o {output} --n-off-regions=1"
 
 
 rule dl3_hdu_index:
