@@ -60,7 +60,11 @@ def build_altaz(*, alt: u.deg = None, zd: u.deg = None, az: u.deg = None) -> Alt
         zenith = u.Quantity(90, u.deg)
         alt = zenith - zd
 
-    location = EarthLocation.of_site("lapalma")
+    location = EarthLocation.from_geodetic(
+        u.Quantity(-17.89139, u.deg),
+        u.Quantity(28.76139, u.deg),
+        height=u.Quantity(2184, u.m),
+    )
     obstime = Time("2022-01-01T00:00")
 
     return AltAz(alt=alt, az=az, location=location, obstime=obstime)
@@ -115,7 +119,7 @@ def main() -> None:
                 template_linkname_dl1.format(
                     night=night,
                     run_id=run_id,
-                )
+                ),
             )
 
             target_model = Path(template_target_model.format(prod=prod, dec=dec))
