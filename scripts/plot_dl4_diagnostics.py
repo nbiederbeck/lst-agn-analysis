@@ -25,8 +25,6 @@ def main(input_path, output):
             table = Table.read(hdu)
             y_cols = ["excess", "sqrt_ts"]
             x_cols = set(table.columns).difference(y_cols)
-            print(y_cols)
-            print(x_cols)
             for y in y_cols:
                 for x in x_cols:
                     fig, ax = plt.subplots()
