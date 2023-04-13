@@ -37,7 +37,7 @@ mamba activate snakemake
 For development, you should also install atleast pre-commit.
 The enviroment in `workflow/envs/data-selection` should contain everything (Don't forget to `pre-commit install` afterwards).
 This is not a specific development enviroment though.
-Cleaning up the envs is definetively a TODO as it got a bit messy after merging what was originally two projects.
+Cleaning up the envs is definetively a DEV-TODO as it got a bit messy after merging what was originally two projects.
 
 Also you need the source catalogue. Since this requires credentials (standard LST ones), it is not done automatically.
 This is needed only once (or whenever you want to use new runs).
@@ -53,10 +53,10 @@ curl --user <username>:<password> \
 
 Adapt to your liking
 
-- Data selection: `config.json` (TODO: Move this)
-- MCs to use, lstchain env and number of off regions: `configs/slt_agn.json` (gammapy does not handle energy-dependent cuts automatically, so we need to work around this)
+- Data selection: `config.json` (DEV-TODO: Move this)
+- MCs to use, lstchain env and number of off regions: `configs/lst_agn.json` (gammapy does not handle energy-dependent cuts automatically, so we need to work around this)
 - IRFs (lstchain): `configs/irf_tool_config.json`
-- gammapy: `analysis.yaml` and `models.yaml` in subdirectories `configs/analysis_*`. All `analysis*` directories will be searched, so you might want to remove the standard ones first (TODO: Find a better solution for this). These all use the same dl3, but produce their own dl4
+- gammapy: `analysis.yaml` and `models.yaml` in subdirectories `configs/analysis_*`. All `analysis*` directories will be searched, so you might want to remove the standard ones first (DEV-TODO: Find a better solution for this). These all use the same dl3, but produce their own dl4
 
 ## Run the analysis
 
@@ -86,6 +86,6 @@ Afterwards:
 make -f local.mk
 ```
 
-TODO: Do the same for the other plots (https://github.com/nbiederbeck/lst-agn-analysis/issues/39)
-If you do some `cp **/*.fits.gz` shenanigans, beware that the dl3 files are saved as with
+DEV-TODO: Do the same for the other plots (https://github.com/nbiederbeck/lst-agn-analysis/issues/39)
+If you do some `cp **/*.fits.gz` shenanigans, beware that the dl3 files are saved with
 the extension `fits.gz` as well.
