@@ -24,8 +24,11 @@ def main():
     time = Time(runsummary["time"], format="unix", scale="utc")
 
     norm = colors.Normalize(0, 1)
-
-    location = EarthLocation.of_site("lapalma")
+    location = EarthLocation.from_geodetic(
+        u.Quantity(-17.89139, u.deg),
+        u.Quantity(28.76139, u.deg),
+        height=u.Quantity(2184, u.m),
+    )
 
     ped_std = runsummary["ped_charge_stddev"]
 
