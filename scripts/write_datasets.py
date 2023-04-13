@@ -3,11 +3,10 @@ from os import cpu_count
 
 from astropy.coordinates import SkyCoord
 from gammapy.analysis import Analysis, AnalysisConfig
-from gammapy.datasets import MapDataset
+from gammapy.datasets import SpectrumDataset
 from gammapy.makers import (
     DatasetsMaker,
     ReflectedRegionsBackgroundMaker,
-    SafeMaskMaker,
     SpectrumDatasetMaker,
     WobbleRegionsFinder,
 )
@@ -51,6 +50,16 @@ def main(config, output, n_off_regions, n_jobs):
         interp="log",
         node_type="edges",
     )
+    energy_axis_true_config = config.datasets.geom.axes.energy_true
+    energy_axis_true = MapAxis.from_bounds(
+        name="energy_true",
+        lo_bnd=energy_axis_true_config.min.value,
+        hi_bnd=energy_axis_true_config.max.to_value(energy_axis_true_config.min.unit),
+        nbin=energy_axis_true_config.nbins,
+        unit=energy_axis_true_config.min.unit,
+        interp="log",
+        node_type="edges",
+    )
     geom = RegionGeom.create(region=on_region, axes=[energy_axis])
     dataset_maker = SpectrumDatasetMaker(
         containment_correction=False,
@@ -59,16 +68,10 @@ def main(config, output, n_off_regions, n_jobs):
     region_finder = WobbleRegionsFinder(n_off_regions=n_off_regions)
     bkg_maker = ReflectedRegionsBackgroundMaker(region_finder=region_finder)
 
-    # use the energy threshold specified in the DL3 files
-    # TODO Test what influence this has
-    # according to docs most of these discard energy migration -> bad
-    safe_mask_maker = SafeMaskMaker(methods=[])
-
-    global_dataset = MapDataset.create(geom)
+    global_dataset = SpectrumDataset.create(geom, energy_axis_true=energy_axis_true)
 
     makers = [
         dataset_maker,
-        safe_mask_maker,
         bkg_maker,
     ]
 
@@ -76,10 +79,6 @@ def main(config, output, n_off_regions, n_jobs):
     datasets = datasets_maker.run(
         global_dataset,
         analysis.observations,
-        [
-            MapDataset.create(geom, name=str(obs.obs_id))
-            for obs in analysis.observations
-        ],
     )
 
     datasets.write(output, overwrite=True)
