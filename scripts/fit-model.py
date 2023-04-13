@@ -15,7 +15,16 @@ def main(config, dataset_path, model_config, output):
     config = AnalysisConfig.read(config)
 
     analysis = Analysis(config)
-    analysis.datasets = Datasets.read(dataset_path)
+    datasets = Datasets.read(dataset_path)
+    # Since we read the datasets here, they need not to be stacked
+    # Especially our helper script to handle energy-dependent theta-cuts
+    # does not stack at all.
+    # This is helpful to still have per-run information, but means
+    # we need to explicitly stack here, which should be cheap
+    if config.datasets.stack:
+        analysis.datasets = Datasets([datasets.stack_reduce()])
+    else:
+        analysis.datasets = datasets
 
     analysis.read_models(model_config)
 
