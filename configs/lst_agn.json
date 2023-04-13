@@ -1,5 +1,6 @@
 {
   "production": "20230127_v0.9.12_base_prod_az_tel",
   "declination": "dec_3476",
-  "lstchain_enviroment": "lstchain-v0.9.13"
+  "lstchain_enviroment": "lstchain-v0.9.13",
+  "n_off_regions": 1
 }
