@@ -3,7 +3,7 @@ repos:
     rev: v0.0.252
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix, --select, "F,E,W,I,N,PL"]
+        args: [--fix, --exit-non-zero-on-fix, --select, "F,E,W,I,N,PL,Q,COM"]
   - repo: https://github.com/psf/black
     rev: 23.1.0
     hooks:

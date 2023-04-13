@@ -1,6 +1,6 @@
 from pathlib import Path
 
-gammapy_env = "envs/environment.yml"  # keep in sync with Snakefile
+gammapy_env = "envs/agn-analysis.yml"  # keep in sync with Snakefile
 
 analyses = [
     x.name
