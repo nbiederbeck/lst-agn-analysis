@@ -64,6 +64,7 @@ rule calc_theta2:
         script="scripts/calc_theta2.py",
     resources:
         mem_mb=16000,
+        cpus=16,
     conda:
         gammapy_env
     shell:
