@@ -70,6 +70,21 @@ rule calc_theta2:
         "python {input.script} -c {input.config} -o {output}"
 
 
+rule calc_dl4_diagnostics:
+    output:
+        "build/dl4/{analysis}/dl4_diagnostics.fits.gz",
+    input:
+        data="build/dl4/{analysis}/datasets.fits.gz",
+        config="configs/{analysis}/analysis.yaml",
+        script="scripts/calc_dl4_diagnostics.py",
+    resources:
+        mem_mb=16000,
+    conda:
+        gammapy_env
+    shell:
+        "python {input.script} -c {input.config} -o {output} --dataset-path {input.data}"
+
+
 rule calc_flux_points:
     input:
         data="build/dl4/{analysis}/datasets.fits.gz",
