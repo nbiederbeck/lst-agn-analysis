@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
+from os import cpu_count
 
 import astropy.units as u
+import boost_histogram as bh
 import numpy as np
 from astropy.coordinates import Angle, SkyCoord
 from astropy.io import fits
@@ -140,11 +142,15 @@ def main(config, output):  # noqa: PLR0915
             mask_energy = np.ones(len(obs.events.energy), dtype=bool)
             mask_energy &= obs.events.energy > elow
             mask_energy &= obs.events.energy < ehigh
-            counts, _ = np.histogram(
-                separation[mask_energy] ** 2, theta_squared_axis.edges
+            counts, _ = bh.numpy.histogram(
+                separation[mask_energy] ** 2,
+                theta_squared_axis.edges,
+                threads=cpu_count(),
             )
-            counts_off, _ = np.histogram(
-                separation_off[mask_energy] ** 2, theta_squared_axis.edges
+            counts_off, _ = bh.numpy.histogram(
+                separation_off[mask_energy] ** 2,
+                theta_squared_axis.edges,
+                threads=cpu_count(),
             )
             mask_on = mask_energy & mask_threshold_on
             mask_off = mask_energy & mask_threshold_off
