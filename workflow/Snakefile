@@ -203,6 +203,8 @@ rule dataset:
         data="build/dl3/hdu-index.fits.gz",
         config="configs/{analysis}/analysis.yaml",
         script="scripts/write_datasets.py",
+    params:
+        n_off=config["n_off_regions"],
     output:
         "build/dl4/{analysis}/datasets.fits.gz",
     resources:
@@ -212,7 +214,7 @@ rule dataset:
     conda:
         gammapy_env
     shell:
-        "python {input.script} -j{resources.cpus} -c {input.config} -o {output} --n-off-regions=1"
+        "python {input.script} -j{resources.cpus} -c {input.config} -o {output} --n-off-regions={params.n_off}"
 
 
 rule dl3_hdu_index:
