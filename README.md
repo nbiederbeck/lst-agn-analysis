@@ -86,6 +86,6 @@ Afterwards:
 make -f local.mk
 ```
 
-DEV-TODO: Do the same for the other plots (https://github.com/nbiederbeck/lst-agn-analysis/issues/39)
+DEV-TODO: Do the same for the other plots (https://github.com/nbiederbeck/lst-agn-analysis/issues/29)
 If you do some `cp **/*.fits.gz` shenanigans, beware that the dl3 files are saved with
 the extension `fits.gz` as well.
