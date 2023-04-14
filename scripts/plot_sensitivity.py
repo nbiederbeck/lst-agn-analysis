@@ -5,13 +5,13 @@ from astropy.table import Table
 from gammapy.modeling.models import create_crab_spectral_model
 
 parser = ArgumentParser()
-parser.add_argument("--sensitivity-path", required=True)
+parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output", required=True)
 args = parser.parse_args()
 
 
-def main(sensitivity_path, output):
-    t = Table.read(sensitivity_path)
+def main(input_path, output):
+    t = Table.read(input_path)
 
     fig, ax = plt.subplots()
 
@@ -45,8 +45,8 @@ def main(sensitivity_path, output):
             elim,
             ax=ax,
             sed_type="e2dnde",
-            label=f"{n:.0%}% Crab",
-            linesyle="dashed",
+            label=f"{n:.0%} Crab",
+            linestyle="dashed",
             alpha=0.3,
         )
 
