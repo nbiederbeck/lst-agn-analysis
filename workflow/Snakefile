@@ -161,19 +161,6 @@ rule observation_plots:
         """
 
 
-rule sensitivity:
-    input:
-        "build/model-best-fit.yaml",
-        "build/dl3/hdu-index.fits.gz",
-        script="scripts/sensitivity.py",
-    output:
-        "build/plots/sensitivity.pdf",
-    conda:
-        gammapy_env
-    shell:
-        "python {input.script} -o {output}"
-
-
 rule calc_light_curve:
     input:
         model="build/dl4/{analysis}/model-best-fit.yaml",
