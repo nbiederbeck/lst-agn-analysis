@@ -12,6 +12,7 @@ plots = [
     for analysis in analyses
     for plot in [
         "theta2",
+        "sensitivity",
         "dl4_diagnostics",
         "light_curve",
         "flux_points",
