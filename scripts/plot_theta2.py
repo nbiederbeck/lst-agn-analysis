@@ -1,16 +1,15 @@
 from argparse import ArgumentParser
 
+import numpy as np
+from astropy.table import Table
+from gammapy.maps import MapAxis
+from matplotlib import pyplot as plt
+
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output", required=True)
 parser.add_argument("--preliminary", action="store_true")
 args = parser.parse_args()
-
-
-import numpy as np
-from astropy.table import Table
-from gammapy.maps import MapAxis
-from matplotlib import pyplot as plt
 
 
 def plot_theta_squared_table(table, *, preliminary=False, ylim=None):
