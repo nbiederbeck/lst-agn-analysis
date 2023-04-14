@@ -9,9 +9,9 @@ with open("build/runs.json", "r") as f:
 RUN_IDS = sorted(set(chain(*runs.values())))
 
 with open("configs/lst_agn.json", "r") as f:
-    config = json.load(f)
+    config_agn = json.load(f)
 
-lstchain_env = config.get("lstchain_enviroment", "lstchain-v0.9.13")
+lstchain_env = config_agn.get("lstchain_enviroment", "lstchain-v0.9.13")
 
 gammapy_env = "envs/agn-analysis.yml"
 
@@ -68,6 +68,22 @@ rule calc_theta2:
         gammapy_env
     shell:
         "python {input.script} -c {input.config} -o {output}"
+
+
+rule calc_sensitivity:
+    input:
+        data="build/dl4/{analysis}/datasets.fits.gz",
+        script="scripts/calc_sensitivity.py",
+    output:
+        "build/dl4/{analysis}/sensitivity.fits.gz",
+    conda:
+        gammapy_env
+    shell:
+        """
+        python {input.script} \
+            --dataset-path {input.data} \
+            -o {output}
+        """
 
 
 rule calc_dl4_diagnostics:
@@ -145,19 +161,6 @@ rule observation_plots:
         """
 
 
-rule sensitivity:
-    input:
-        "build/model-best-fit.yaml",
-        "build/dl3/hdu-index.fits.gz",
-        script="scripts/sensitivity.py",
-    output:
-        "build/plots/sensitivity.pdf",
-    conda:
-        gammapy_env
-    shell:
-        "python {input.script} -o {output}"
-
-
 rule calc_light_curve:
     input:
         model="build/dl4/{analysis}/model-best-fit.yaml",
@@ -204,7 +207,7 @@ rule dataset:
         config="configs/{analysis}/analysis.yaml",
         script="scripts/write_datasets.py",
     params:
-        n_off=config["n_off_regions"],
+        n_off=config_agn["n_off_regions"],
     output:
         "build/dl4/{analysis}/datasets.fits.gz",
     resources:
