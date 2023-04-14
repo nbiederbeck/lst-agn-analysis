@@ -22,7 +22,7 @@ def main(input_path, output):
             [
                 rad_max["ENERG_LO"].quantity.to_value(energy_unit).flatten(),
                 rad_max["ENERG_HI"].quantity.to_value(energy_unit).flatten(),
-            ]
+            ],
         ),
     )
     energy_axis = MapAxis.from_energy_edges(energy_edges, unit=energy_unit)

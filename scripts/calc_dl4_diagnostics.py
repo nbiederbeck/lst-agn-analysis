@@ -29,7 +29,7 @@ def main(config, dataset_path, output):
             "excess": info_table["excess"],
             "sqrt_ts": info_table["sqrt_ts"],
             "livetime": info_table["livetime"],
-        }
+        },
     )
     table.meta["CUMUL"] = True
     hdulist.append(fits.table_to_hdu(table))
@@ -52,7 +52,7 @@ def main(config, dataset_path, output):
                 "sqrt_ts": np.array(sqrt_ts),
                 "zenith": np.array(zenith),
                 "obs_id": np.array(obs_ids),
-            }
+            },
         )
         table.meta["CUMUL"] = False
         hdulist.append(fits.table_to_hdu(table))

@@ -1,16 +1,16 @@
 from argparse import ArgumentParser
 
-parser = ArgumentParser()
-parser.add_argument("-c", "--config", required=True)
-parser.add_argument("-o", "--output", required=True)
-args = parser.parse_args()
-
-
 from astropy.coordinates import SkyCoord
 from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.makers.utils import make_theta_squared_table
 from gammapy.maps import MapAxis
 from gammapy.utils import pbar
+
+parser = ArgumentParser()
+parser.add_argument("-c", "--config", required=True)
+parser.add_argument("-o", "--output", required=True)
+args = parser.parse_args()
+
 
 pbar.SHOW_PROGRESS_BAR = True
 

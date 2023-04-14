@@ -20,7 +20,7 @@ def main(input_path, output):
         [
             f"${offset.center.to_value(unit)[0]}",
             f"{offset.bin_width.to_value(unit)[0] / 2:.1f}$ {unit}",
-        ]
+        ],
     )
 
     fig, ax = plt.subplots()

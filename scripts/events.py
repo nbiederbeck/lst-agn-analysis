@@ -1,16 +1,15 @@
 from argparse import ArgumentParser
 
-parser = ArgumentParser()
-parser.add_argument("-c", "--config", required=True)
-parser.add_argument("-o", "--output", required=True)
-args = parser.parse_args()
-
-
 from astropy.coordinates import SkyCoord
 from gammapy.analysis import Analysis, AnalysisConfig
 from gammapy.data import EventList
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+
+parser = ArgumentParser()
+parser.add_argument("-c", "--config", required=True)
+parser.add_argument("-o", "--output", required=True)
+args = parser.parse_args()
 
 
 def on_region_to_skyframe(on_region):
