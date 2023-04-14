@@ -242,24 +242,6 @@ rule dl3_hdu_index:
         """
 
 
-# rule select_low_offset:
-#     output:
-#         "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
-#     input:
-#         "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
-#     conda:
-#         gammapy_env
-#     resources:
-#         time=10,
-#     log:
-#         "build/logs/dl3/{run_id}.log",
-#     shell:
-#         """
-#         python scripts/select_low_offset.py \
-#             -i {input} -o {output} \
-#         """
-
-
 rule dl3:
     output:
         "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
