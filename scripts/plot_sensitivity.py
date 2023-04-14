@@ -36,7 +36,7 @@ def main(input_path, output):
     elim = min(t["energy"].quantity), max(t["energy"].quantity)
 
     crab = create_crab_spectral_model()
-    for n in (1, 0.1, 0.01):
+    for n, ls in zip((1, 0.1, 0.01), ("dashed", "dotted", "dashdot")):
         crab.norm.scale = n
         # TODO It would be nicer to have the label next to the line
         # and not in the legend
@@ -46,8 +46,8 @@ def main(input_path, output):
             ax=ax,
             sed_type="e2dnde",
             label=f"{n:.0%} Crab",
-            linestyle="dashed",
-            alpha=0.3,
+            linestyle=ls,
+            color="gray",
         )
 
     ax.loglog()
