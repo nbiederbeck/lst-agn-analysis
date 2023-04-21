@@ -1,3 +1,4 @@
+import logging
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -6,11 +7,14 @@ import pandas as pd
 from astropy import units as u
 from astropy.table import vstack
 from ctapipe.io import read_table
+from log import setup_logging
 from rich.progress import track
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
 parser.add_argument("output_path")
+parser.add_argument("--log-file")
+parser.add_argument("-v", "--verbose", action="store_true")
 args = parser.parse_args()
 
 template = (
@@ -20,6 +24,9 @@ template = (
 
 
 def main():
+    setup_logging(logfile=args.log_file, verbose=args.verbose)
+    log = logging.getLogger("merge-datachecks")
+
     runs = pd.read_csv(args.input_path)
 
     filenames = [
@@ -27,18 +34,22 @@ def main():
         for night in sorted(np.unique(runs["Date directory"]))
     ]
 
-    tables = [
-        read_table(filename, "/runsummary/table")
-        for filename in track(filenames)
-        if Path(filename).exists()
-    ]
+    datachecks = []
+    for f in filenames:
+        if Path(f).exists():
+            datachecks.append(f)
+        else:
+            log.warning("%s not found.", f)
 
-    if len(tables) == 0:
-        p = Path(args.output_path)
-        if not p.exists():
-            raise ValueError("Output path does not exist and no files to merge.")
-        p.touch()
-        return
+    if len(datachecks) == 0:
+        raise Exception(
+            "No datachecks exist. "
+            "That might come from a bad configuration or "
+            "means that none are found. "
+            "Please check the logs.",
+        )
+
+    tables = [read_table(d, "/runsummary/table") for d in track(datachecks)]
 
     runsummary = vstack(
         tables,
