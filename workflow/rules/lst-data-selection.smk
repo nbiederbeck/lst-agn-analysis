@@ -2,7 +2,7 @@
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 
 env = "../envs/data-selection.yml"
-config = "config.json"
+config = "configs/data-selection.json"
 
 
 localrules:
