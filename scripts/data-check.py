@@ -168,7 +168,20 @@ if __name__ == "__main__":
 
     cosmics_rate = runsummary["cosmics_rate"]
 
-    mask_cosmics = get_mask(cosmics_rate, ge=config.cosmics.ll, le=config.cosmics.ul)
+    cos_ll = config.cosmics.ll
+    cos_ul = config.cosmics.ul
+
+    if config.cosmics_sigma is not None:
+        sigma = config.cosmics_sigma
+        log.info(
+            "Calculating cosmics cuts based on configured sigma interval.",
+        )
+
+        cos_ll, cos_ul = bounds_std(cosmics_rate, sigma)
+
+        log.info("Calculated %f sigma interval is (%f, %f)", sigma, cos_ll, cos_ul)
+
+    mask_cosmics = get_mask(cosmics_rate, ge=cos_ll, le=cos_ul)
 
     runsummary["mask_cosmics"] = mask_cosmics
 

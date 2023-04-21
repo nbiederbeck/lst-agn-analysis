@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+import numpy as np
 from astropy.table import Table
 from astropy.time import Time
 from config import Config
@@ -14,6 +15,13 @@ args = parser.parse_args()
 config = Config.parse_file(args.config)
 
 
+def bounds_std(x, n_sig=1):
+    m = np.nanmean(x)
+    s = n_sig * np.nanstd(x)
+
+    return (m - s, m + s)
+
+
 def main():
     runsummary = Table.read(args.input_path)
     runsummary = runsummary[runsummary["mask_run_selection"]]
@@ -21,6 +29,12 @@ def main():
     fig, ax = plt.subplots()
 
     cosmics_rate = runsummary["cosmics_rate"]
+
+    cos_ll = config.cosmics_ll
+    cos_ul = config.cosmics_ul
+
+    if config.cosmics_sigma is not None:
+        cos_ll, cos_ul = bounds_std(cosmics_rate, config.cosmics_sigma)
 
     ax.plot(
         time.datetime,
@@ -30,8 +44,8 @@ def main():
     ax.set_xlim(ax.get_xlim())
     ax.fill_between(
         ax.get_xlim(),
-        [config.cosmics_ll],
-        [config.cosmics_ul],
+        [cos_ll],
+        [cos_ul],
         alpha=0.1,
         label="Selection",
     )
