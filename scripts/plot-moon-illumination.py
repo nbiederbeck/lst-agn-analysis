@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+import numpy as np
 from astroplan.moon import moon_illumination
 from astropy import units as u
 from astropy.coordinates import AltAz, EarthLocation, get_moon
@@ -16,6 +17,13 @@ parser.add_argument("-c", "--config", required=True)
 args = parser.parse_args()
 
 config = Config.parse_file(args.config)
+
+
+def bounds_std(x, n_sig=1):
+    m = np.nanmean(x)
+    s = n_sig * np.nanstd(x)
+
+    return (m - s, m + s)
 
 
 def main():
@@ -36,8 +44,9 @@ def main():
 
     moon = get_moon(time, location=location).transform_to(altaz)
 
+    mask_altitude = moon.alt.to_value(u.deg) < 0
     moon_light = moon_illumination(time)
-    moon_light[moon.alt.to_value(u.deg) < 0] = 1
+    moon_light[mask_altitude] = 1
 
     fig, ax = plt.subplots()
 
@@ -53,10 +62,16 @@ def main():
     ax.set_ylim(0)
     ax.set_xlim(-90, 80)
 
+    ped_ll = config.pedestal_ll
+    ped_ul = config.pedestal_ul
+
+    if config.pedestal_sigma is not None:
+        ped_ll, ped_ul = bounds_std(ped_std[mask_altitude], config.pedestal_sigma)
+
     ax.fill_between(
         (0, 1),
-        [config.pedestal_ll],
-        [config.pedestal_ul],
+        [ped_ll],
+        [ped_ul],
         alpha=0.1,
         label="Selection",
         transform=ax.get_yaxis_transform(),

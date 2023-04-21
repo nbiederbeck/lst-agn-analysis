@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import numpy as np
 import pandas as pd
 from astropy import units as u
-from astropy.coordinates import AltAz, EarthLocation, SkyCoord
+from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon
 from astropy.table import Table
 from astropy.time import Time
 from config import Config
@@ -43,8 +43,8 @@ def nmad(x):
 
 
 def bounds_std(x, n_sig=1):
-    m = np.mean(x)
-    s = n_sig * np.std(x)
+    m = np.nanmean(x)
+    s = n_sig * np.nanstd(x)
 
     return (m - s, m + s)
 
@@ -134,11 +134,24 @@ if __name__ == "__main__":
 
     ped_std = runsummary["ped_charge_stddev"]
 
-    mask_pedestal_charge = get_mask(
-        ped_std,
-        ge=config.pedestal.ll,
-        le=config.pedestal.ul,
-    )
+    ped_ll = config.pedestal.ll
+    ped_ul = config.pedestal.ul
+
+    if config.pedestal_sigma is not None:
+        sigma = config.pedestal_sigma
+        log.info(
+            "Calculating pedestal cuts based on configured sigma interval "
+            "for pedestals with moon below horizon.",
+        )
+
+        altaz = AltAz(obstime=time, location=location)
+        moon = get_moon(time, location=location).transform_to(altaz)
+
+        ped_ll, ped_ul = bounds_std(ped_std[moon.alt.to_value(u.deg) < 0], sigma)
+
+        log.info("Calculated %f sigma interval is (%f, %f)", sigma, ped_ll, ped_ul)
+
+    mask_pedestal_charge = get_mask(ped_std, ge=ped_ll, le=ped_ul)
 
     runsummary["mask_pedestal_charge"] = mask_pedestal_charge & mask
     mask = runsummary["mask_pedestal_charge"] & mask
