@@ -33,11 +33,12 @@ rule merge_datachecks:
         data="build/runlist.csv",
         script="scripts/merge-datachecks.py",
     output:
-        "build/dl1-datachecks-merged.h5",
+        output="build/dl1-datachecks-merged.h5",
+        log="build/merge-datachecks.log",
     conda:
         env
     shell:
-        "python {input.script} {input.data} {output}"
+        "python {input.script} {input.data} {output.output} --log-file={output.log}"
 
 
 rule run_ids:
