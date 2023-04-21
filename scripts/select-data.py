@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 
 import numpy as np
 import pandas as pd
-from config import Config
 from astropy.time import Time
+from config import Config
 
 parser = ArgumentParser()
 parser.add_argument("input_file")
