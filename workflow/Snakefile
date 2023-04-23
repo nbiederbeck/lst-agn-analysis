@@ -1,19 +1,16 @@
+include: "local.smk"
+include: "rules/lst-data-selection.smk"
+
+
 # vim: ft=snakemake nofoldenable commentstring=#%s
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 import json
 from itertools import chain
 
-with open("build/runs.json", "r") as f:
-    runs = json.load(f)
-
-RUN_IDS = sorted(set(chain(*runs.values())))
-
 with open("configs/lst_agn.json", "r") as f:
     config_agn = json.load(f)
 
 lstchain_env = config_agn.get("lstchain_enviroment", "lstchain-v0.9.13")
-
-gammapy_env = "envs/agn-analysis.yml"
 
 irf_plots = [
     f"build/plots/irf/{irf}_Run{run_id:05d}.pdf"
@@ -22,16 +19,11 @@ irf_plots = [
 ]
 
 
-include: "local.smk"
-
-
 rule all:
     input:
-        plots,
+        per_obs_plots,
+        stacked_plots,
         irf_plots,
-
-
-include: "rules/lst-data-selection.smk"
 
 
 localrules:
@@ -55,20 +47,43 @@ rule plot_irf:
         "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
-rule calc_theta2:
+# Arguably theta^2 is dl3, not dl4, but it involves the gammapy config and
+# thus should be split up by analyses
+# Also this means we dont need an extra rule for plots from dl3
+# The 0 in the data wildcard is a hack, because I couldnt get the :05d to work
+rule calc_theta2_per_obs:
     output:
-        "build/dl4/{analysis}/theta2.fits.gz",
+        "build/dl4/{analysis}/theta2_{run_id}.fits.gz",
     input:
         data="build/dl3/hdu-index.fits.gz",
         config="configs/{analysis}/analysis.yaml",
-        script="scripts/calc_theta2.py",
+        script="scripts/calc_theta2_per_obs.py",
     resources:
         mem_mb=16000,
-        cpus=16,
     conda:
         gammapy_env
+    log:
+        "build/logs/dl4/{analysis}/theta2_{run_id}.log",
     shell:
-        "python {input.script} -c {input.config} -o {output}"
+        "python {input.script} -c {input.config} -o {output} --obs-id {wildcards.run_id}"
+
+
+rule stack_theta2:
+    output:
+        "build/dl4/{analysis}/theta2_stacked.fits.gz",
+    input:
+        runs=expand(
+            "build/dl4/theta2_{run_id}.fits.gz",
+            run_id=RUN_IDS,
+        ),
+        config="configs/{analysis}/analysis.yaml",
+        script="scripts/stack_theta2.py",
+    conda:
+        gammapy_env
+    log:
+        "build/logs/dl4/{analysis}/theta2_stacked.log",
+    shell:
+        "python {input.script} -c {input.config} -o {output} --runs {input.runs}"
 
 
 rule calc_sensitivity:

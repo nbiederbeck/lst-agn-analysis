@@ -92,7 +92,9 @@ def main(input_path, output, preliminary):
         for hdu in f[1:]:
             table = Table.read(hdu)
             fig, ax = plot_theta_squared_table(table, preliminary=preliminary)
-            ax.set_title(table.meta["ERANGE"])
+            low = table.meta["ELOW"]
+            high = table.meta["EHI"]
+            ax.set_title(f"{low} - {high}")
             figures.append(fig)
 
     if output is None:
