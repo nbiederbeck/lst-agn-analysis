@@ -149,10 +149,12 @@ if __name__ == "__main__":
     if config.cosmics_sigma is not None:
         sigma = config.cosmics.sigma
         log.info(
-            "Calculating cosmics cuts based on configured sigma interval.",
+            "Calculating cosmics cuts based on "
+            "configured sigma interval "
+            "for runs selected before.",
         )
 
-        cos_ll, cos_ul = bounds_std(cosmics_rate, sigma)
+        cos_ll, cos_ul = bounds_std(cosmics_rate[mask], sigma)
 
         log.info("Calculated %f sigma interval is (%f, %f)", sigma, cos_ll, cos_ul)
 
@@ -179,10 +181,12 @@ if __name__ == "__main__":
     if config.cosmics_10_sigma is not None:
         sigma = config.cosmics_10.sigma
         log.info(
-            "Calculating cosmics cuts based on configured sigma interval.",
+            "Calculating cosmics above 10 cuts based "
+            "on configured sigma interval "
+            "for runs selected before.",
         )
 
-        cos_10_ll, cos_10_ul = bounds_std(cosmics_rate_above10, sigma)
+        cos_10_ll, cos_10_ul = bounds_std(cosmics_rate_above10[mask], sigma)
 
         log.info(
             "Calculated %f sigma interval is (%f, %f)",
@@ -197,10 +201,12 @@ if __name__ == "__main__":
     if config.cosmics_30_sigma is not None:
         sigma = config.cosmics_30.sigma
         log.info(
-            "Calculating cosmics cuts based on configured sigma interval.",
+            "Calculating cosmics above 30 cuts based "
+            "on configured sigma interval for "
+            "runs selected before.",
         )
 
-        cos_30_ll, cos_30_ul = bounds_std(cosmics_rate_above30, sigma)
+        cos_30_ll, cos_30_ul = bounds_std(cosmics_rate_above30[mask], sigma)
 
         log.info(
             "Calculated %f sigma interval is (%f, %f)",
