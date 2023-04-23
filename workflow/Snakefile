@@ -58,6 +58,8 @@ rule calc_theta2_per_obs:
         data="build/dl3/hdu-index.fits.gz",
         config="configs/{analysis}/analysis.yaml",
         script="scripts/calc_theta2_per_obs.py",
+    wildcard_constraints:
+        run_id="\d+",
     resources:
         mem_mb=16000,
     conda:
@@ -73,17 +75,16 @@ rule stack_theta2:
         "build/dl4/{analysis}/theta2_stacked.fits.gz",
     input:
         runs=expand(
-            "build/dl4/theta2_{run_id}.fits.gz",
+            "build/dl4/{{analysis}}/theta2_{run_id}.fits.gz",
             run_id=RUN_IDS,
         ),
-        config="configs/{analysis}/analysis.yaml",
         script="scripts/stack_theta2.py",
     conda:
         gammapy_env
     log:
         "build/logs/dl4/{analysis}/theta2_stacked.log",
     shell:
-        "python {input.script} -c {input.config} -o {output} --runs {input.runs}"
+        "python {input.script} -o {output} --input-files {input.runs}"
 
 
 rule calc_sensitivity:

@@ -15,10 +15,9 @@ analyses = [
 stacked_plots = [
     f"build/plots/{analysis}/{plot}.pdf"
     for analysis in analyses
-    for plot in ["light_curve", "flux_points", "observation_plots"]
+    for plot in ["light_curve", "flux_points", "observation_plots", "theta2_stacked"]
 ]
 
-# "theta2_stacked",
 per_obs_plots = [
     f"build/plots/{analysis}/{plot}_{run}.pdf"
     for analysis in analyses
