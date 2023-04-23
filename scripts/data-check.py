@@ -138,7 +138,7 @@ if __name__ == "__main__":
     ped_ul = config.pedestal.ul
 
     if config.pedestal_sigma is not None:
-        sigma = config.pedestal_sigma
+        sigma = config.pedestal.sigma
         log.info(
             "Calculating pedestal cuts based on configured sigma interval "
             "for pedestals with moon below horizon.",
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     cos_ul = config.cosmics.ul
 
     if config.cosmics_sigma is not None:
-        sigma = config.cosmics_sigma
+        sigma = config.cosmics.sigma
         log.info(
             "Calculating cosmics cuts based on configured sigma interval.",
         )
@@ -198,15 +198,51 @@ if __name__ == "__main__":
     cosmics_rate_above10 = runsummary["cosmics_rate_above10"]
     cosmics_rate_above30 = runsummary["cosmics_rate_above30"]
 
+    cos_10_ll = config.cosmics_10.ll
+    cos_10_ul = config.cosmics_10.ul
+
+    if config.cosmics_10_sigma is not None:
+        sigma = config.cosmics_10.sigma
+        log.info(
+            "Calculating cosmics cuts based on configured sigma interval.",
+        )
+
+        cos_10_ll, cos_10_ul = bounds_std(cosmics_rate_above10, sigma)
+
+        log.info(
+            "Calculated %f sigma interval is (%f, %f)",
+            sigma,
+            cos_10_ll,
+            cos_10_ul,
+        )
+
+    cos_30_ll = config.cosmics_30.ll
+    cos_30_ul = config.cosmics_30.ul
+
+    if config.cosmics_30_sigma is not None:
+        sigma = config.cosmics_30.sigma
+        log.info(
+            "Calculating cosmics cuts based on configured sigma interval.",
+        )
+
+        cos_30_ll, cos_30_ul = bounds_std(cosmics_rate_above30, sigma)
+
+        log.info(
+            "Calculated %f sigma interval is (%f, %f)",
+            sigma,
+            cos_30_ll,
+            cos_30_ul,
+        )
+
     mask_above10 = get_mask(
         cosmics_rate_above10,
-        le=config.cosmics_10.ul,
-        ge=config.cosmics_10.ll,
+        le=cos_10_ul,
+        ge=cos_10_ll,
     )
     mask_above30 = get_mask(
         cosmics_rate_above30,
-        le=config.cosmics_30.ul,
-        ge=config.cosmics_30.ll,
+        le=cos_30_ul,
+        ge=cos_30_ll,
     )
 
     mask_above = mask_above10 & mask_above30
