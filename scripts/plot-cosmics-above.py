@@ -1,10 +1,10 @@
 from argparse import ArgumentParser
 
-import numpy as np
 from astropy.table import Table
 from astropy.time import Time
 from config import Config
 from matplotlib import pyplot as plt
+from stats import bounds_std
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
@@ -13,13 +13,6 @@ parser.add_argument("-c", "--config", required=True)
 args = parser.parse_args()
 
 config = Config.parse_file(args.config)
-
-
-def bounds_std(x, n_sig=1):
-    m = np.nanmean(x)
-    s = n_sig * np.nanstd(x)
-
-    return (m - s, m + s)
 
 
 def main():

@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 
-import numpy as np
 from astroplan.moon import moon_illumination
 from astropy import units as u
 from astropy.coordinates import AltAz, EarthLocation, get_moon
@@ -9,6 +8,7 @@ from astropy.time import Time
 from config import Config
 from matplotlib import colors
 from matplotlib import pyplot as plt
+from stats import bounds_std
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
@@ -17,13 +17,6 @@ parser.add_argument("-c", "--config", required=True)
 args = parser.parse_args()
 
 config = Config.parse_file(args.config)
-
-
-def bounds_std(x, n_sig=1):
-    m = np.nanmean(x)
-    s = n_sig * np.nanstd(x)
-
-    return (m - s, m + s)
 
 
 def main():
