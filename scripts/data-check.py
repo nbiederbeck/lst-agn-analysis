@@ -136,8 +136,8 @@ if __name__ == "__main__":
 
     mask_pedestal_charge = get_mask(
         ped_std,
-        ge=config.pedestal_ll,
-        le=config.pedestal_ul,
+        ge=config.pedestal.ll,
+        le=config.pedestal.ul,
     )
 
     runsummary["mask_pedestal_charge"] = mask_pedestal_charge & mask
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     cosmics_rate = runsummary["cosmics_rate"]
 
-    mask_cosmics = get_mask(cosmics_rate, ge=config.cosmics_ll, le=config.cosmics_ul)
+    mask_cosmics = get_mask(cosmics_rate, ge=config.cosmics.ll, le=config.cosmics.ul)
 
     runsummary["mask_cosmics"] = mask_cosmics
 
@@ -174,13 +174,13 @@ if __name__ == "__main__":
 
     mask_above10 = get_mask(
         cosmics_rate_above10,
-        le=config.cosmics_10_ul,
-        ge=config.cosmics_10_ll,
+        le=config.cosmics_10.ul,
+        ge=config.cosmics_10.ll,
     )
     mask_above30 = get_mask(
         cosmics_rate_above30,
-        le=config.cosmics_30_ul,
-        ge=config.cosmics_30_ll,
+        le=config.cosmics_30.ul,
+        ge=config.cosmics_30.ll,
     )
 
     mask_above = mask_above10 & mask_above30
