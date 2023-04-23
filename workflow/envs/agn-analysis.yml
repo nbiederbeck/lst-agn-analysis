@@ -11,4 +11,3 @@ dependencies:
   - iminuit
   - tqdm
   - rich
-  - boost-histogram

@@ -29,6 +29,7 @@ per_obs_plots = [
 rule plots:
     input:
         stacked_plots,
+        per_obs_plots,
 
 
 rule plot:
