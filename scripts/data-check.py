@@ -9,7 +9,7 @@ from astropy.table import Table
 from astropy.time import Time
 from config import Config
 from log import setup_logging
-from stats import bounds_std
+from stats import bounds_std as bounds
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         altaz = AltAz(obstime=time, location=location)
         moon = get_moon(time, location=location).transform_to(altaz)
 
-        ped_ll, ped_ul = bounds_std(ped_std[moon.alt.to_value(u.deg) < 0], sigma)
+        ped_ll, ped_ul = bounds(ped_std[moon.alt.to_value(u.deg) < 0], sigma)
 
         log.info("Calculated %f sigma interval is (%f, %f)", sigma, ped_ll, ped_ul)
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
             "for runs selected before.",
         )
 
-        cos_ll, cos_ul = bounds_std(cosmics_rate[mask], sigma)
+        cos_ll, cos_ul = bounds(cosmics_rate[mask], sigma)
 
         log.info("Calculated %f sigma interval is (%f, %f)", sigma, cos_ll, cos_ul)
 
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             "for runs selected before.",
         )
 
-        cos_10_ll, cos_10_ul = bounds_std(cosmics_rate_above10[mask], sigma)
+        cos_10_ll, cos_10_ul = bounds(cosmics_rate_above10[mask], sigma)
 
         log.info(
             "Calculated %f sigma interval is (%f, %f)",
@@ -212,7 +212,7 @@ if __name__ == "__main__":
             "runs selected before.",
         )
 
-        cos_30_ll, cos_30_ul = bounds_std(cosmics_rate_above30[mask], sigma)
+        cos_30_ll, cos_30_ul = bounds(cosmics_rate_above30[mask], sigma)
 
         log.info(
             "Calculated %f sigma interval is (%f, %f)",

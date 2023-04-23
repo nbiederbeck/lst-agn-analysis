@@ -20,12 +20,12 @@ def nmad(x):
     [1]: https://en.wikipedia.org/wiki/Median_absolute_deviation
 
     """
-    return 1.4826 * np.median(np.abs(x - np.median(x)))
+    return 1.4826 * np.nanmedian(np.abs(x - np.nanmedian(x)))
 
 
 def bounds_mad(x, n_sig=1):
     """Calculate +-`n_sig` nmad around the median."""
-    m = np.median(x)
+    m = np.nanmedian(x)
     s = n_sig * nmad(x)
 
     return (m - s, m + s)
