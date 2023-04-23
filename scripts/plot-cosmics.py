@@ -2,17 +2,13 @@ from argparse import ArgumentParser
 
 from astropy.table import Table
 from astropy.time import Time
-from config import Config
 from matplotlib import pyplot as plt
-from stats import bounds_std
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
 parser.add_argument("-o", "--output_path", required=True)
-parser.add_argument("-c", "--config", required=True)
+parser.add_argument("-c", "--cuts", required=True)
 args = parser.parse_args()
-
-config = Config.parse_file(args.config)
 
 
 def main():
@@ -23,11 +19,8 @@ def main():
 
     cosmics_rate = runsummary["cosmics_rate"]
 
-    cos_ll = config.cosmics_ll
-    cos_ul = config.cosmics_ul
-
-    if config.cosmics_sigma is not None:
-        cos_ll, cos_ul = bounds_std(cosmics_rate, config.cosmics_sigma)
+    with open(args.cuts, "r") as f:
+        cos_ll, cos_ul = map(float, f.read().split(","))
 
     ax.plot(
         time.datetime,

@@ -126,6 +126,9 @@ if __name__ == "__main__":
 
         log.info("Calculated %f sigma interval is (%f, %f)", sigma, ped_ll, ped_ul)
 
+    with open("build/cuts-moon-illumination.txt", "w") as f:
+        f.write(f"{ped_ll},{ped_ul}")
+
     mask_pedestal_charge = get_mask(ped_std, ge=ped_ll, le=ped_ul)
 
     runsummary["mask_pedestal_charge"] = mask_pedestal_charge & mask
@@ -157,6 +160,9 @@ if __name__ == "__main__":
         cos_ll, cos_ul = bounds_std(cosmics_rate[mask], sigma)
 
         log.info("Calculated %f sigma interval is (%f, %f)", sigma, cos_ll, cos_ul)
+
+    with open("build/cuts-cosmics.txt", "w") as f:
+        f.write(f"{cos_ll},{cos_ul}")
 
     mask_cosmics = get_mask(cosmics_rate, ge=cos_ll, le=cos_ul)
 
@@ -214,6 +220,9 @@ if __name__ == "__main__":
             cos_30_ll,
             cos_30_ul,
         )
+
+    with open("build/cuts-cosmics-above.txt", "w") as f:
+        f.write(f"{cos_10_ll},{cos_10_ul},{cos_30_ll},{cos_30_ul}")
 
     mask_above10 = get_mask(
         cosmics_rate_above10,

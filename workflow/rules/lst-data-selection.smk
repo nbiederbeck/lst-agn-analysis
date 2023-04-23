@@ -64,6 +64,11 @@ rule data_check:
         runlist="build/runlist-checked.csv",
         datachecks="build/dl1-datachecks-masked.h5",
         log="build/datacheck.log",
+        cuts=[
+            "build/cuts-cosmics.txt",
+            "build/cuts-cosmics-above.txt",
+            "build/cuts-moon-illumination.txt",
+        ],
     conda:
         env
     shell:
@@ -89,14 +94,14 @@ rule runlist:
 rule plot_data_selection:
     input:
         data="build/dl1-datachecks-masked.h5",
-        config=config,
+        cuts="build/cuts-{name}.txt",
         script="scripts/plot-{name}.py",
     output:
         "build/{name}.pdf",
     conda:
         env
     shell:
-        "python {input.script} {input.data} -c {input.config} -o {output}"
+        "python {input.script} {input.data} -c {input.cuts} -o {output}"
 
 
 rule numbers:
