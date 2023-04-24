@@ -112,7 +112,7 @@ if __name__ == "__main__":
     ped_ll = config.pedestal.ll
     ped_ul = config.pedestal.ul
 
-    if config.pedestal_sigma is not None:
+    if config.pedestal.sigma is not None:
         sigma = config.pedestal.sigma
         log.info(
             "Calculating pedestal cuts based on configured sigma interval "
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     cos_ll = config.cosmics.ll
     cos_ul = config.cosmics.ul
 
-    if config.cosmics_sigma is not None:
+    if config.cosmics.sigma is not None:
         sigma = config.cosmics.sigma
         log.info(
             "Calculating cosmics cuts based on "
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     cos_10_ll = config.cosmics_10.ll
     cos_10_ul = config.cosmics_10.ul
 
-    if config.cosmics_10_sigma is not None:
+    if config.cosmics_10.sigma is not None:
         sigma = config.cosmics_10.sigma
         log.info(
             "Calculating cosmics above 10 cuts based "
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     cos_30_ll = config.cosmics_30.ll
     cos_30_ul = config.cosmics_30.ul
 
-    if config.cosmics_30_sigma is not None:
+    if config.cosmics_30.sigma is not None:
         sigma = config.cosmics_30.sigma
         log.info(
             "Calculating cosmics above 30 cuts based "
