@@ -55,6 +55,7 @@ rule calc_theta2_per_obs:
         data="build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
         script="scripts/calc_theta2_per_obs.py",
         config=config,
+        index="build/dl3/hdu-index.fits.gz",
     wildcard_constraints:
         run_id="\d+",
     resources:
