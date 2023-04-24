@@ -13,9 +13,8 @@ analyses = [
 ]
 
 dl3_plots = [
-    f"build/plots/{plot}_{run:05d}.pdf" for run in RUN_IDS for plot in ["theta2"]
-]
-# + ["build/plots/theta2_stacked.pdf"]
+    f"build/plots/{plot}/{run:05d}.pdf" for run in RUN_IDS for plot in ["theta2"]
+] + ["build/plots/theta2/stacked.pdf"]
 
 
 # observation plots are arguably dl3
@@ -35,7 +34,7 @@ rule plots:
 # Extra rule because there is one script generating many plots with differing names
 rule plot_theta:
     output:
-        "build/plots/theta2_{runid}.pdf",
+        "build/plots/theta2/{runid}.pdf",
     input:
         data="build/dl3/theta2_{runid}.fits.gz",
         script="scripts/plot_theta2.py",

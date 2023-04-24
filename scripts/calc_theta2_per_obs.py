@@ -75,12 +75,10 @@ def stack_energies(tables):
     Since every table is from the same observation(s),
     we do not need to handle acceptance and metadata.
     """
-    for i, t in enumerate(tables):
-        if i == 0:
-            stacked = t.copy()
-        else:
-            for c in ["counts", "counts_off"]:
-                stacked[c] += t[c]
+    stacked = tables[0].copy()
+    for t in tables[1:]:
+        for c in ["counts", "counts_off"]:
+            stacked[c] += t[c]
     stacked = add_stats(stacked)
     return stacked
 
@@ -117,6 +115,8 @@ def main(input_dir, output, obs_id, log_file, verbose, config):  # noqa: PLR0915
         np.append(energy_axis.edges_min[0], energy_axis.edges_max),
         overflow,
     )
+    # This will break for multiple offsets in the IRF
+    theta_cuts = np.append(None, np.append(obs.rad_max.data.flatten(), None))
 
     # Get on and off position
     with open(config) as f:
@@ -139,12 +139,13 @@ def main(input_dir, output, obs_id, log_file, verbose, config):  # noqa: PLR0915
 
     hdulist = [fits.PrimaryHDU()]
     theta_tables = []
-    for elow, ehigh in zip(energy_lower, energy_upper):
+    for elow, ehigh, theta in zip(energy_lower, energy_upper, theta_cuts):
         log.info("Calculating counts in range {elow} - {ehigh}")
         table = create_empty_table(theta_squared_axis, position)
         # Useful for plotting
         table.meta["ELOW"] = format_energy(elow)
         table.meta["EHI"] = format_energy(ehigh)
+        table.meta["CUT"] = theta**2 if theta else ""
         # This is needed for stacking later
         table.meta["TOBS"] = obs.observation_live_time_duration.to_value(u.s)
 

@@ -61,6 +61,14 @@ def plot_theta_squared_table(table, *, preliminary=False, ylim=None):
         label="Off",
     )
 
+    if table.meta["CUT"]:
+        ax.axvline(
+            table.meta["CUT"],
+            linestyle="dashed",
+            color="k",
+            label="Rad Max Cut",
+        )
+
     if ylim is None:
         ymin = min(min(on), min(off))
         ymax = max(max(on), max(off))

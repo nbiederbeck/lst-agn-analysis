@@ -63,7 +63,7 @@ rule calc_theta2_per_obs:
     log:
         "build/logs/dl3/theta2_{run_id}.log",
     shell:
-        "python {input.script} -i build/dl3 -o {output} --obs-id {wildcards.run_id} --config {input.config}"
+        "python {input.script} -i build/dl3 -o {output} --obs-id {wildcards.run_id} --config {input.config} --log-file {log}"
 
 
 rule stack_theta2:
@@ -80,7 +80,7 @@ rule stack_theta2:
     log:
         "build/logs/dl3/theta2_stacked.log",
     shell:
-        "python {input.script} -o {output} --input-files {input.runs}"
+        "python {input.script} -o {output} --input-files {input.runs} --log-file {log}"
 
 
 rule calc_sensitivity:

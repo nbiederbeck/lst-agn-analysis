@@ -1,44 +1,26 @@
+import logging
 from argparse import ArgumentParser
 
 import numpy as np
 from astropy.io import fits
 from astropy.table import Table
-from gammapy.stats import WStatCountsStatistic
+from calc_theta2_per_obs import add_stats
 from gammapy.utils import pbar
+from log import setup_logging
 
 parser = ArgumentParser()
 parser.add_argument("-o", "--output", required=True)
 parser.add_argument("-i", "--input-files", required=True, nargs="+")
+parser.add_argument("--log-file")
+parser.add_argument("-v", "--verbose", action="store_true")
 args = parser.parse_args()
 
 pbar.SHOW_PROGRESS_BAR = True
 
 
-def create_empty_table(theta_squared_axis, position):
-    table = Table()
-    table["theta2_min"] = theta_squared_axis.edges_min
-    table["theta2_max"] = theta_squared_axis.edges_max
-    table["counts"] = 0
-    table["counts_off"] = 0
-    table["acceptance"] = 0.0
-    table["acceptance_off"] = 0.0
-    table.meta["NON_THR"] = 0
-    table.meta["NOFF_THR"] = 0
-    table.meta["ON_RA"] = position.icrs.ra
-    table.meta["ON_DEC"] = position.icrs.dec
-    return table
-
-
-def add_stats(table):
-    stat = WStatCountsStatistic(table["counts"], table["counts_off"], table["alpha"])
-    table["excess"] = stat.n_sig
-    table["sqrt_ts"] = stat.sqrt_ts
-    table["excess_errn"] = stat.compute_errn()
-    table["excess_errp"] = stat.compute_errp()
-    return table
-
-
-def main(input_files, output):  # noqa: PLR0915
+def main(input_files, output, log_file, verbose):  # noqa: PLR0915
+    setup_logging(logfile=log_file, verbose=verbose)
+    logging.getLogger("theta2-stacking")
     stacked_tables = []
     livetime_tot = 0
 
