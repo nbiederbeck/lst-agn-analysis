@@ -1,4 +1,4 @@
-# Version control of configuration files is done via submodules.
+# Version control of configuration files is done via their own repositories.
 configs/*
 
 *.h5
