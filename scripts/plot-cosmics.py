@@ -30,8 +30,8 @@ def main():
     ax.set_xlim(ax.get_xlim())
     ax.fill_between(
         ax.get_xlim(),
-        [config.cosmics_ll],
-        [config.cosmics_ul],
+        [config.cosmics.ll],
+        [config.cosmics.ul],
         alpha=0.1,
         label="Selection",
     )

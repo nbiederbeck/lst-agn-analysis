@@ -4,23 +4,26 @@ from argparse import ArgumentParser
 import numpy as np
 import pandas as pd
 from astropy import units as u
-from astropy.coordinates import AltAz, EarthLocation, SkyCoord
+from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_moon
 from astropy.table import Table
 from astropy.time import Time
 from config import Config
 from log import setup_logging
+from stats import bounds_std as bounds
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
 parser.add_argument("datacheck_path")
 parser.add_argument("--output-runlist", required=True)
 parser.add_argument("--output-datachecks", required=True)
+parser.add_argument("--output-config", required=True)
 parser.add_argument("-c", "--config", required=True)
 parser.add_argument("--log-file")
 parser.add_argument("-v", "--verbose", action="store_true")
 args = parser.parse_args()
 
 config = Config.parse_file(args.config)
+output_config = config.copy()
 
 
 def get_mask(x, le=np.inf, ge=-np.inf):
@@ -28,32 +31,6 @@ def get_mask(x, le=np.inf, ge=-np.inf):
         np.greater_equal(x, ge),
         np.less_equal(x, le),
     )
-
-
-def nmad(x):
-    """Normalized Median Absolute Difference.
-
-    Similar to standard deviation, but more robust to outliers [0], [1].
-
-    [0]: https://en.wikipedia.org/wiki/Robust_measures_of_scale
-    [1]: https://en.wikipedia.org/wiki/Median_absolute_deviation
-
-    """
-    return 1.4826 * np.median(np.abs(x - np.median(x)))
-
-
-def bounds_std(x, n_sig=1):
-    m = np.mean(x)
-    s = n_sig * np.std(x)
-
-    return (m - s, m + s)
-
-
-def bounds_mad(x, n_sig=1):
-    m = np.median(x)
-    s = n_sig * nmad(x)
-
-    return (m - s, m + s)
 
 
 if __name__ == "__main__":
@@ -134,11 +111,24 @@ if __name__ == "__main__":
 
     ped_std = runsummary["ped_charge_stddev"]
 
-    mask_pedestal_charge = get_mask(
-        ped_std,
-        ge=config.pedestal.ll,
-        le=config.pedestal.ul,
-    )
+    ped_ll = config.pedestal.ll
+    ped_ul = config.pedestal.ul
+
+    if config.pedestal.sigma is not None:
+        sigma = config.pedestal.sigma
+        log.info(
+            "Calculating pedestal cuts based on configured sigma interval "
+            "for pedestals with moon below horizon.",
+        )
+
+        altaz = AltAz(obstime=time, location=location)
+        moon = get_moon(time, location=location).transform_to(altaz)
+
+        ped_ll, ped_ul = bounds(ped_std[moon.alt.to_value(u.deg) < 0], sigma)
+
+        log.info("Calculated %f sigma interval is (%f, %f)", sigma, ped_ll, ped_ul)
+
+    mask_pedestal_charge = get_mask(ped_std, ge=ped_ll, le=ped_ul)
 
     runsummary["mask_pedestal_charge"] = mask_pedestal_charge & mask
     mask = runsummary["mask_pedestal_charge"] & mask
@@ -155,7 +145,22 @@ if __name__ == "__main__":
 
     cosmics_rate = runsummary["cosmics_rate"]
 
-    mask_cosmics = get_mask(cosmics_rate, ge=config.cosmics.ll, le=config.cosmics.ul)
+    cos_ll = config.cosmics.ll
+    cos_ul = config.cosmics.ul
+
+    if config.cosmics.sigma is not None:
+        sigma = config.cosmics.sigma
+        log.info(
+            "Calculating cosmics cuts based on "
+            "configured sigma interval "
+            "for runs selected before.",
+        )
+
+        cos_ll, cos_ul = bounds(cosmics_rate[mask], sigma)
+
+        log.info("Calculated %f sigma interval is (%f, %f)", sigma, cos_ll, cos_ul)
+
+    mask_cosmics = get_mask(cosmics_rate, ge=cos_ll, le=cos_ul)
 
     runsummary["mask_cosmics"] = mask_cosmics
 
@@ -172,15 +177,55 @@ if __name__ == "__main__":
     cosmics_rate_above10 = runsummary["cosmics_rate_above10"]
     cosmics_rate_above30 = runsummary["cosmics_rate_above30"]
 
+    cos_10_ll = config.cosmics_10.ll
+    cos_10_ul = config.cosmics_10.ul
+
+    if config.cosmics_10.sigma is not None:
+        sigma = config.cosmics_10.sigma
+        log.info(
+            "Calculating cosmics above 10 cuts based "
+            "on configured sigma interval "
+            "for runs selected before.",
+        )
+
+        cos_10_ll, cos_10_ul = bounds(cosmics_rate_above10[mask], sigma)
+
+        log.info(
+            "Calculated %f sigma interval is (%f, %f)",
+            sigma,
+            cos_10_ll,
+            cos_10_ul,
+        )
+
+    cos_30_ll = config.cosmics_30.ll
+    cos_30_ul = config.cosmics_30.ul
+
+    if config.cosmics_30.sigma is not None:
+        sigma = config.cosmics_30.sigma
+        log.info(
+            "Calculating cosmics above 30 cuts based "
+            "on configured sigma interval for "
+            "runs selected before.",
+        )
+
+        cos_30_ll, cos_30_ul = bounds(cosmics_rate_above30[mask], sigma)
+
+        log.info(
+            "Calculated %f sigma interval is (%f, %f)",
+            sigma,
+            cos_30_ll,
+            cos_30_ul,
+        )
+
     mask_above10 = get_mask(
         cosmics_rate_above10,
-        le=config.cosmics_10.ul,
-        ge=config.cosmics_10.ll,
+        le=cos_10_ul,
+        ge=cos_10_ll,
     )
     mask_above30 = get_mask(
         cosmics_rate_above30,
-        le=config.cosmics_30.ul,
-        ge=config.cosmics_30.ll,
+        le=cos_30_ul,
+        ge=cos_30_ll,
     )
 
     mask_above = mask_above10 & mask_above30
@@ -212,3 +257,10 @@ if __name__ == "__main__":
         path="data",
         compression=True,
     )
+
+    output_config.pedestal = {"ul": ped_ul, "ll": ped_ll, "sigma": None}
+    output_config.cosmics = {"ul": cos_ul, "ll": cos_ll, "sigma": None}
+    output_config.cosmics_10 = {"ul": cos_10_ul, "ll": cos_10_ll, "sigma": None}
+    output_config.cosmics_30 = {"ul": cos_30_ul, "ll": cos_30_ll, "sigma": None}
+    with open(args.output_config, "w") as f:
+        f.write(output_config.json())

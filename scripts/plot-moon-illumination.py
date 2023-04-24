@@ -36,8 +36,9 @@ def main():
 
     moon = get_moon(time, location=location).transform_to(altaz)
 
+    mask_altitude = moon.alt.to_value(u.deg) < 0
     moon_light = moon_illumination(time)
-    moon_light[moon.alt.to_value(u.deg) < 0] = 1
+    moon_light[mask_altitude] = 1
 
     fig, ax = plt.subplots()
 
@@ -55,8 +56,8 @@ def main():
 
     ax.fill_between(
         (0, 1),
-        [config.pedestal_ll],
-        [config.pedestal_ul],
+        [config.pedestal.ll],
+        [config.pedestal.ul],
         alpha=0.1,
         label="Selection",
         transform=ax.get_yaxis_transform(),
