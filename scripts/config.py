@@ -76,3 +76,8 @@ class Config(BaseModel):
     #                 f"{name}.sigma is not None, will calculate new limits.",
     #             )
     #     return values
+
+    class Config:
+        json_encoders = {
+            Time: lambda t: t.datetime,
+        }

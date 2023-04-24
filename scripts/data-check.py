@@ -262,8 +262,5 @@ if __name__ == "__main__":
     output_config.cosmics = {"ul": cos_ul, "ll": cos_ll, "sigma": None}
     output_config.cosmics_10 = {"ul": cos_10_ul, "ll": cos_10_ll, "sigma": None}
     output_config.cosmics_30 = {"ul": cos_30_ul, "ll": cos_30_ll, "sigma": None}
-    # not needed, but otherwise serialization fails
-    # TODO: add Time serialization to Config
-    output_config.time_start = output_config.time_stop = None
     with open(args.output_config, "w") as f:
         f.write(output_config.json())
