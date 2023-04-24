@@ -94,14 +94,14 @@ rule runlist:
 rule plot_data_selection:
     input:
         data="build/dl1-datachecks-masked.h5",
-        cuts="build/cuts-{name}.txt",
+        config="build/dl1-selection-cuts-config.json",
         script="scripts/plot-{name}.py",
     output:
         "build/{name}.pdf",
     conda:
         env
     shell:
-        "python {input.script} {input.data} -c {input.cuts} -o {output}"
+        "python {input.script} {input.data} -c {input.config} -o {output}"
 
 
 rule numbers:
