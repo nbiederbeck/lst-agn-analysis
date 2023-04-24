@@ -1,3 +1,5 @@
+import json
+import logging
 from argparse import ArgumentParser
 
 import astropy.units as u
@@ -5,15 +7,19 @@ import numpy as np
 from astropy.coordinates import Angle, SkyCoord
 from astropy.io import fits
 from astropy.table import Table
-from gammapy.analysis import Analysis, AnalysisConfig
+from gammapy.data import DataStore
 from gammapy.maps import MapAxis
 from gammapy.stats import WStatCountsStatistic
 from gammapy.utils import pbar
+from log import setup_logging
 
 parser = ArgumentParser()
-parser.add_argument("-c", "--config", required=True)
+parser.add_argument("-i", "--input-dir", required=True)
 parser.add_argument("-o", "--output", required=True)
 parser.add_argument("--obs-id", required=True)
+parser.add_argument("--log-file")
+parser.add_argument("-v", "--verbose", action="store_true")
+parser.add_argument("-c", "--config", required=True)
 args = parser.parse_args()
 
 pbar.SHOW_PROGRESS_BAR = True
@@ -25,13 +31,6 @@ def format_energy(e):
     else:
         e = e.to(u.GeV)
     return f"{e:.1f}"
-
-
-def on_region_to_skyframe(on_region):
-    if on_region.frame != "galactic":
-        raise ValueError(f"Currently unsupported frame {on_region.frame}.")
-
-    return SkyCoord(frame=on_region.frame, b=on_region.lat, l=on_region.lon)
 
 
 def create_empty_table(theta_squared_axis, position):
@@ -52,7 +51,13 @@ def create_empty_table(theta_squared_axis, position):
     return table
 
 
-def get_axes(config):
+def get_axes(obs):
+    """
+    Create axes for the theta table.
+    Energy axis is taken from the radmax table
+    in the observation in order to match cut from
+    the irfs.
+    """
     theta_squared_axis = MapAxis.from_bounds(
         0,
         0.2,
@@ -60,18 +65,7 @@ def get_axes(config):
         interp="lin",
         unit="deg2",
     )
-    # TODO: Is there an easier way to just get the axes, that is used in the analysis?
-    energy_axis = MapAxis.from_bounds(
-        name="energy",
-        lo_bnd=config.datasets.geom.axes.energy.min.value,
-        hi_bnd=config.datasets.geom.axes.energy.max.to_value(
-            config.datasets.geom.axes.energy.min.unit,
-        ),
-        nbin=config.datasets.geom.axes.energy.nbins,
-        unit=config.datasets.geom.axes.energy.min.unit,
-        interp="log",
-        node_type="edges",
-    )
+    energy_axis = obs.rad_max.axes["energy"]
     return theta_squared_axis, energy_axis
 
 
@@ -92,6 +86,7 @@ def stack_energies(tables):
 
 
 def add_stats(table):
+    "Calculate sqrt ts and excess."
     stat = WStatCountsStatistic(table["counts"], table["counts_off"], table["alpha"])
     table["excess"] = stat.n_sig
     table["sqrt_ts"] = stat.sqrt_ts
@@ -100,23 +95,20 @@ def add_stats(table):
     return table
 
 
-def main(config, output, obs_id):  # noqa: PLR0915
+def main(input_dir, output, obs_id, log_file, verbose, config):  # noqa: PLR0915 PLR0913
     """
     Basically this:
     https://docs.gammapy.org/1.0.1/_modules/gammapy/makers/utils.html#make_theta_squared_table
     for one observation and in bins of energy
     """
-    config = AnalysisConfig.read(config)
+    setup_logging(logfile=log_file, verbose=verbose)
+    log = logging.getLogger("theta2-per-obs")
+    ds = DataStore.from_dir(input_dir)
+    obs = ds.obs(int(obs_id), ["aeff"])
 
-    analysis = Analysis(config)
-    analysis.get_observations()
-    obs = analysis.observations[obs_id]
-
-    theta_squared_axis, energy_axis = get_axes(config)
+    theta_squared_axis, energy_axis = get_axes(obs)
     underflow = -np.inf * u.GeV
     overflow = np.inf * u.GeV
-    print(energy_axis.edges_max)
-    print(energy_axis.edges_max[-1])
     energy_lower = np.append(
         np.append(underflow, energy_axis.edges_min),
         energy_axis.edges_max[-1],
@@ -127,8 +119,13 @@ def main(config, output, obs_id):  # noqa: PLR0915
     )
 
     # Get on and off position
-    on_region = analysis.config.datasets.on_region
-    position = on_region_to_skyframe(on_region)
+    with open(config) as f:
+        config = json.load(f)
+    position = SkyCoord(
+        frame="icrs",
+        ra=config["source_ra_deg"] * u.deg,
+        dec=config["source_dec_deg"] * u.deg,
+    )
     pos_angle = obs.pointing_radec.position_angle(position)
     sep_angle = obs.pointing_radec.separation(position)
     position_off = obs.pointing_radec.directional_offset_by(
@@ -143,7 +140,7 @@ def main(config, output, obs_id):  # noqa: PLR0915
     hdulist = [fits.PrimaryHDU()]
     theta_tables = []
     for elow, ehigh in zip(energy_lower, energy_upper):
-        print("Calculating counts in range", elow, ehigh)
+        log.info("Calculating counts in range {elow} - {ehigh}")
         table = create_empty_table(theta_squared_axis, position)
         # Useful for plotting
         table.meta["ELOW"] = format_energy(elow)

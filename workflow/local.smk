@@ -12,32 +12,33 @@ analyses = [
     if x.name.startswith("analysis") and x.is_dir()
 ]
 
-stacked_plots = [
+dl3_plots = [
+    f"build/plots/{plot}_{run:05d}.pdf" for run in RUN_IDS for plot in ["theta2"]
+]
+# + ["build/plots/theta2_stacked.pdf"]
+
+
+# observation plots are arguably dl3
+dl4_plots = [
     f"build/plots/{analysis}/{plot}.pdf"
     for analysis in analyses
-    for plot in ["light_curve", "flux_points", "observation_plots", "theta2_stacked"]
-]
-
-per_obs_plots = [
-    f"build/plots/{analysis}/{plot}_{run}.pdf"
-    for analysis in analyses
-    for run in RUN_IDS
-    for plot in ["theta2"]
+    for plot in ["light_curve", "flux_points", "observation_plots"]
 ]
 
 
 rule plots:
     input:
-        stacked_plots,
-        per_obs_plots,
+        dl3_plots,
+        dl4_plots,
 
 
-rule plot:
+# Extra rule because there is one script generating many plots with differing names
+rule plot_theta:
     output:
-        "build/plots/{analysis}/{name}.pdf",
+        "build/plots/theta2_{runid}.pdf",
     input:
-        data="build/dl4/{analysis}/{name}.fits.gz",
-        script="scripts/plot_{name}.py",
+        data="build/dl3/theta2_{runid}.fits.gz",
+        script="scripts/plot_theta2.py",
         rc=os.environ.get("MATPLOTLIBRC", "configs/matplotlibrc"),
     conda:
         gammapy_env
@@ -45,13 +46,12 @@ rule plot:
         "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
-# Extra rule because there is one script generating many plots with differing names
-rule plot_theta:
+rule plot_dl4:
     output:
-        "build/plots/{analysis}/theta2_{runid}.pdf",
+        "build/plots/{analysis}/{name}.pdf",
     input:
-        data="build/dl4/{analysis}/theta2_{runid}.fits.gz",
-        script="scripts/plot_theta2.py",
+        data="build/dl4/{analysis}/{name}.fits.gz",
+        script="scripts/plot_{name}.py",
         rc=os.environ.get("MATPLOTLIBRC", "configs/matplotlibrc"),
     conda:
         gammapy_env

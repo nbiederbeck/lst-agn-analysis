@@ -21,8 +21,8 @@ irf_plots = [
 
 rule all:
     input:
-        per_obs_plots,
-        stacked_plots,
+        dl3_plots,
+        dl4_plots,
         irf_plots,
 
 
@@ -47,17 +47,13 @@ rule plot_irf:
         "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
-# Arguably theta^2 is dl3, not dl4, but it involves the gammapy config and
-# thus should be split up by analyses
-# Also this means we dont need an extra rule for plots from dl3
-# The 0 in the data wildcard is a hack, because I couldnt get the :05d to work
 rule calc_theta2_per_obs:
     output:
-        "build/dl4/{analysis}/theta2_{run_id}.fits.gz",
+        "build/dl3/theta2_{run_id}.fits.gz",
     input:
-        data="build/dl3/hdu-index.fits.gz",
-        config="configs/{analysis}/analysis.yaml",
+        data="build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
         script="scripts/calc_theta2_per_obs.py",
+        config=config,
     wildcard_constraints:
         run_id="\d+",
     resources:
@@ -65,24 +61,24 @@ rule calc_theta2_per_obs:
     conda:
         gammapy_env
     log:
-        "build/logs/dl4/{analysis}/theta2_{run_id}.log",
+        "build/logs/dl3/theta2_{run_id}.log",
     shell:
-        "python {input.script} -c {input.config} -o {output} --obs-id {wildcards.run_id}"
+        "python {input.script} -i build/dl3 -o {output} --obs-id {wildcards.run_id} --config {input.config}"
 
 
 rule stack_theta2:
     output:
-        "build/dl4/{analysis}/theta2_stacked.fits.gz",
+        "build/dl3/theta2_stacked.fits.gz",
     input:
         runs=expand(
-            "build/dl4/{{analysis}}/theta2_{run_id}.fits.gz",
+            "build/dl3/theta2_{run_id:05d}.fits.gz",
             run_id=RUN_IDS,
         ),
         script="scripts/stack_theta2.py",
     conda:
         gammapy_env
     log:
-        "build/logs/dl4/{analysis}/theta2_stacked.log",
+        "build/logs/dl3/theta2_stacked.log",
     shell:
         "python {input.script} -o {output} --input-files {input.runs}"
 
@@ -138,7 +134,8 @@ rule calc_flux_points:
         """
 
 
-ruleorder: plot_flux_points > plot
+ruleorder: plot_flux_points > plot_dl4 > plot_data_selection
+ruleorder: plot_theta > plot_dl4 > plot_data_selection
 
 
 rule plot_flux_points:
