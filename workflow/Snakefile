@@ -7,7 +7,12 @@ include: "rules/lst-data-selection.smk"
 import json
 from itertools import chain
 
-with open("configs/lst_agn.json", "r") as f:
+with open("build/runs.json", "r") as f:
+    runs = json.load(f)
+
+RUN_IDS = sorted(set(chain(*runs.values())))
+
+with open("../lst-analysis-config/lst_agn.json", "r") as f:
     config_agn = json.load(f)
 
 lstchain_env = config_agn.get("lstchain_enviroment", "lstchain-v0.9.13")
@@ -37,7 +42,7 @@ rule plot_irf:
     input:
         data="build/irf/calculated/irf_Run{run_id}.fits.gz",
         script="scripts/plot_irf_{irf}.py",
-        rc=os.environ.get("MATPLOTLIBRC", "configs/matplotlibrc"),
+        rc=os.environ.get("MATPLOTLIBRC", "../lst-analysis-config/matplotlibrc"),
     resources:
         mem_mb=1000,
         time=5,  # minutes
@@ -51,11 +56,9 @@ rule calc_theta2_per_obs:
     output:
         "build/dl3/theta2_{run_id}.fits.gz",
     input:
-        data="build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
-        script="scripts/calc_theta2_per_obs.py",
-        config=config,
-    wildcard_constraints:
-        run_id="\d+",
+        data="build/dl3/hdu-index.fits.gz",
+        config="../lst-analysis-config/{analysis}/analysis.yaml",
+        script="scripts/calc_theta2.py",
     resources:
         mem_mb=16000,
     conda:
@@ -104,7 +107,7 @@ rule calc_dl4_diagnostics:
         "build/dl4/{analysis}/dl4_diagnostics.fits.gz",
     input:
         data="build/dl4/{analysis}/datasets.fits.gz",
-        config="configs/{analysis}/analysis.yaml",
+        config="../lst-analysis-config/{analysis}/analysis.yaml",
         script="scripts/calc_dl4_diagnostics.py",
     resources:
         mem_mb=16000,
@@ -117,7 +120,7 @@ rule calc_dl4_diagnostics:
 rule calc_flux_points:
     input:
         data="build/dl4/{analysis}/datasets.fits.gz",
-        config="configs/{analysis}/analysis.yaml",
+        config="../lst-analysis-config/{analysis}/analysis.yaml",
         model="build/dl4/{analysis}/model-best-fit.yaml",
         script="scripts/calc_flux_points.py",
     output:
@@ -159,7 +162,7 @@ rule plot_flux_points:
 rule observation_plots:
     input:
         "build/dl3/hdu-index.fits.gz",
-        config="configs/{analysis}/analysis.yaml",
+        config="../lst-analysis-config/{analysis}/analysis.yaml",
         script="scripts/events.py",
     output:
         "build/plots/{analysis}/observation_plots.pdf",
@@ -178,7 +181,7 @@ rule observation_plots:
 rule calc_light_curve:
     input:
         model="build/dl4/{analysis}/model-best-fit.yaml",
-        config="configs/{analysis}/analysis.yaml",
+        config="../lst-analysis-config/{analysis}/analysis.yaml",
         dataset="build/dl4/{analysis}/datasets.fits.gz",
         script="scripts/calc_light_curve.py",
     output:
@@ -197,9 +200,9 @@ rule calc_light_curve:
 
 rule model_best_fit:
     input:
-        config="configs/{analysis}/analysis.yaml",
+        config="../lst-analysis-config/{analysis}/analysis.yaml",
         dataset="build/dl4/{analysis}/datasets.fits.gz",
-        model="configs/{analysis}/models.yaml",
+        model="../lst-analysis-config/{analysis}/models.yaml",
         script="scripts/fit-model.py",
     output:
         "build/dl4/{analysis}/model-best-fit.yaml",
@@ -218,7 +221,7 @@ rule model_best_fit:
 rule dataset:
     input:
         data="build/dl3/hdu-index.fits.gz",
-        config="configs/{analysis}/analysis.yaml",
+        config="../lst-analysis-config/{analysis}/analysis.yaml",
         script="scripts/write_datasets.py",
     params:
         n_off=config_agn["n_off_regions"],
@@ -262,7 +265,7 @@ rule dl3:
     input:
         data="build/dl2/dl2_LST-1.Run{run_id}.h5",
         irf="build/irf/calculated/irf_Run{run_id}.fits.gz",
-        config="configs/irf_tool_config.json",
+        config="../lst-analysis-config/irf_tool_config.json",
     resources:
         mem_mb="12G",
         time=30,
@@ -312,7 +315,7 @@ rule irf:
         "build/irf/calculated/irf_Run{run_id}.fits.gz",
     input:
         gammas="build/dl2/test/dl2_LST-1.Run{run_id}.h5",
-        config="configs/irf_tool_config.json",
+        config="../lst-analysis-config/irf_tool_config.json",
     conda:
         lstchain_env
     shell:

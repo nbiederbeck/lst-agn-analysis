@@ -27,10 +27,10 @@ Conceptually there are three main steps (You could define more, but these are st
 
 ## Prerequisites
 
-You need configuration files. Check [our example repository](https://github.com/nbiederbeck/lst-analysis-config) for how to use them, and clone them, e.g.
+You need configuration files. Check [our example repository](https://github.com/nbiederbeck/lst-analysis-config) for how to use them, and clone them next to this repo, e.g.
 
 ```
-git clone https://github.com/nbiederbeck/lst-analysis-config.git configs
+git clone https://github.com/nbiederbeck/lst-analysis-config.git ../lst-analysis-config
 ```
 
 You need snakemake installed. If you do not have that, you can create an enviroment with only snakemake like this:
