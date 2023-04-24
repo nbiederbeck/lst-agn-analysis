@@ -5,14 +5,18 @@ from astropy import units as u
 from astropy.coordinates import AltAz, EarthLocation, get_moon
 from astropy.table import Table
 from astropy.time import Time
+from config import Config
 from matplotlib import colors
 from matplotlib import pyplot as plt
+from stats import bounds_std
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
 parser.add_argument("-o", "--output_path", required=True)
-parser.add_argument("-c", "--cuts", required=True)
+parser.add_argument("-c", "--config", required=True)
 args = parser.parse_args()
+
+config = Config.parse_file(args.config)
 
 
 def main():
@@ -51,8 +55,11 @@ def main():
     ax.set_ylim(0)
     ax.set_xlim(-90, 80)
 
-    with open(args.cuts, "r") as f:
-        ped_ll, ped_ul = map(float, f.read().split(","))
+    ped_ll = config.pedestal_ll
+    ped_ul = config.pedestal_ul
+
+    if config.pedestal_sigma is not None:
+        ped_ll, ped_ul = bounds_std(ped_std[mask_altitude], config.pedestal_sigma)
 
     ax.fill_between(
         (0, 1),
