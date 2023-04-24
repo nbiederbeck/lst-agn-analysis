@@ -59,10 +59,10 @@ curl --user <username>:<password> \
 
 Adapt to your liking
 
-- Data selection: `configs/data-selection.json`
-- MCs to use, lstchain env and number of off regions: `configs/lst_agn.json` (gammapy does not handle energy-dependent cuts automatically, so we need to work around this)
-- IRFs (lstchain): `configs/irf_tool_config.json`
-- gammapy: `analysis.yaml` and `models.yaml` in subdirectories `configs/analysis_*`. All `analysis*` directories will be searched, so you might want to remove the standard ones first (DEV-TODO: Find a better solution for this). These all use the same dl3, but produce their own dl4
+- Data selection: `../lst-analysis-config/data-selection.json`
+- MCs to use, lstchain env and number of off regions: `../lst-analysis-config/lst_agn.json` (gammapy does not handle energy-dependent cuts automatically, so we need to work around this)
+- IRFs (lstchain): `../lst-analysis-config/irf_tool_config.json`
+- gammapy: `analysis.yaml` and `models.yaml` in subdirectories `../lst-analysis-config/analysis_*`. All `analysis*` directories will be searched, so you might want to remove the standard ones first (DEV-TODO: Find a better solution for this). These all use the same dl3, but produce their own dl4
 
 ## Run the analysis
 

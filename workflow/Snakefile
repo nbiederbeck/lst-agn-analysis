@@ -56,9 +56,11 @@ rule calc_theta2_per_obs:
     output:
         "build/dl3/theta2_{run_id}.fits.gz",
     input:
-        data="build/dl3/hdu-index.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
-        script="scripts/calc_theta2.py",
+        data="build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
+        script="scripts/calc_theta2_per_obs.py",
+        config=config,
+    wildcard_constraints:
+        run_id="\d+",
     resources:
         mem_mb=16000,
     conda:

@@ -38,7 +38,7 @@ rule plot_theta:
     input:
         data="build/dl3/theta2_{runid}.fits.gz",
         script="scripts/plot_theta2.py",
-        rc=os.environ.get("MATPLOTLIBRC", "configs/matplotlibrc"),
+        rc=os.environ.get("MATPLOTLIBRC", "../lst-analysis-config/matplotlibrc"),
     conda:
         gammapy_env
     shell:
