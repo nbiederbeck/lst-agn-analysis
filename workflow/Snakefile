@@ -7,10 +7,6 @@ include: "rules/lst-data-selection.smk"
 import json
 from itertools import chain
 
-with open("build/runs.json", "r") as f:
-    runs = json.load(f)
-
-RUN_IDS = sorted(set(chain(*runs.values())))
 
 with open("../lst-analysis-config/lst_agn.json", "r") as f:
     config_agn = json.load(f)
