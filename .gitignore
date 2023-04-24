@@ -1,3 +1,6 @@
+# Version control of configuration files is done via submodules.
+configs/*
+
 *.h5
 *.log
 
