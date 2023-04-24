@@ -1,19 +1,16 @@
+include: "local.smk"
+include: "rules/lst-data-selection.smk"
+
+
 # vim: ft=snakemake nofoldenable commentstring=#%s
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 import json
 from itertools import chain
 
-with open("build/runs.json", "r") as f:
-    runs = json.load(f)
-
-RUN_IDS = sorted(set(chain(*runs.values())))
-
 with open("configs/lst_agn.json", "r") as f:
     config_agn = json.load(f)
 
 lstchain_env = config_agn.get("lstchain_enviroment", "lstchain-v0.9.13")
-
-gammapy_env = "envs/agn-analysis.yml"
 
 irf_plots = [
     f"build/plots/irf/{irf}_Run{run_id:05d}.pdf"
@@ -22,16 +19,11 @@ irf_plots = [
 ]
 
 
-include: "local.smk"
-
-
 rule all:
     input:
-        plots,
+        dl3_plots,
+        dl4_plots,
         irf_plots,
-
-
-include: "rules/lst-data-selection.smk"
 
 
 localrules:
@@ -55,19 +47,40 @@ rule plot_irf:
         "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
-rule calc_theta2:
+rule calc_theta2_per_obs:
     output:
-        "build/dl4/{analysis}/theta2.fits.gz",
+        "build/dl3/theta2_{run_id}.fits.gz",
     input:
-        data="build/dl3/hdu-index.fits.gz",
-        config="configs/{analysis}/analysis.yaml",
-        script="scripts/calc_theta2.py",
+        data="build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
+        script="scripts/calc_theta2_per_obs.py",
+        config=config,
+    wildcard_constraints:
+        run_id="\d+",
     resources:
         mem_mb=16000,
     conda:
         gammapy_env
+    log:
+        "build/logs/dl3/theta2_{run_id}.log",
     shell:
-        "python {input.script} -c {input.config} -o {output}"
+        "python {input.script} -i build/dl3 -o {output} --obs-id {wildcards.run_id} --config {input.config} --log-file {log}"
+
+
+rule stack_theta2:
+    output:
+        "build/dl3/theta2_stacked.fits.gz",
+    input:
+        runs=expand(
+            "build/dl3/theta2_{run_id:05d}.fits.gz",
+            run_id=RUN_IDS,
+        ),
+        script="scripts/stack_theta2.py",
+    conda:
+        gammapy_env
+    log:
+        "build/logs/dl3/theta2_stacked.log",
+    shell:
+        "python {input.script} -o {output} --input-files {input.runs} --log-file {log}"
 
 
 rule calc_sensitivity:
@@ -121,7 +134,8 @@ rule calc_flux_points:
         """
 
 
-ruleorder: plot_flux_points > plot
+ruleorder: plot_flux_points > plot_dl4 > plot_data_selection
+ruleorder: plot_theta > plot_dl4 > plot_data_selection
 
 
 rule plot_flux_points:

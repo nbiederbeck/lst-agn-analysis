@@ -1,9 +1,17 @@
 from argparse import ArgumentParser
 
+import matplotlib
 import numpy as np
+from astropy.io import fits
 from astropy.table import Table
 from gammapy.maps import MapAxis
 from matplotlib import pyplot as plt
+
+if matplotlib.get_backend() == "pgf":
+    from matplotlib.backends.backend_pgf import PdfPages
+else:
+    from matplotlib.backends.backend_pdf import PdfPages
+
 
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
@@ -53,6 +61,14 @@ def plot_theta_squared_table(table, *, preliminary=False, ylim=None):
         label="Off",
     )
 
+    if table.meta["CUT"]:
+        ax.axvline(
+            table.meta["CUT"],
+            linestyle="dashed",
+            color="k",
+            label="Rad Max Cut",
+        )
+
     if ylim is None:
         ymin = min(min(on), min(off))
         ymax = max(max(on), max(off))
@@ -78,9 +94,20 @@ def plot_theta_squared_table(table, *, preliminary=False, ylim=None):
 
 
 def main(input_path, output, preliminary):
-    table = Table.read(input_path)
-    fig, ax = plot_theta_squared_table(table, preliminary=preliminary)
-    fig.savefig(output)
+    figures = []
+    with fits.open(input_path) as f:
+        # Skip primary
+        for hdu in f[1:]:
+            table = Table.read(hdu)
+            fig, ax = plot_theta_squared_table(table, preliminary=preliminary)
+            low = table.meta["ELOW"]
+            high = table.meta["EHI"]
+            ax.set_title(f"{low} - {high}")
+            figures.append(fig)
+
+    with PdfPages(output) as pdf:
+        for fig in figures:
+            pdf.savefig(fig)
 
 
 if __name__ == "__main__":
