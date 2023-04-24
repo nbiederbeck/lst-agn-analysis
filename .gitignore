@@ -1,5 +1,5 @@
 # Version control of configuration files is done via their own repositories.
-configs/*
+configs
 
 *.h5
 *.log
