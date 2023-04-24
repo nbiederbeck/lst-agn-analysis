@@ -13,15 +13,6 @@ from gammapy.stats import WStatCountsStatistic
 from gammapy.utils import pbar
 from log import setup_logging
 
-parser = ArgumentParser()
-parser.add_argument("-i", "--input-dir", required=True)
-parser.add_argument("-o", "--output", required=True)
-parser.add_argument("--obs-id", required=True)
-parser.add_argument("--log-file")
-parser.add_argument("-v", "--verbose", action="store_true")
-parser.add_argument("-c", "--config", required=True)
-args = parser.parse_args()
-
 pbar.SHOW_PROGRESS_BAR = True
 
 
@@ -133,7 +124,7 @@ def main(input_dir, output, obs_id, log_file, verbose, config):  # noqa: PLR0915
         sep_angle,
     )
 
-    # Distance to an and off positions
+    # Distance to on and off positions
     separation = position.separation(obs.events.radec)
     separation_off = position_off.separation(obs.events.radec)
 
@@ -171,4 +162,13 @@ def main(input_dir, output, obs_id, log_file, verbose, config):  # noqa: PLR0915
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--input-dir", required=True)
+    parser.add_argument("-o", "--output", required=True)
+    parser.add_argument("--obs-id", required=True)
+    parser.add_argument("--log-file")
+    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("-c", "--config", required=True)
+    args = parser.parse_args()
+
     main(**vars(args))

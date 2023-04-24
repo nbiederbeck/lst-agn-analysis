@@ -105,12 +105,9 @@ def main(input_path, output, preliminary):
             ax.set_title(f"{low} - {high}")
             figures.append(fig)
 
-    if output is None:
-        plt.show()
-    else:
-        with PdfPages(output) as pdf:
-            for fig in figures:
-                pdf.savefig(fig)
+    with PdfPages(output) as pdf:
+        for fig in figures:
+            pdf.savefig(fig)
 
 
 if __name__ == "__main__":
