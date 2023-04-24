@@ -4,7 +4,6 @@ from astropy.table import Table
 from astropy.time import Time
 from config import Config
 from matplotlib import pyplot as plt
-from stats import bounds_std
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
@@ -23,12 +22,6 @@ def main():
 
     cosmics_rate = runsummary["cosmics_rate"]
 
-    cos_ll = config.cosmics_ll
-    cos_ul = config.cosmics_ul
-
-    if config.cosmics_sigma is not None:
-        cos_ll, cos_ul = bounds_std(cosmics_rate, config.cosmics_sigma)
-
     ax.plot(
         time.datetime,
         cosmics_rate,
@@ -37,8 +30,8 @@ def main():
     ax.set_xlim(ax.get_xlim())
     ax.fill_between(
         ax.get_xlim(),
-        [cos_ll],
-        [cos_ul],
+        [config.cosmics.ll],
+        [config.cosmics.ul],
         alpha=0.1,
         label="Selection",
     )

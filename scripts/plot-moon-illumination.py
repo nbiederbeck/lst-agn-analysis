@@ -8,7 +8,6 @@ from astropy.time import Time
 from config import Config
 from matplotlib import colors
 from matplotlib import pyplot as plt
-from stats import bounds_std
 
 parser = ArgumentParser()
 parser.add_argument("input_path")
@@ -55,16 +54,10 @@ def main():
     ax.set_ylim(0)
     ax.set_xlim(-90, 80)
 
-    ped_ll = config.pedestal_ll
-    ped_ul = config.pedestal_ul
-
-    if config.pedestal_sigma is not None:
-        ped_ll, ped_ul = bounds_std(ped_std[mask_altitude], config.pedestal_sigma)
-
     ax.fill_between(
         (0, 1),
-        [ped_ll],
-        [ped_ul],
+        [config.pedestal.ll],
+        [config.pedestal.ul],
         alpha=0.1,
         label="Selection",
         transform=ax.get_yaxis_transform(),
