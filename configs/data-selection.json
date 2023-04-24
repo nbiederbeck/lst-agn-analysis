@@ -6,6 +6,6 @@
   "cosmics": { "ul": 7.8e3, "ll": 2.6e3, "sigma": 2 },
   "cosmics_10": { "ul": 37.6, "ll": 17.7, "sigma": 2 },
   "cosmics_30": { "ul": 5.9, "ll": 1.6, "sigma": 2 },
-  "time_start": null,
+  "time_start": "2020-12-12",
   "time_stop": "2022-05-24"
 }
