@@ -1,16 +1,13 @@
 SNAKEMAKE_PROFILE?=slurm
 PROFILE=--profile=workflow/profiles/$(SNAKEMAKE_PROFILE)
 
-all: link
+all: build/all-linked.txt
 	snakemake $(PROFILE)
-
-link: build/all-linked.txt
 
 build/all-linked.txt: build/runs.json
 	snakemake $@ \
 		--use-conda \
-		--cores=1 \
-		--snakefile workflow/rules/data-selection.smk
+		--cores=1
 
 build/runs.json: FORCE
 	snakemake $@ \
