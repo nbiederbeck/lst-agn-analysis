@@ -1,7 +1,3 @@
-# vim: ft=snakemake nofoldenable commentstring=#%s
-# https://github.com/snakemake/snakemake/tree/main/misc/vim
-
-
 include: "definitions.smk"
 
 
@@ -11,6 +7,13 @@ localrules:
     merge_datachecks,
     run_ids,
     data_check,
+
+
+rule runlist:
+    output:
+        "runlist.html",
+    shell:
+        "echo 'Provide the file {output} as explained in README.md'"
 
 
 rule select_datasets:
@@ -37,19 +40,6 @@ rule merge_datachecks:
         data_selection_env
     shell:
         "python {input.script} {input.data} {output.output} --log-file={output.log}"
-
-
-rule run_ids:
-    output:
-        "build/runs.json",
-    input:
-        data="build/runlist-checked.csv",
-        config=data_selection_config_path,
-        script="scripts/create-night-run-list.py",
-    conda:
-        data_selection_env
-    shell:
-        "python {input.script} {input.data} {output} -c {input.config}"
 
 
 rule data_check:
@@ -79,11 +69,17 @@ rule data_check:
         "
 
 
-rule runlist:
+rule run_ids:
     output:
-        "runlist.html",
+        "build/runs.json",
+    input:
+        data="build/runlist-checked.csv",
+        config=data_selection_config_path,
+        script="scripts/create-night-run-list.py",
+    conda:
+        data_selection_env
     shell:
-        "echo 'Provide the file {output} as explained in README.md'"
+        "python {input.script} {input.data} {output} -c {input.config}"
 
 
 rule link_paths:
