@@ -27,6 +27,12 @@ Conceptually there are three main steps (You could define more, but these are st
 
 ## Prerequisites
 
+You need configuration files. Check [our example repository](https://github.com/nbiederbeck/lst-analysis-config) for how to use them, and clone them next to this repo, e.g.
+
+```
+git clone https://github.com/nbiederbeck/lst-analysis-config.git ../lst-analysis-config
+```
+
 You need snakemake installed. If you do not have that, you can create an enviroment with only snakemake like this:
 
 ```
@@ -53,10 +59,10 @@ curl --user <username>:<password> \
 
 Adapt to your liking
 
-- Data selection: `configs/data-selection.json`
-- MCs to use, lstchain env and number of off regions: `configs/lst_agn.json` (gammapy does not handle energy-dependent cuts automatically, so we need to work around this)
-- IRFs (lstchain): `configs/irf_tool_config.json`
-- gammapy: `analysis.yaml` and `models.yaml` in subdirectories `configs/analysis_*`. All `analysis*` directories will be searched, so you might want to remove the standard ones first (DEV-TODO: Find a better solution for this). These all use the same dl3, but produce their own dl4
+- Data selection: `../lst-analysis-config/data-selection.json`
+- MCs to use, lstchain env and number of off regions: `../lst-analysis-config/lst_agn.json` (gammapy does not handle energy-dependent cuts automatically, so we need to work around this)
+- IRFs (lstchain): `../lst-analysis-config/irf_tool_config.json`
+- gammapy: `analysis.yaml` and `models.yaml` in subdirectories `../lst-analysis-config/analysis_*`. All `analysis*` directories will be searched, so you might want to remove the standard ones first (DEV-TODO: Find a better solution for this). These all use the same dl3, but produce their own dl4
 
 ## Run the analysis
 

@@ -2,7 +2,7 @@ localrules:
     link_paths,
 
 
-with open("configs/lst_agn.json", "r") as f:
+with open("../lst-analysis-config/lst_agn.json", "r") as f:
     config = json.load(f)
 
 env = config.get("lstchain_enviroment", "lstchain-v0.9.13")

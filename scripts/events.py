@@ -13,10 +13,7 @@ args = parser.parse_args()
 
 
 def on_region_to_skyframe(on_region):
-    if on_region.frame != "galactic":
-        raise ValueError(f"Currently unsupported frame {on_region.frame}.")
-
-    return SkyCoord(frame=on_region.frame, b=on_region.lat, l=on_region.lon)
+    return SkyCoord(on_region.lon, on_region.lat, frame=on_region.frame)
 
 
 def main(config, output):
@@ -25,7 +22,10 @@ def main(config, output):
     analysis = Analysis(config)
     analysis.get_observations()
 
-    events = EventList.from_stack([obs.events for obs in analysis.observations])
+    events = EventList.from_stack(
+        [obs.events for obs in analysis.observations],
+        metadata_conflicts="silent",
+    )
 
     center = on_region_to_skyframe(analysis.config.datasets.on_region)
 

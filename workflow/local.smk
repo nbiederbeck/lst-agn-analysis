@@ -8,7 +8,7 @@ with open("build/runs.json", "r") as f:
 RUN_IDS = sorted(set(chain(*runs.values())))
 analyses = [
     x.name
-    for x in Path("configs").iterdir()
+    for x in Path("../lst-analysis-config").iterdir()
     if x.name.startswith("analysis") and x.is_dir()
 ]
 
@@ -38,7 +38,7 @@ rule plot_theta:
     input:
         data="build/dl3/theta2_{runid}.fits.gz",
         script="scripts/plot_theta2.py",
-        rc=os.environ.get("MATPLOTLIBRC", "configs/matplotlibrc"),
+        rc=os.environ.get("MATPLOTLIBRC", "../lst-analysis-config/matplotlibrc"),
     conda:
         gammapy_env
     shell:
@@ -51,7 +51,7 @@ rule plot_dl4:
     input:
         data="build/dl4/{analysis}/{name}.fits.gz",
         script="scripts/plot_{name}.py",
-        rc=os.environ.get("MATPLOTLIBRC", "configs/matplotlibrc"),
+        rc=os.environ.get("MATPLOTLIBRC", "../lst-analysis-config/matplotlibrc"),
     conda:
         gammapy_env
     shell:
