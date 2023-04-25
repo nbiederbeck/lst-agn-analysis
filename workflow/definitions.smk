@@ -10,8 +10,12 @@ with open("../lst-analysis-config/lst_agn.json", "r") as f:
 with open("build/runs.json", "r") as f:
     runs = json.load(f)
 
-gammapy_env = "envs/agn-analysis.yml"
+gammapy_env = Path("workflow/envs/agn-analysis.yml").resolve()
 lstchain_env = config_agn.get("lstchain_enviroment", "lstchain-v0.9.13")
+
+config_dir = Path("../lst-analysis-config")
+irf_config_path = (config_dir / "irf_tool_config.json").resolve()
+data_selection_config_path = (config_dir / "data-selection.json").resolve()
 
 PRODUCTION = config_agn["production"]
 DECLINATION = config_agn["declination"]

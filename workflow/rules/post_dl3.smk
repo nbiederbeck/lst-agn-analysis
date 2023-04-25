@@ -6,7 +6,7 @@ rule calc_theta2_per_obs:
     input:
         data="build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
         script="scripts/calc_theta2_per_obs.py",
-        config=config_agn,
+        config=data_selection_config_path,
         index="build/dl3/hdu-index.fits.gz",
     wildcard_constraints:
         run_id="\d+",
@@ -58,7 +58,7 @@ rule calc_dl4_diagnostics:
         "build/dl4/{analysis}/dl4_diagnostics.fits.gz",
     input:
         data="build/dl4/{analysis}/datasets.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
+        config=config_dir / "{analysis}/analysis.yaml",
         script="scripts/calc_dl4_diagnostics.py",
     resources:
         mem_mb=16000,
@@ -71,7 +71,7 @@ rule calc_dl4_diagnostics:
 rule calc_flux_points:
     input:
         data="build/dl4/{analysis}/datasets.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
+        config=config_dir / "{analysis}/analysis.yaml",
         model="build/dl4/{analysis}/model-best-fit.yaml",
         script="scripts/calc_flux_points.py",
     output:
@@ -109,7 +109,7 @@ rule plot_flux_points:
 rule observation_plots:
     input:
         "build/dl3/hdu-index.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
+        config=config_dir / "{analysis}/analysis.yaml",
         script="scripts/events.py",
     output:
         "build/plots/{analysis}/observation_plots.pdf",
@@ -128,7 +128,7 @@ rule observation_plots:
 rule calc_light_curve:
     input:
         model="build/dl4/{analysis}/model-best-fit.yaml",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
+        config=config_dir / "{analysis}/analysis.yaml",
         dataset="build/dl4/{analysis}/datasets.fits.gz",
         script="scripts/calc_light_curve.py",
     output:
@@ -147,9 +147,9 @@ rule calc_light_curve:
 
 rule model_best_fit:
     input:
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
+        config=config_dir / "{analysis}/analysis.yaml",
         dataset="build/dl4/{analysis}/datasets.fits.gz",
-        model="../lst-analysis-config/{analysis}/models.yaml",
+        model=config_dir / "{analysis}/models.yaml",
         script="scripts/fit-model.py",
     output:
         "build/dl4/{analysis}/model-best-fit.yaml",
@@ -168,7 +168,7 @@ rule model_best_fit:
 rule dataset:
     input:
         data="build/dl3/hdu-index.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
+        config=config_dir / "{analysis}/analysis.yaml",
         script="scripts/write_datasets.py",
     params:
         n_off=config_agn["n_off_regions"],
@@ -182,3 +182,30 @@ rule dataset:
         gammapy_env
     shell:
         "python {input.script} -j{resources.cpus} -c {input.config} -o {output} --n-off-regions={params.n_off}"
+
+
+# Extra rule because there is one script generating many plots with differing names
+rule plot_theta:
+    output:
+        "build/plots/theta2/{runid}.pdf",
+    input:
+        data="build/dl3/theta2_{runid}.fits.gz",
+        script="scripts/plot_theta2.py",
+        rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
+    conda:
+        gammapy_env
+    shell:
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
+
+
+rule plot_dl4:
+    output:
+        "build/plots/{analysis}/{name}.pdf",
+    input:
+        data="build/dl4/{analysis}/{name}.fits.gz",
+        script="scripts/plot_{name}.py",
+        rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
+    conda:
+        gammapy_env
+    shell:
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
