@@ -1,6 +1,9 @@
 include: "definitions.smk"
 include: "local.smk"
-include: "rules/lst-data-selection.smk"
+
+
+ruleorder: plot_flux_points > plot_dl4
+ruleorder: plot_theta > plot_dl4
 
 
 rule all:
@@ -92,7 +95,7 @@ rule calc_theta2_per_obs:
     input:
         data="build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
         script="scripts/calc_theta2_per_obs.py",
-        config=config,
+        config=config_agn,
         index="build/dl3/hdu-index.fits.gz",
     wildcard_constraints:
         run_id="\d+",
@@ -172,10 +175,6 @@ rule calc_flux_points:
             --best-model-path {input.model} \
             -o {output}
         """
-
-
-ruleorder: plot_flux_points > plot_dl4 > plot_data_selection
-ruleorder: plot_theta > plot_dl4 > plot_data_selection
 
 
 rule plot_flux_points:
