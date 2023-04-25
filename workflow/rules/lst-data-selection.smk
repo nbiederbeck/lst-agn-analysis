@@ -11,8 +11,6 @@ localrules:
     merge_datachecks,
     run_ids,
     data_check,
-    plot_data_selection,
-    numbers,
 
 
 rule select_datasets:
@@ -88,29 +86,22 @@ rule runlist:
         "echo 'Provide the file {output} as explained in README.md'"
 
 
-rule plot_data_selection:
-    input:
-        data="build/dl1-datachecks-masked.h5",
-        config="build/dl1-selection-cuts-config.json",
-        script="scripts/plot-{name}.py",
+rule link_paths:
     output:
-        "build/{name}.pdf",
+        "build/all-linked.txt",
     conda:
-        env
-    shell:
-        "python {input.script} {input.data} -c {input.config} -o {output}"
-
-
-rule numbers:
+        lstchain_env
     input:
-        data="build/dl1-datachecks-masked.h5",
-        script="scripts/extract-numbers.py",
-    output:
-        "build/runselection-01-observing-source.tex",
-        "build/runselection-02-ok-during-timeframe.tex",
-        "build/runselection-03-pedestal-charge.tex",
-        "build/runselection-04-cosmics.tex",
-    conda:
-        env
+        runs="build/runs.json",
+        datacheck="build/dl1-datachecks-masked.h5",
+        script="link-paths.py",
+    params:
+        production=PRODUCTION,
+        declination=DECLINATION,
     shell:
-        "python {input.script} {input.data} build"
+        "python {input.script} \
+        --runs {input.runs} \
+        --prod {params.production} \
+        --dec {params.declination} \
+        --runsummary {input.datacheck} \
+        -o {output}"

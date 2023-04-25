@@ -4,11 +4,6 @@ PROFILE=--profile=workflow/profiles/$(SNAKEMAKE_PROFILE)
 all: build/all-linked.txt
 	snakemake $(PROFILE)
 
-build/all-linked.txt: build/runs.json
-	snakemake $@ \
-		--use-conda \
-		--cores=1
-
 build/runs.json: FORCE
 	snakemake $@ \
 		--use-conda \
