@@ -1,24 +1,6 @@
+include: "definitions.smk"
 include: "local.smk"
 include: "rules/lst-data-selection.smk"
-
-
-# vim: ft=snakemake nofoldenable commentstring=#%s
-# https://github.com/snakemake/snakemake/tree/main/misc/vim
-import json
-from itertools import chain
-
-with open("../lst-analysis-config/lst_agn.json", "r") as f:
-    config_agn = json.load(f)
-
-lstchain_env = config_agn.get("lstchain_enviroment", "lstchain-v0.9.13")
-PRODUCTION = config_agn["production"]
-DECLINATION = config_agn["declination"]
-
-irf_plots = [
-    f"build/plots/irf/{irf}_Run{run_id:05d}.pdf"
-    for irf in ("aeff", "edisp", "gh_cut", "radmax_cut")
-    for run_id in RUN_IDS
-]
 
 
 rule all:
