@@ -1,8 +1,8 @@
 # vim: ft=snakemake nofoldenable commentstring=#%s
 # https://github.com/snakemake/snakemake/tree/main/misc/vim
 
-env = "../envs/data-selection.yml"
-config = "../lst-analysis-config/data-selection.json"
+
+include: "definitions.smk"
 
 
 localrules:
@@ -16,12 +16,12 @@ localrules:
 rule select_datasets:
     input:
         data="runlist.html",
-        config=config,
+        config=data_selection_config_path,
         script="scripts/select-data.py",
     output:
         "build/runlist.csv",
     conda:
-        env
+        data_selection_env
     shell:
         "python {input.script} {input.data} {output} -c {input.config}"
 
@@ -34,7 +34,7 @@ rule merge_datachecks:
         output="build/dl1-datachecks-merged.h5",
         log="build/merge-datachecks.log",
     conda:
-        env
+        data_selection_env
     shell:
         "python {input.script} {input.data} {output.output} --log-file={output.log}"
 
@@ -44,10 +44,10 @@ rule run_ids:
         "build/runs.json",
     input:
         data="build/runlist-checked.csv",
-        config=config,
+        config=data_selection_config_path,
         script="scripts/create-night-run-list.py",
     conda:
-        env
+        data_selection_env
     shell:
         "python {input.script} {input.data} {output} -c {input.config}"
 
@@ -56,7 +56,7 @@ rule data_check:
     input:
         runlist="build/runlist.csv",
         datachecks="build/dl1-datachecks-merged.h5",
-        config=config,
+        config=data_selection_config_path,
         script="scripts/data-check.py",
     output:
         runlist="build/runlist-checked.csv",
@@ -64,7 +64,7 @@ rule data_check:
         log="build/datacheck.log",
         config="build/dl1-selection-cuts-config.json",
     conda:
-        env
+        data_selection_env
     shell:
         "\
         python \
@@ -90,7 +90,7 @@ rule link_paths:
     output:
         "build/all-linked.txt",
     conda:
-        lstchain_env
+        data_selection_env
     input:
         runs="build/runs.json",
         datacheck="build/dl1-datachecks-masked.h5",

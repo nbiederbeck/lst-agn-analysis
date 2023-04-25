@@ -39,7 +39,7 @@ rule plot_data_selection:
     output:
         "build/{name}.pdf",
     conda:
-        env
+        data_selection_env
     shell:
         "python {input.script} {input.data} -c {input.config} -o {output}"
 
@@ -54,6 +54,6 @@ rule numbers:
         "build/runselection-03-pedestal-charge.tex",
         "build/runselection-04-cosmics.tex",
     conda:
-        env
+        data_selection_env
     shell:
         "python {input.script} {input.data} build"
