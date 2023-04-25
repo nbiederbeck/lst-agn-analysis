@@ -37,7 +37,7 @@ def main(config, output, n_off_regions, n_jobs):
     # Define things for the dataset maker step
     # point sky region > circle sky region for energy dependent cuts
     on_region = analysis.config.datasets.on_region
-    target_position = SkyCoord(frame=on_region.frame, b=on_region.lat, l=on_region.lon)
+    target_position = SkyCoord(on_region.lon, on_region.lat, frame=on_region.frame)
 
     on_region = PointSkyRegion(target_position)
     energy_axis_config = config.datasets.geom.axes.energy
