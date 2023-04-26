@@ -1,22 +1,43 @@
-include: "local.smk"
-include: "rules/lst-data-selection.smk"
-
-
-# vim: ft=snakemake nofoldenable commentstring=#%s
-# https://github.com/snakemake/snakemake/tree/main/misc/vim
 import json
 from itertools import chain
 
 
-with open("../lst-analysis-config/lst_agn.json", "r") as f:
-    config_agn = json.load(f)
+include: "definitions.smk"
 
-lstchain_env = config_agn.get("lstchain_enviroment", "lstchain-v0.9.13")
+
+with open(build_dir / "runs.json", "r") as f:
+    runs = json.load(f)
+
+RUN_IDS = sorted(set(chain(*runs.values())))
+
+
+include: "rules/run_selection.smk"
+include: "rules/create_dl3.smk"
+include: "rules/post_dl3.smk"
+
 
 irf_plots = [
-    f"build/plots/irf/{irf}_Run{run_id:05d}.pdf"
+    build_dir / f"plots/irf/{irf}_Run{run_id}.pdf"
     for irf in ("aeff", "edisp", "gh_cut", "radmax_cut")
     for run_id in RUN_IDS
+]
+
+analyses = [
+    x.name for x in config_dir.iterdir() if x.name.startswith("analysis") and x.is_dir()
+]
+
+dl3_plots = [
+    build_dir / f"plots/{plot}/{run_id}.pdf"
+    for run_id in RUN_IDS
+    for plot in ["theta2"]
+] + [build_dir / "plots/theta2/stacked.pdf"]
+
+
+# observation plots are arguably dl3
+dl4_plots = [
+    build_dir / f"plots/{analysis}/{plot}.pdf"
+    for analysis in analyses
+    for plot in ["light_curve", "flux_points", "observation_plots"]
 ]
 
 
@@ -30,297 +51,4 @@ rule all:
 localrules:
     irf,
     plot_irf,
-
-
-rule plot_irf:
-    output:
-        "build/plots/irf/{irf}_Run{run_id}.pdf",
-    input:
-        data="build/irf/calculated/irf_Run{run_id}.fits.gz",
-        script="scripts/plot_irf_{irf}.py",
-        rc=os.environ.get("MATPLOTLIBRC", "../lst-analysis-config/matplotlibrc"),
-    resources:
-        mem_mb=1000,
-        time=5,  # minutes
-    conda:
-        gammapy_env
-    shell:
-        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
-
-
-rule calc_theta2_per_obs:
-    output:
-        "build/dl3/theta2_{run_id}.fits.gz",
-    input:
-        data="build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
-        script="scripts/calc_theta2_per_obs.py",
-        config=config,
-        index="build/dl3/hdu-index.fits.gz",
-    wildcard_constraints:
-        run_id="\d+",
-    resources:
-        mem_mb=16000,
-    conda:
-        gammapy_env
-    log:
-        "build/logs/dl3/theta2_{run_id}.log",
-    shell:
-        "python {input.script} -i build/dl3 -o {output} --obs-id {wildcards.run_id} --config {input.config} --log-file {log}"
-
-
-rule stack_theta2:
-    output:
-        "build/dl3/theta2_stacked.fits.gz",
-    input:
-        runs=expand(
-            "build/dl3/theta2_{run_id:05d}.fits.gz",
-            run_id=RUN_IDS,
-        ),
-        script="scripts/stack_theta2.py",
-    conda:
-        gammapy_env
-    log:
-        "build/logs/dl3/theta2_stacked.log",
-    shell:
-        "python {input.script} -o {output} --input-files {input.runs} --log-file {log}"
-
-
-rule calc_sensitivity:
-    input:
-        data="build/dl4/{analysis}/datasets.fits.gz",
-        script="scripts/calc_sensitivity.py",
-    output:
-        "build/dl4/{analysis}/sensitivity.fits.gz",
-    conda:
-        gammapy_env
-    shell:
-        """
-        python {input.script} \
-            --dataset-path {input.data} \
-            -o {output}
-        """
-
-
-rule calc_dl4_diagnostics:
-    output:
-        "build/dl4/{analysis}/dl4_diagnostics.fits.gz",
-    input:
-        data="build/dl4/{analysis}/datasets.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
-        script="scripts/calc_dl4_diagnostics.py",
-    resources:
-        mem_mb=16000,
-    conda:
-        gammapy_env
-    shell:
-        "python {input.script} -c {input.config} -o {output} --dataset-path {input.data}"
-
-
-rule calc_flux_points:
-    input:
-        data="build/dl4/{analysis}/datasets.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
-        model="build/dl4/{analysis}/model-best-fit.yaml",
-        script="scripts/calc_flux_points.py",
-    output:
-        "build/dl4/{analysis}/flux_points.fits.gz",
-    conda:
-        gammapy_env
-    shell:
-        """
-        python {input.script} \
-            -c {input.config} \
-            --dataset-path {input.data} \
-            --best-model-path {input.model} \
-            -o {output}
-        """
-
-
-ruleorder: plot_flux_points > plot_dl4 > plot_data_selection
-ruleorder: plot_theta > plot_dl4 > plot_data_selection
-
-
-rule plot_flux_points:
-    input:
-        data="build/dl4/{analysis}/flux_points.fits.gz",
-        model="build/dl4/{analysis}/model-best-fit.yaml",
-        script="scripts/plot_flux_points.py",
-    output:
-        "build/plots/{analysis}/flux_points.pdf",
-    conda:
-        gammapy_env
-    shell:
-        """
-        python {input.script} \
-            -i {input.data} \
-            --best-model-path {input.model} \
-            -o {output}
-        """
-
-
-rule observation_plots:
-    input:
-        "build/dl3/hdu-index.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
-        script="scripts/events.py",
-    output:
-        "build/plots/{analysis}/observation_plots.pdf",
-    resources:
-        mem_mb=64000,
-    conda:
-        gammapy_env
-    shell:
-        """
-        python {input.script} \
-            -c {input.config} \
-            -o {output} \
-        """
-
-
-rule calc_light_curve:
-    input:
-        model="build/dl4/{analysis}/model-best-fit.yaml",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
-        dataset="build/dl4/{analysis}/datasets.fits.gz",
-        script="scripts/calc_light_curve.py",
-    output:
-        "build/dl4/{analysis}/light_curve.fits.gz",
-    conda:
-        gammapy_env
-    shell:
-        """
-        python {input.script} \
-            -c {input.config} \
-            --dataset-path {input.dataset} \
-            --best-model-path {input.model} \
-            -o {output} \
-        """
-
-
-rule model_best_fit:
-    input:
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
-        dataset="build/dl4/{analysis}/datasets.fits.gz",
-        model="../lst-analysis-config/{analysis}/models.yaml",
-        script="scripts/fit-model.py",
-    output:
-        "build/dl4/{analysis}/model-best-fit.yaml",
-    conda:
-        gammapy_env
-    shell:
-        """
-        python {input.script} \
-            -c {input.config} \
-            --dataset-path {input.dataset} \
-            --model-config {input.model} \
-            -o {output} \
-        """
-
-
-rule dataset:
-    input:
-        data="build/dl3/hdu-index.fits.gz",
-        config="../lst-analysis-config/{analysis}/analysis.yaml",
-        script="scripts/write_datasets.py",
-    params:
-        n_off=config_agn["n_off_regions"],
-    output:
-        "build/dl4/{analysis}/datasets.fits.gz",
-    resources:
-        cpus=16,
-        mem_mb="32G",
-        time=30,  # minutes
-    conda:
-        gammapy_env
-    shell:
-        "python {input.script} -j{resources.cpus} -c {input.config} -o {output} --n-off-regions={params.n_off}"
-
-
-rule dl3_hdu_index:
-    conda:
-        lstchain_env
-    output:
-        "build/dl3/hdu-index.fits.gz",
-    input:
-        expand(
-            "build/dl3/dl3_LST-1.Run{run_id:05d}.fits.gz",
-            run_id=RUN_IDS,
-        ),
-    resources:
-        time=15,
-    shell:
-        """
-        lstchain_create_dl3_index_files  \
-            --input-dl3-dir build/dl3/  \
-            --output-index-path build/dl3/  \
-            --file-pattern 'dl3_*.fits.gz'  \
-            --overwrite \
-        """
-
-
-rule dl3:
-    output:
-        "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
-    input:
-        data="build/dl2/dl2_LST-1.Run{run_id}.h5",
-        irf="build/irf/calculated/irf_Run{run_id}.fits.gz",
-        config="../lst-analysis-config/irf_tool_config.json",
-    resources:
-        mem_mb="12G",
-        time=30,
-    conda:
-        lstchain_env
-    log:
-        "build/logs/dl3/{run_id}.log",
-    shell:
-        """
-        lstchain_create_dl3_file  \
-            --input-dl2 {input.data}  \
-            --output-dl3-path $(dirname $(realpath {output}))  \
-            --input-irf {input.irf}  \
-            --config {input.config} \
-            --gzip \
-            --overwrite \
-        """
-
-
-rule dl2:
-    resources:
-        mem_mb="64G",
-    output:
-        "build/dl2/dl2_LST-1.Run{run_id}.h5",
-    input:
-        data="build/dl1/dl1_LST-1.Run{run_id}.h5",
-        config="build/models/model_Run{run_id}/lstchain_config.json",
-    conda:
-        lstchain_env
-    log:
-        "build/logs/dl2/{run_id}.log",
-    shell:
-        """
-        lstchain_dl1_to_dl2  \
-            --input-file {input.data}  \
-            --output-dir $(dirname $(realpath {output}))  \
-            --path-models $(dirname {input.config})  \
-            --config {input.config}  \
-        """
-
-
-rule irf:
-    resources:
-        mem_mb="8G",
-        time=10,
-    output:
-        "build/irf/calculated/irf_Run{run_id}.fits.gz",
-    input:
-        gammas="build/dl2/test/dl2_LST-1.Run{run_id}.h5",
-        config="../lst-analysis-config/irf_tool_config.json",
-    conda:
-        lstchain_env
-    shell:
-        """
-        lstchain_create_irf_files \
-            -o {output} \
-            -g {input.gammas} \
-            --config {input.config} \
-        """
+    link_paths,

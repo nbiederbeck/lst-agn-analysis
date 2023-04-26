@@ -1,30 +1,32 @@
 SNAKEMAKE_PROFILE?=slurm
 PROFILE=--profile=workflow/profiles/$(SNAKEMAKE_PROFILE)
 
-all: link
-	snakemake $(PROFILE)
+# Keep these in sync with workflow/definitions.smk
+CONFIG_DIR?=../lst-analysis-config
+BUILD_DIR=build/$(notdir $(CONFIG_DIR))
+CFG=--config config_dir="$(CONFIG_DIR)"
 
-link: build/all-linked.txt
+all: $(BUILD_DIR)/all-linked.txt
+	snakemake $(PROFILE) $(CFG)
 
-build/all-linked.txt: build/runs.json
-	snakemake $@ \
+$(BUILD_DIR)/all-linked.txt: FORCE
+	snakemake $@ $(CFG) \
 		--use-conda \
 		--cores=1 \
-		--snakefile workflow/rules/data-selection.smk
+		--snakefile workflow/link_runs.smk
 
-build/runs.json: FORCE
-	snakemake $@ \
-		--use-conda \
-		--cores=1 \
-		--snakefile workflow/rules/lst-data-selection.smk
+$(BUILD_DIR)/%: FORCE
+	snakemake $(PROFILE) $(CFG) $@
 
-build/%: FORCE
-	snakemake $(PROFILE) $@
-
-build:
-	mkdir -p build
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 FORCE:
 
+# Only remove the analysis matching the current config
+mostlyclean:
+	rm -rf $(BUILD_DIR)
+
+# Beware that this removes all (!) analyses in build
 clean:
 	rm -rf build

@@ -25,6 +25,7 @@ if __name__ == "__main__":
         "",
     ).astype(int)
     df["Run start [UTC]"] = np.array(df["Run start [UTC]"], dtype=np.datetime64)
+    df["Run ID"] = df["Run ID"].apply("{:05d}".format)
 
     # select runs
     mask_source = df["Source name"] == config.source
