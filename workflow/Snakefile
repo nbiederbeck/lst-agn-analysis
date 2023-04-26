@@ -1,31 +1,29 @@
 import json
 from itertools import chain
 
-with open("build/runs.json", "r") as f:
+with open(build_dir / "runs.json", "r") as f:
     runs = json.load(f)
 
 RUN_IDS = sorted(set(chain(*runs.values())))
 
 irf_plots = [
-    f"build/plots/irf/{irf}_Run{run_id:05d}.pdf"
+    build_dir / f"plots/irf/{irf}_Run{run_id:05d}.pdf"
     for irf in ("aeff", "edisp", "gh_cut", "radmax_cut")
     for run_id in RUN_IDS
 ]
 
 analyses = [
-    x.name
-    for x in Path("../lst-analysis-config").iterdir()
-    if x.name.startswith("analysis") and x.is_dir()
+    x.name for x in config_dir.iterdir() if x.name.startswith("analysis") and x.is_dir()
 ]
 
 dl3_plots = [
-    f"build/plots/{plot}/{run:05d}.pdf" for run in RUN_IDS for plot in ["theta2"]
-] + ["build/plots/theta2/stacked.pdf"]
+    build_dir / f"plots/{plot}/{run:05d}.pdf" for run in RUN_IDS for plot in ["theta2"]
+] + [build_dir / "plots/theta2/stacked.pdf"]
 
 
 # observation plots are arguably dl3
 dl4_plots = [
-    f"build/plots/{analysis}/{plot}.pdf"
+    build_dir / f"plots/{analysis}/{plot}.pdf"
     for analysis in analyses
     for plot in ["light_curve", "flux_points", "observation_plots"]
 ]
@@ -35,10 +33,6 @@ include: "definitions.smk"
 include: "rules/run_selection.smk"
 include: "rules/create_dl3.smk"
 include: "rules/post_dl3.smk"
-
-
-ruleorder: plot_flux_points > plot_dl4
-ruleorder: plot_theta > plot_dl4
 
 
 rule all:

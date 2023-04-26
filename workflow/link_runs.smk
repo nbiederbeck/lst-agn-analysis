@@ -22,7 +22,7 @@ rule select_datasets:
         config=data_selection_config_path,
         script="scripts/select-data.py",
     output:
-        "build/runlist.csv",
+        build_dir / "runlist.csv",
     conda:
         data_selection_env
     shell:
@@ -31,11 +31,11 @@ rule select_datasets:
 
 rule merge_datachecks:
     input:
-        data="build/runlist.csv",
+        data=build_dir / "runlist.csv",
         script="scripts/merge-datachecks.py",
     output:
-        output="build/dl1-datachecks-merged.h5",
-        log="build/merge-datachecks.log",
+        output=build_dir / "dl1-datachecks-merged.h5",
+        log=build_dir / "merge-datachecks.log",
     conda:
         data_selection_env
     shell:
@@ -44,15 +44,15 @@ rule merge_datachecks:
 
 rule data_check:
     input:
-        runlist="build/runlist.csv",
-        datachecks="build/dl1-datachecks-merged.h5",
+        runlist=build_dir / "runlist.csv",
+        datachecks=build_dir / "dl1-datachecks-merged.h5",
         config=data_selection_config_path,
         script="scripts/data-check.py",
     output:
-        runlist="build/runlist-checked.csv",
-        datachecks="build/dl1-datachecks-masked.h5",
-        log="build/datacheck.log",
-        config="build/dl1-selection-cuts-config.json",
+        runlist=build_dir / "runlist-checked.csv",
+        datachecks=build_dir / "dl1-datachecks-masked.h5",
+        log=build_dir / "datacheck.log",
+        config=build_dir / "dl1-selection-cuts-config.json",
     conda:
         data_selection_env
     shell:
@@ -71,9 +71,9 @@ rule data_check:
 
 rule run_ids:
     output:
-        "build/runs.json",
+        build_dir / "runs.json",
     input:
-        data="build/runlist-checked.csv",
+        data=build_dir / "runlist-checked.csv",
         config=data_selection_config_path,
         script="scripts/create-night-run-list.py",
     conda:
@@ -84,12 +84,12 @@ rule run_ids:
 
 rule link_paths:
     output:
-        "build/all-linked.txt",
+        build_dir / "all-linked.txt",
     conda:
         data_selection_env
     input:
-        runs="build/runs.json",
-        datacheck="build/dl1-datachecks-masked.h5",
+        runs=build_dir / "runs.json",
+        datacheck=build_dir / "dl1-datachecks-masked.h5",
         script="link-paths.py",
     params:
         production=PRODUCTION,

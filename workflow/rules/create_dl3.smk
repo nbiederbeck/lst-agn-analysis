@@ -3,14 +3,14 @@ rule dl2:
     resources:
         mem_mb="64G",
     output:
-        "build/dl2/dl2_LST-1.Run{run_id}.h5",
+        build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
     input:
-        data="build/dl1/dl1_LST-1.Run{run_id}.h5",
-        config="build/models/model_Run{run_id}/lstchain_config.json",
+        data=build_dir / "dl1/dl1_LST-1.Run{run_id}.h5",
+        config=build_dir / "models/model_Run{run_id}/lstchain_config.json",
     conda:
         lstchain_env
     log:
-        "build/logs/dl2/{run_id}.log",
+        build_dir / "logs/dl2/{run_id}.log",
     shell:
         """
         lstchain_dl1_to_dl2  \
@@ -26,9 +26,9 @@ rule irf:
         mem_mb="8G",
         time=10,
     output:
-        "build/irf/calculated/irf_Run{run_id}.fits.gz",
+        build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
     input:
-        gammas="build/dl2/test/dl2_LST-1.Run{run_id}.h5",
+        gammas=build_dir / "dl2/test/dl2_LST-1.Run{run_id}.h5",
         config=irf_config_path,
     conda:
         lstchain_env
@@ -43,9 +43,9 @@ rule irf:
 
 rule plot_irf:
     output:
-        "build/plots/irf/{irf}_Run{run_id}.pdf",
+        build_dir / "plots/irf/{irf}_Run{run_id}.pdf",
     input:
-        data="build/irf/calculated/irf_Run{run_id}.fits.gz",
+        data=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
         script="scripts/plot_irf_{irf}.py",
         rc=os.environ.get("MATPLOTLIBRC", "../lst-analysis-config/matplotlibrc"),
     resources:
@@ -59,10 +59,10 @@ rule plot_irf:
 
 rule dl3:
     output:
-        "build/dl3/dl3_LST-1.Run{run_id}.fits.gz",
+        build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
     input:
-        data="build/dl2/dl2_LST-1.Run{run_id}.h5",
-        irf="build/irf/calculated/irf_Run{run_id}.fits.gz",
+        data=build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
+        irf=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
         config=irf_config_path,
     resources:
         mem_mb="12G",
@@ -70,7 +70,7 @@ rule dl3:
     conda:
         lstchain_env
     log:
-        "build/logs/dl3/{run_id}.log",
+        build_dir / "logs/dl3/{run_id}.log",
     shell:
         """
         lstchain_create_dl3_file  \
@@ -87,19 +87,20 @@ rule dl3_hdu_index:
     conda:
         lstchain_env
     output:
-        "build/dl3/hdu-index.fits.gz",
+        build_dir / "dl3/hdu-index.fits.gz",
     input:
-        expand(
-            "build/dl3/dl3_LST-1.Run{run_id:05d}.fits.gz",
+        runs=expand(
+            build_dir / "dl3/dl3_LST-1.Run{run_id:05d}.fits.gz",
             run_id=RUN_IDS,
         ),
+        dir=build_dir / dl3,
     resources:
         time=15,
     shell:
         """
         lstchain_create_dl3_index_files  \
-            --input-dl3-dir build/dl3/  \
-            --output-index-path build/dl3/  \
+            --input-dl3-dir {input.dir}  \
+            --output-index-path {input.dir}  \
             --file-pattern 'dl3_*.fits.gz'  \
             --overwrite \
         """

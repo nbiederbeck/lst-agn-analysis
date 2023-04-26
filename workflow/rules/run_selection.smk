@@ -1,6 +1,6 @@
 rule gather_test_nodes:
     output:
-        "build/allsky-mc/test-nodes.csv",
+        build_dir / "allsky-mc/test-nodes.csv",
     conda:
         lstchain_env
     input:
@@ -17,12 +17,12 @@ rule gather_test_nodes:
 
 rule gather_run_pointings:
     output:
-        "build/allsky-mc/run-pointings.csv",
+        build_dir / "allsky-mc/run-pointings.csv",
     conda:
         lstchain_env
     input:
-        runs="build/runs.json",
-        datacheck="build/dl1-datachecks-masked.h5",
+        runs=build_dir / "runs.json",
+        datacheck=build_dir / "dl1-datachecks-masked.h5",
         script="scripts/gather-run-pointings.py",
     shell:
         "python {input.script} \
@@ -33,11 +33,11 @@ rule gather_run_pointings:
 
 rule plot_data_selection:
     input:
-        data="build/dl1-datachecks-masked.h5",
-        config="build/dl1-selection-cuts-config.json",
+        data=build_dir / "dl1-datachecks-masked.h5",
+        config=build_dir / "dl1-selection-cuts-config.json",
         script="scripts/plot-{name}.py",
     output:
-        "build/{name}.pdf",
+        build_dir / "{name}.pdf",
     conda:
         data_selection_env
     shell:
@@ -46,13 +46,13 @@ rule plot_data_selection:
 
 rule numbers:
     input:
-        data="build/dl1-datachecks-masked.h5",
+        data=build_dir / "dl1-datachecks-masked.h5",
         script="scripts/extract-numbers.py",
     output:
-        "build/runselection-01-observing-source.tex",
-        "build/runselection-02-ok-during-timeframe.tex",
-        "build/runselection-03-pedestal-charge.tex",
-        "build/runselection-04-cosmics.tex",
+        build_dir / "runselection-01-observing-source.tex",
+        build_dir / "runselection-02-ok-during-timeframe.tex",
+        build_dir / "runselection-03-pedestal-charge.tex",
+        build_dir / "runselection-04-cosmics.tex",
     conda:
         data_selection_env
     shell:
