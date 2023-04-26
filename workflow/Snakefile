@@ -8,9 +8,7 @@ include: "definitions.smk"
 with open(build_dir / "runs.json", "r") as f:
     runs = json.load(f)
 
-print(runs)
 RUN_IDS = sorted(set(chain(*runs.values())))
-print(RUN_IDS)
 
 
 include: "rules/run_selection.smk"

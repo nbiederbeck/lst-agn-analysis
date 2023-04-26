@@ -5,7 +5,7 @@ ruleorder: plot_theta > plot_dl4
 # Plots using dl3 files
 rule observation_plots:
     input:
-        dl3_dir / "hdu-index.fits.gz",
+        build_dir / "dl3/hdu-index.fits.gz",
         config=config_dir / "{analysis}/analysis.yaml",
         script="scripts/events.py",
     output:
@@ -24,12 +24,12 @@ rule observation_plots:
 
 rule calc_theta2_per_obs:
     output:
-        dl3_dir / "theta2_{run_id}.fits.gz",
+        build_dir / "dl3/theta2_{run_id}.fits.gz",
     input:
-        data=dl3_dir / "dl3_LST-1.Run{run_id}.fits.gz",
+        data=build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
         script="scripts/calc_theta2_per_obs.py",
         config=data_selection_config_path,
-        index=dl3_dir / "hdu-index.fits.gz",
+        index=build_dir / "dl3/hdu-index.fits.gz",
     wildcard_constraints:
         run_id="\d+",
     resources:
@@ -39,15 +39,15 @@ rule calc_theta2_per_obs:
     log:
         build_dir / "logs/dl3/theta2_{run_id}.log",
     shell:
-        "python {input.script} -i {dl3_dir} -o {output} --obs-id {wildcards.run_id} --config {input.config} --log-file {log}"
+        "python {input.script} -i {build_dir}/dl3 -o {output} --obs-id {wildcards.run_id} --config {input.config} --log-file {log}"
 
 
 rule stack_theta2:
     output:
-        dl3_dir / "theta2_stacked.fits.gz",
+        build_dir / "dl3/theta2_stacked.fits.gz",
     input:
         runs=expand(
-            dl3_dir / "theta2_{run_id}.fits.gz",
+            build_dir / "dl3/theta2_{run_id}.fits.gz",
             run_id=RUN_IDS,
         ),
         script="scripts/stack_theta2.py",
@@ -63,7 +63,7 @@ rule plot_theta:
     output:
         build_dir / "plots/theta2/{runid}.pdf",
     input:
-        data=dl3_dir / "theta2_{runid}.fits.gz",
+        data=build_dir / "dl3/theta2_{runid}.fits.gz",
         script="scripts/plot_theta2.py",
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     conda:
@@ -77,7 +77,7 @@ rule plot_theta:
 
 rule dataset:
     input:
-        data=dl3_dir / "hdu-index.fits.gz",
+        data=build_dir / "dl3/hdu-index.fits.gz",
         config=config_dir / "{analysis}/analysis.yaml",
         script="scripts/write_datasets.py",
     params:
