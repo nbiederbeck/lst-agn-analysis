@@ -14,7 +14,7 @@ config = Config.parse_file(args.config)
 
 
 def main():
-    df = pd.read_csv(args.input_path)
+    df = pd.read_csv(args.input_path, dtype={"Run ID": str})
 
     runs = {}
 

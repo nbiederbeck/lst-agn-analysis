@@ -34,11 +34,11 @@ def get_mask(x, le=np.inf, ge=-np.inf):
 
 
 if __name__ == "__main__":
-    runs = pd.read_csv(args.input_path)
+    runs = pd.read_csv(args.input_path, dtype={"Run ID": str})
     setup_logging(logfile=args.log_file, verbose=args.verbose)
     log = logging.getLogger("data-check")
 
-    run_ids = np.array(runs["Run ID"])
+    run_ids = np.array(runs["Run ID"], dtype=int)
 
     runsummary = Table.read(args.datacheck_path)
 
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     )
     log.info(s)
 
-    mask = np.in1d(runs["Run ID"], runsummary["runnumber"][mask])
+    mask = np.in1d(run_ids, runsummary["runnumber"][mask])
 
     runs[mask].to_csv(args.output_runlist, index=False)
 

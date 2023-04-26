@@ -22,22 +22,27 @@ with open(args.runs, "r") as f:
     runs = json.load(f)
 n_runs = len(set(chain(*runs.values())))
 
-outdir_dl1 = "build/dl1/"
-filename_dl1 = "dl1_LST-1.Run{run_id:05d}.h5"
-template_target_dl1 = "/fefs/aswg/data/real/DL1/{night}/v0.9/tailcut84/" + filename_dl1
-template_linkname_dl1 = outdir_dl1 + filename_dl1
+build_dir = Path(args.output_path).parent
+outdir_dl1 = build_dir / "dl1/"
+filename_dl1 = "dl1_LST-1.Run{run_id}.h5"
+template_target_dl1 = (
+    (Path("/fefs/aswg/data/real/DL1/{night}/v0.9/tailcut84") / filename_dl1)
+    .resolve()
+    .as_posix()
+)
+template_linkname_dl1 = (outdir_dl1 / filename_dl1).resolve().as_posix()
 
-outdir_dl2 = "build/dl2/test/"
-filename_dl2 = "dl2_LST-1.Run{run_id:05d}.h5"
+outdir_dl2 = build_dir / "dl2/test/"
+filename_dl2 = "dl2_LST-1.Run{run_id}.h5"
 template_target_dl2 = "/fefs/aswg/data/mc/DL2/AllSky/{prod}/TestingDataset/{dec}/{node}/dl2_{prod}_{node}_merged.h5"  # noqa
-template_linkname_dl2 = outdir_dl2 + filename_dl2
+template_linkname_dl2 = (outdir_dl2 / filename_dl2).resolve().as_posix()
 
-filename_irf = "irf_Run{run_id:05d}.fits.gz"
+filename_irf = "irf_Run{run_id}.fits.gz"
 template_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}/irf_{prod}_{node}.fits.gz"  # noqa
 
-outdir_model = "build/models/model_Run{run_id:05d}/"
+outdir_model = build_dir / "models/model_Run{run_id}/"
 template_target_model = "/fefs/aswg/data/models/AllSky/{prod}/{dec}/"
-template_linkname_model = outdir_model
+template_linkname_model = outdir_model.resolve().as_posix()
 
 
 @u.quantity_input
@@ -106,7 +111,7 @@ def main() -> None:
         for run_id in run_ids:
             target_dl1 = Path(template_target_dl1.format(night=night, run_id=run_id))
 
-            run = runsummary[runsummary["runnumber"] == run_id]
+            run = runsummary[runsummary["runnumber"] == int(run_id)]
 
             pointing = build_altaz(
                 alt=run["mean_altitude"] * u.rad,

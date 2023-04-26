@@ -3,6 +3,7 @@ from pathlib import Path
 
 config_dir = Path("../lst-analysis-config")
 build_dir = Path("build") / config_dir.name
+dl3_dir = build_dir / "dl3"
 env_dir = Path("workflow/envs")
 
 # .resolve(), because I am paranoid

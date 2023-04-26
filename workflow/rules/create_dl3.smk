@@ -87,20 +87,19 @@ rule dl3_hdu_index:
     conda:
         lstchain_env
     output:
-        build_dir / "dl3/hdu-index.fits.gz",
+        "{dl3_dir}/hdu-index.fits.gz",
     input:
         runs=expand(
-            build_dir / "dl3/dl3_LST-1.Run{run_id:05d}.fits.gz",
+            dl3_dir / "dl3_LST-1.Run{run_id}.fits.gz",
             run_id=RUN_IDS,
         ),
-        dir=build_dir / dl3,
     resources:
         time=15,
     shell:
         """
         lstchain_create_dl3_index_files  \
-            --input-dl3-dir {input.dir}  \
-            --output-index-path {input.dir}  \
+            --input-dl3-dir {dl3_dir}  \
+            --output-index-path {dl3_dir}  \
             --file-pattern 'dl3_*.fits.gz'  \
             --overwrite \
         """
