@@ -56,4 +56,4 @@ rule numbers:
     conda:
         data_selection_env
     shell:
-        "python {input.script} {input.data} build"
+        "python {input.script} {input.data} {build_dir}"

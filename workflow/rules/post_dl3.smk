@@ -31,7 +31,7 @@ rule calc_theta2_per_obs:
         config=data_selection_config_path,
         index=build_dir / "dl3/hdu-index.fits.gz",
     wildcard_constraints:
-        run_id="\d+",
+        run_id="\d+",  # dont match on "stacked".
     resources:
         mem_mb=16000,
     conda:

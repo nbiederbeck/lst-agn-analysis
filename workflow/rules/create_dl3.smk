@@ -87,7 +87,7 @@ rule dl3_hdu_index:
     conda:
         lstchain_env
     output:
-        "{build_dir}/dl3/hdu-index.fits.gz",
+        build_dir / "dl3/hdu-index.fits.gz",
     input:
         runs=expand(
             build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
