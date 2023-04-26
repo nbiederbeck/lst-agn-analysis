@@ -47,7 +47,7 @@ rule plot_irf:
     input:
         data=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
         script="scripts/plot_irf_{irf}.py",
-        rc=os.environ.get("MATPLOTLIBRC", "../lst-analysis-config/matplotlibrc"),
+        rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     resources:
         mem_mb=1000,
         time=5,  # minutes

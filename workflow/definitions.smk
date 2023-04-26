@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-config_dir = Path("../lst-analysis-config")
+config_dir = Path(config.get("config_dir", "../lst-analysis-config"))
 build_dir = Path("build") / config_dir.name
 env_dir = Path("workflow/envs")
 
