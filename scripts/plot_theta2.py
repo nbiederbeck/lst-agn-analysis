@@ -1,3 +1,4 @@
+import warnings
 from argparse import ArgumentParser
 
 import matplotlib
@@ -11,6 +12,14 @@ if matplotlib.get_backend() == "pgf":
     from matplotlib.backends.backend_pgf import PdfPages
 else:
     from matplotlib.backends.backend_pdf import PdfPages
+
+# this warning happens for empty energy bins
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    message="Attempting to set identical low and high ylims makes "
+    "transformation singular; automatically expanding.",
+)
 
 
 parser = ArgumentParser()
@@ -96,6 +105,7 @@ def plot_theta_squared_table(table, *, preliminary=False, ylim=None):
 def main(input_path, output, preliminary):
     figures = []
     with fits.open(input_path) as f:
+        plt.rcParams["figure.max_open_warning"] = len(f)
         # Skip primary
         for hdu in f[1:]:
             table = Table.read(hdu)
