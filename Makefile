@@ -16,7 +16,7 @@ $(BUILD_DIR)/all-linked.txt: FORCE
 		--snakefile workflow/link_runs.smk
 
 $(BUILD_DIR)/%: FORCE
-	snakemake $(PROFILE) $(CFG) $@
+	snakemake $(PROFILE) $@ $(CFG)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
