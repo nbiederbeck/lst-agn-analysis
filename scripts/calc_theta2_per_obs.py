@@ -131,7 +131,11 @@ def main(input_dir, output, obs_id, log_file, verbose, config):  # noqa: PLR0915
     hdulist = [fits.PrimaryHDU()]
     theta_tables = []
     for elow, ehigh, theta in zip(energy_lower, energy_upper, theta_cuts):
-        log.info("Calculating counts in range {elow} - {ehigh}")
+        log.info(
+            "Calculating counts in range %s - %s",
+            format_energy(elow),
+            format_energy(ehigh),
+        )
         table = create_empty_table(theta_squared_axis, position)
         # Useful for plotting
         table.meta["ELOW"] = format_energy(elow)
