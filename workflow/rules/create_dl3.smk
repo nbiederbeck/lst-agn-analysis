@@ -103,3 +103,32 @@ rule dl3_hdu_index:
             --file-pattern 'dl3_*.fits.gz'  \
             --overwrite \
         """
+
+
+rule cuts_dl2_dl3:
+    conda:
+        lstchain_env
+    output:
+        build_dir / "dl4/counts_after_gh_theta_cut_Run{run_id}.h5",
+    input:
+        dl2=build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
+        irf=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
+        config=irf_config_path,
+        script="scripts/calc_counts_after_cuts.py",
+    shell:
+        "python {input.script} --input-dl2 {input.dl2} --input-irf {input.irf} -c {input.config} -o {output}"
+
+
+rule plot_cuts_dl2_dl3:
+    conda:
+        lstchain_env
+    output:
+        build_dir / "plots/counts_after_gh_theta_cut_{norm}.pdf",
+    input:
+        data=expand(
+            build_dir / "dl4/counts_after_gh_theta_cut_Run{run_id}.h5",
+            run_id=RUN_IDS,
+        ),
+        script="scripts/plot_counts_after_cuts.py",
+    shell:
+        "python {input.script} -i {input.data} -o {output} --norm {wildcards.norm}"
