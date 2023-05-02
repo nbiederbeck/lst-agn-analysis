@@ -1,28 +1,19 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 from argparse import ArgumentParser
 
-import numpy as np
 from astropy import units as u
 from gammapy.maps import WcsMap
 from matplotlib import pyplot as plt
 
 parser = ArgumentParser()
-parser.add_argument("-i", "--input-paths", required=True, nargs="+")
+parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output-path", required=True)
 args = parser.parse_args()
 
 angle = u.deg
 
 
-def main(input_paths, output_path):
-    data = []
-    for path in input_paths:
-        skymap = WcsMap.read(path, map_type="wcs")
-        data.append(skymap.data)
-
-    data = np.sum(data, axis=0)[0]
+def main(input_path, output_path):
+    skymap = WcsMap.read(input_path, map_type="wcs")
 
     geom = skymap.geom
     source = geom.center_skydir
@@ -36,7 +27,11 @@ def main(input_paths, output_path):
 
     fig, ax = plt.subplots()
 
-    ax.pcolormesh(*edges.to_value(angle), data, rasterized=True)
+    ax.pcolormesh(
+        *edges.to_value(angle),
+        skymap.data[0, ...],
+        rasterized=True,
+    )
 
     ax.scatter(
         source.ra.to_value(u.deg),
