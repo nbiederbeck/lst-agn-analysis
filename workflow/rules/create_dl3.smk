@@ -141,6 +141,9 @@ rule plot_cuts_dl2_dl3:
 
 
 rule calc_skymap:
+    resources:
+        mem_mb="64G",
+        time=10,
     conda:
         lstchain_env
     output:
