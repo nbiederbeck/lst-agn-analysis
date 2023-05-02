@@ -22,30 +22,36 @@ def main(input_paths, output_path):
         skymap = WcsMap.read(path, map_type="wcs")
         data.append(skymap.data)
 
+    data = np.sum(data, axis=0)[0]
+
     geom = skymap.geom
-    center = geom.center_coord
     source = geom.center_skydir
+
+    edges = u.Quantity(
+        [
+            u.Quantity(geom.pix_to_coord([i, j]))
+            for i, j in zip(range(int(geom.npix[0])), range(int(geom.npix[1])))
+        ],
+    ).T
 
     fig, ax = plt.subplots()
 
-    ax.imshow(np.sum(data, axis=0)[0])
+    ax.pcolormesh(*edges.to_value(angle), data, rasterized=True)
 
     ax.scatter(
-        *geom.coord_to_pix(center)[:-1],
-        marker="*",
-    )
-
-    ax.set_xticks(
-        geom.coord_to_pix(center)[0],
-        labels=[f"{source.ra.to_value(angle):.2f}"],
-    )
-    ax.set_yticks(
-        geom.coord_to_pix(center)[1],
-        labels=[f"{source.dec.to_value(angle):.2f}"],
+        source.ra.to_value(u.deg),
+        source.dec.to_value(u.deg),
+        ec="k",
+        fc="w",
+        label="Source",
     )
 
     ax.set_xlabel(f"RA / {angle}")
     ax.set_ylabel(f"Dec / {angle}")
+
+    ax.legend()
+
+    ax.set_aspect(1)
 
     fig.savefig(output_path)
 
