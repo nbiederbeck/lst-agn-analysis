@@ -19,7 +19,10 @@ def setup_logging(logfile=None, verbose=False):
     log.level = level
 
     shell_handler = RichHandler()
-    shell_formatter = logging.Formatter(fmt="%(message)s")
+    shell_formatter = logging.Formatter(
+        fmt="%(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+    )
     shell_handler.setFormatter(shell_formatter)
     log.addHandler(shell_handler)
 
