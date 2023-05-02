@@ -1,6 +1,3 @@
-plot = "MATPLOTLIBRC={input.rc} python {input.script} "
-
-
 rule dl2:
     resources:
         mem_mb="64G",
@@ -137,7 +134,7 @@ rule plot_cuts_dl2_dl3:
         script="scripts/plot_counts_after_cuts.py",
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     shell:
-        plot + "-i {input.data} -o {output} --norm {wildcards.norm}"
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output} --norm {wildcards.norm}"
 
 
 rule calc_skymap:
@@ -166,7 +163,7 @@ rule plot_skymap:
         script="scripts/plot_skymap.py",
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     shell:
-        plot + "-i {input.data} -o {output}"
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
 rule stack_skymaps:
