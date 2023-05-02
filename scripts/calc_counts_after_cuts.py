@@ -56,8 +56,6 @@ def main(input_dl2, input_irf, config, output):
     theta_mask = events["theta"] <= events["theta_cut"]
     events["theta_mask"] = theta_mask
 
-    # events.write(output, path="events", overwrite=True, serialize_meta=True)
-
     table = QTable(
         {
             "after_trigger": [

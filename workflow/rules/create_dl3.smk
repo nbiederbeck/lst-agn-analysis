@@ -106,10 +106,13 @@ rule dl3_hdu_index:
 
 
 rule cuts_dl2_dl3:
+    resources:
+        mem_mb="64G",
+        time=10,
     conda:
         lstchain_env
     output:
-        build_dir / "dl4/counts_after_gh_theta_cut_Run{run_id}.h5",
+        build_dir / "dl3/counts_after_gh_theta_cut_Run{run_id}.h5",
     input:
         dl2=build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
         irf=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
@@ -126,7 +129,7 @@ rule plot_cuts_dl2_dl3:
         build_dir / "plots/counts_after_gh_theta_cut_{norm}.pdf",
     input:
         data=expand(
-            build_dir / "dl4/counts_after_gh_theta_cut_Run{run_id}.h5",
+            build_dir / "dl3/counts_after_gh_theta_cut_Run{run_id}.h5",
             run_id=RUN_IDS,
         ),
         script="scripts/plot_counts_after_cuts.py",

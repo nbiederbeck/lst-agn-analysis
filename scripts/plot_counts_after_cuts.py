@@ -38,7 +38,7 @@ def main(input_paths, output_path, norm):
     elif norm == "eff":
         norm = np.sum(t_eff)
     else:
-        raise ValueError(f"Unsupported norm {norm}")
+        raise NotImplementedError(f"Unsupported norm {norm}")
 
     cuts_after_trigger = np.sum(
         np.array(cuts_after_trigger) * t_eff.to_value("s") / norm,
