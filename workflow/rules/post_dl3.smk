@@ -24,7 +24,7 @@ rule observation_plots:
 
 rule calc_theta2_per_obs:
     output:
-        build_dir / "dl3/theta2_{run_id}.fits.gz",
+        build_dir / "dl3/theta2/{run_id}.fits.gz",
     input:
         data=build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
         script="scripts/calc_theta2_per_obs.py",
@@ -37,17 +37,17 @@ rule calc_theta2_per_obs:
     conda:
         gammapy_env
     log:
-        build_dir / "logs/dl3/theta2_{run_id}.log",
+        build_dir / "logs/dl3/theta2/{run_id}.log",
     shell:
         "python {input.script} -i {build_dir}/dl3 -o {output} --obs-id {wildcards.run_id} --config {input.config} --log-file {log}"
 
 
 rule stack_theta2:
     output:
-        build_dir / "dl3/theta2_stacked.fits.gz",
+        build_dir / "dl3/theta2/stacked.fits.gz",
     input:
         runs=expand(
-            build_dir / "dl3/theta2_{run_id}.fits.gz",
+            build_dir / "dl3/theta2/{run_id}.fits.gz",
             run_id=RUN_IDS,
         ),
         script="scripts/stack_theta2.py",
@@ -63,7 +63,7 @@ rule plot_theta:
     output:
         build_dir / "plots/theta2/{runid}.pdf",
     input:
-        data=build_dir / "dl3/theta2_{runid}.fits.gz",
+        data=build_dir / "dl3/theta2/{runid}.fits.gz",
         script="scripts/plot_theta2.py",
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     conda:

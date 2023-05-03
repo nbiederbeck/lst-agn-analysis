@@ -28,9 +28,9 @@ analyses = [
 
 dl3_plots = [
     build_dir / f"plots/{plot}/{run_id}.pdf"
-    for run_id in RUN_IDS
-    for plot in ["theta2"]
-] + [build_dir / "plots/theta2/stacked.pdf"]
+    for run_id in RUN_IDS + ["stacked"]
+    for plot in ["theta2", "skymap"]
+]
 
 
 # observation plots are arguably dl3

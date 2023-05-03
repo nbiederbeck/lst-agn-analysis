@@ -144,7 +144,7 @@ rule calc_skymap:
     conda:
         lstchain_env
     output:
-        build_dir / "dl3/skymap_Run{run_id}.fits",
+        build_dir / "dl3/skymap/{run_id}.fits",
     input:
         data=build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
         config=irf_config_path,
@@ -157,9 +157,9 @@ rule plot_skymap:
     conda:
         lstchain_env
     output:
-        build_dir / "plots/skymap_{run_id}.pdf",
+        build_dir / "plots/skymap/{run_id}.pdf",
     input:
-        data=build_dir / "dl3/skymap_{run_id}.fits",
+        data=build_dir / "dl3/skymap/{run_id}.fits",
         script="scripts/plot_skymap.py",
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     shell:
@@ -170,10 +170,10 @@ rule stack_skymaps:
     conda:
         lstchain_env
     output:
-        build_dir / "dl3/skymap_stacked.fits",
+        build_dir / "dl3/skymap/stacked.fits",
     input:
         data=expand(
-            build_dir / "dl3/skymap_Run{run_id}.fits",
+            build_dir / "dl3/skymap/{run_id}.fits",
             run_id=RUN_IDS,
         ),
         script="scripts/stack_skymap.py",
