@@ -33,7 +33,7 @@ You need configuration files. Check [our example repository](https://github.com/
 git clone https://github.com/nbiederbeck/lst-analysis-config.git ../lst-analysis-config
 ```
 
-You need snakemake installed. If you do not have that, you can create an enviroment with only snakemake like this:
+You need snakemake and astropy installed. If you do not have that, you can create an enviroment with only snakemake like this:
 
 ```
 mamba env create -f workflow/envs/snakemake.yml

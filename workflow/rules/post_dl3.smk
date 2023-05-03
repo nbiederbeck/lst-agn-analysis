@@ -86,7 +86,7 @@ rule dataset:
         build_dir / "dl4/{analysis}/datasets.fits.gz",
     resources:
         cpus=16,
-        mem_mb="32G",
+        mem_mb=32000,
         time=30,  # minutes
     conda:
         gammapy_env
