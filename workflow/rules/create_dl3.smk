@@ -1,4 +1,3 @@
-
 rule dl2:
     resources:
         mem_mb="64G",
@@ -133,5 +132,50 @@ rule plot_cuts_dl2_dl3:
             run_id=RUN_IDS,
         ),
         script="scripts/plot_counts_after_cuts.py",
+        rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     shell:
-        "python {input.script} -i {input.data} -o {output} --norm {wildcards.norm}"
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output} --norm {wildcards.norm}"
+
+
+rule calc_skymap:
+    resources:
+        mem_mb="64G",
+        time=10,
+    conda:
+        lstchain_env
+    output:
+        build_dir / "dl3/skymap/{run_id}.fits",
+    input:
+        data=build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
+        config=irf_config_path,
+        script="scripts/calc_skymap.py",
+    shell:
+        "python {input.script} -i {input.data} -o {output} -c {input.config}"
+
+
+rule plot_skymap:
+    conda:
+        lstchain_env
+    output:
+        build_dir / "plots/skymap/{run_id}.pdf",
+    input:
+        data=build_dir / "dl3/skymap/{run_id}.fits",
+        script="scripts/plot_skymap.py",
+        rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
+    shell:
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
+
+
+rule stack_skymaps:
+    conda:
+        lstchain_env
+    output:
+        build_dir / "dl3/skymap/stacked.fits",
+    input:
+        data=expand(
+            build_dir / "dl3/skymap/{run_id}.fits",
+            run_id=RUN_IDS,
+        ),
+        script="scripts/stack_skymap.py",
+    shell:
+        "python {input.script} -i {input.data} -o {output}"
