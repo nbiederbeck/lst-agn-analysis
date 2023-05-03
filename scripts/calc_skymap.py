@@ -16,10 +16,18 @@ parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output-path", required=True)
 parser.add_argument("-c", "--config", required=True)
+parser.add_argument(
+    "--width",
+    help="Width of skymap",
+    default="4 deg",
+    type=u.Quantity,
+)
+parser.add_argument("--n-bins", default=100)
 args = parser.parse_args()
 
 
-def main(input_path, output_path, config):
+@u.quantity_input(width=u.deg)
+def main(input_path, output_path, config, width, n_bins):
     with open(config, "r") as f:
         config = json.load(f)
 
@@ -38,12 +46,11 @@ def main(input_path, output_path, config):
 
     evts = SkyCoord(events["RA"], events["Dec"], frame="icrs")
 
-    d = u.Quantity(4, u.deg)
-    n_bins = 100
+    r = width / 2
     bins = u.Quantity(
         [
-            np.linspace(source.ra - d, source.ra + d, n_bins + 1),
-            np.linspace(source.dec - d, source.dec + d, n_bins + 1),
+            np.linspace(source.ra - r, source.ra + r, n_bins + 1),
+            np.linspace(source.dec - r, source.dec + r, n_bins + 1),
         ],
     )
 
@@ -54,14 +61,14 @@ def main(input_path, output_path, config):
     )
 
     energy_axis = MapAxis.from_edges(
-        u.Quantity([1e-5, 1e5], u.TeV),
+        u.Quantity([1e-5, 1e5], u.TeV),  # basically [-inf, inf], but finite
         name="energy",
     )
     geom = WcsGeom.create(
         (n_bins, n_bins),
         skydir=source,
-        binsz=2 * d / n_bins,
-        width=2 * d,
+        binsz=width / n_bins,
+        width=width,
         axes=[energy_axis],
     )
 

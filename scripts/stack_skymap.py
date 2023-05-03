@@ -1,14 +1,11 @@
 from argparse import ArgumentParser
 
-from astropy import units as u
 from gammapy.maps import WcsMap
 
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-paths", required=True, nargs="+")
 parser.add_argument("-o", "--output-path", required=True)
 args = parser.parse_args()
-
-angle = u.deg
 
 
 def main(input_paths, output_path):
