@@ -41,15 +41,15 @@ def main(input_paths, output_path, norm):
         raise NotImplementedError(f"Unsupported norm {norm}")
 
     cuts_after_trigger = np.sum(
-        np.array(cuts_after_trigger) * t_eff.to_value("s") / norm,
+        np.array(cuts_after_trigger) / norm,
         axis=0,
     )
     cuts_after_gh = np.sum(
-        np.array(cuts_after_gh) * t_eff.to_value("s") / norm,
+        np.array(cuts_after_gh) / norm,
         axis=0,
     )
     cuts_after_gh_theta = np.sum(
-        np.array(cuts_after_gh_theta) * t_eff.to_value("s") / norm,
+        np.array(cuts_after_gh_theta) / norm,
         axis=0,
     )
 
@@ -77,7 +77,7 @@ def main(input_paths, output_path, norm):
     ax.set_xscale("log")
     ax.set_yscale("log")
 
-    ax.set_xlabel(x.unit)
+    ax.set_xlabel(rf"E_{{\text{{reco}}}} \:/\: {x.unit}")
     ax.set_ylabel(cuts_after_trigger.unit)
 
     ax.legend(title="Counts after")
