@@ -10,12 +10,10 @@ from matplotlib.patches import Circle
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output-path", required=True)
-# parser.add_argument("-c", "--config", required=True)
-# parser.add_argument("--obs-id", required=True)
 parser.add_argument(
     "--width",
     help="Width of skymap",
-    default="3 deg",
+    default="4 deg",
     type=u.Quantity,
 )
 parser.add_argument("--n-bins", default=100)
@@ -66,11 +64,13 @@ def main(input_path, output_path, width, n_bins):
 
     fig, ax = plt.subplots()
 
-    ax.pcolormesh(
+    mesh = ax.pcolormesh(
         *edges.to_value(u.deg),
         skymap.data[0, ...],
         rasterized=True,
     )
+
+    fig.colorbar(mesh, ax=ax)
 
     ax.set_xlabel("RA / deg")
     ax.set_ylabel("Dec / deg")

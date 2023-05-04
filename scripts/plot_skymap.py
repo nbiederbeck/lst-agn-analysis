@@ -27,7 +27,7 @@ def main(input_path, output_path):
 
     fig, ax = plt.subplots()
 
-    ax.pcolormesh(
+    mesh = ax.pcolormesh(
         *edges.to_value(angle),
         skymap.data[0, ...],
         rasterized=True,
@@ -40,6 +40,8 @@ def main(input_path, output_path):
         fc="w",
         label="Source",
     )
+
+    fig.colorbar(mesh, ax=ax)
 
     ax.set_xlabel(f"RA / {angle}")
     ax.set_ylabel(f"Dec / {angle}")

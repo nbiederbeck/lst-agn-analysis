@@ -228,7 +228,8 @@ rule calc_skymap_per_obs:
     wildcard_constraints:
         run_id="\d+",  # dont match on "stacked".
     resources:
-        mem_mb=16000,
+        # mem_mb=16000,
+        time=5,
     conda:
         gammapy_env
     shell:
@@ -244,5 +245,7 @@ rule plot_skymap_dl3:
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     conda:
         gammapy_env
+    resources:
+        time=5,
     shell:
         "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
