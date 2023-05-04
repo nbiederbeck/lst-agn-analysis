@@ -71,56 +71,6 @@ def main(input_path, config, output_path, obs_id, width, n_bins):  # noqa: PLR09
 
     skymap.write(output_path, overwrite=True)
 
-    # patches = PatchCollection(
-    #     [
-    #         Circle(
-    #             (source.ra.to_value(u.deg), source.dec.to_value(u.deg)),
-    #             radius=0.3,
-    #             color="k",
-    #             ec="k",
-    #             fc="#0000",
-    #             fill=False,
-    #         ),
-    #     ]
-    #     + [
-    #         Circle(
-    #             (
-    #                 source.ra.to_value(u.deg) + 0.8 * np.sin(phi),
-    #                 source.dec.to_value(u.deg) + 0.8 * np.cos(phi),
-    #             ),
-    #             radius=0.3,
-    #             color="w",
-    #             ec="w",
-    #             fc="#0000",
-    #             fill=False,
-    #         )
-    #         for phi in np.linspace(0, 2 * np.pi, 7)
-    #     ],
-    #     match_original=True,
-    # )
-
-    # fig, ax = plt.subplots()
-
-    # ax.pcolormesh(*edges, hist)
-
-    # ax.set_xlabel("RA / deg")
-    # ax.set_ylabel("Dec / deg")
-    # ax.set_aspect(1)
-
-    # ax.scatter(
-    #     source.ra.to_value(u.deg),
-    #     source.dec.to_value(u.deg),
-    #     color="w",
-    #     edgecolor="k",
-    #     label="Source",
-    # )
-
-    # ax.add_collection(patches)
-
-    # ax.legend()
-
-    # fig.savefig(output_path)
-
 
 if __name__ == "__main__":
     main(**vars(args))
