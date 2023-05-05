@@ -83,5 +83,5 @@ run the expensive steps on the local machine. The tables for that are saved as e
 We create a helper script for that that uses `rsync`. Check how to use it:
 
 ```
-./lapalma.py --help
+./copy-from-cluster.py --help
 ```
