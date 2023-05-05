@@ -85,14 +85,3 @@ We create a helper script for that that uses `rsync`. Check how to use it:
 ```
 ./lapalma.py --help
 ```
-
-For the data-selection plots, you need to download `build/dl1-datacheck-masked.h5`, which is done via the above helper script.
-Run it with your settings and afterwards:
-
-```
-make -f local.mk
-```
-
-DEV-TODO: Do the same for the other plots (https://github.com/nbiederbeck/lst-agn-analysis/issues/29)
-If you do some `cp **/*.fits.gz` shenanigans, beware that the dl3 files are saved with
-the extension `fits.gz` as well.
