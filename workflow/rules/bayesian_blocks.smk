@@ -29,6 +29,26 @@ def bayesian_blocks_plot_targets(wildcards):
     )
 
 
+def bayesian_blocks_models(wildcards):
+    blocks = Table.read(checkpoints.calc_bayesian_blocks.get(**wildcards).output[0])
+    indices = list(range(len(blocks)))
+    return expand(
+        build_dir / "dl4/{analysis}/bayesian_blocks/model-best-fit-{index}.yaml",
+        index=indices,
+        analysis=wildcards.analysis,
+    )
+
+
+def bayesian_blocks_flux_points(wildcards):
+    blocks = Table.read(checkpoints.calc_bayesian_blocks.get(**wildcards).output[0])
+    indices = list(range(len(blocks)))
+    return expand(
+        build_dir / "dl4/{analysis}/bayesian_blocks/flux_points_{index}.fits.gz",
+        index=indices,
+        analysis=wildcards.analysis,
+    )
+
+
 # Either merge blocks in script or add an extra rula and target
 checkpoint calc_bayesian_blocks:
     input:
@@ -42,7 +62,8 @@ checkpoint calc_bayesian_blocks:
         """
         python {input.script} \
             -i {input.data} \
-            -o {output}
+            -o {output} \
+            --threshold {bayesian_block_threshold} \
         """
 
 
@@ -65,10 +86,6 @@ rule plot_bayesian_blocks_lightcurve:
         """
 
 
-# Need to match some index i to row i in blocks?
-# have some script that creates one output per block?
-# or give the scripts the blocks and the index and they need to do it themselves?
-# but then again i need to know how many blocks there are...
 rule fit_bayesian_block:
     input:
         config=config_dir / "{analysis}/analysis.yaml",
@@ -136,5 +153,23 @@ rule plot_flux_points_bayesian_block:
         python {input.script} \
             -i {input.data} \
             --best-model-path {input.model} \
+            -o {output}
+        """
+
+
+rule plot_bayesian_block_comparison:
+    input:
+        flux_points=bayesian_blocks_flux_points,
+        models=bayesian_blocks_models,
+        script="scripts/compare_bayesian_blocks.py",
+    output:
+        build_dir / "plots/{analysis}/bayesian_blocks_comparison.pdf",
+    conda:
+        gammapy_env
+    shell:
+        """
+        python {input.script} \
+            --models {input.models} \
+            --flux-points {input.flux_points} \
             -o {output}
         """

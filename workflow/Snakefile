@@ -41,7 +41,13 @@ dl3_plots = [
 dl4_plots = [
     build_dir / f"plots/{analysis}/{plot}.pdf"
     for analysis in analyses
-    for plot in ["light_curve", "flux_points", "observation_plots", "bayesian_blocks"]
+    for plot in [
+        "light_curve",
+        "flux_points",
+        "observation_plots",
+        "bayesian_blocks",
+        "bayesian_blocks_comparison",
+    ]
 ]
 
 
