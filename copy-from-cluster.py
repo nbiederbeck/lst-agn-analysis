@@ -37,12 +37,19 @@ parser.add_argument(
 args = parser.parse_args()
 
 exclude_patterns = [
+    # run files
     "dl1_*.h5",
     "dl2_*.h5",
     "dl3_*.fits.gz",
+    # DL4 Datasets
+    "phaobs_*.fits",
+    "dl4/*/datasets.fits.gz",
+    # log files
     "*.log",
     "logs/*",
+    # models
     "models/model*",
+    # plots
     "*.pdf",
 ]
 
