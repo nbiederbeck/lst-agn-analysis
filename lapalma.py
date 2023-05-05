@@ -55,7 +55,7 @@ def main():
     if args.exclude is not None:
         for pat in args.exclude.split(","):
             rsync += f"--exclude='{pat}' "
-    cmd = f"{rsync} '{args.hostname}:{args.remote_path}' ."
+    cmd = f"{rsync} '{args.hostname}:{args.remote_path.rstrip('/')}' ."
     print(cmd)
     run(cmd, shell=True, capture_output=False, check=True)
 
