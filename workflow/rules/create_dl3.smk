@@ -1,7 +1,7 @@
 
 rule dl2:
     resources:
-        mem_mb="64G",
+        mem_mb=64000,
     output:
         build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
     input:
@@ -23,7 +23,7 @@ rule dl2:
 
 rule irf:
     resources:
-        mem_mb="8G",
+        mem_mb=8000,
         time=10,
     output:
         build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
@@ -65,7 +65,7 @@ rule dl3:
         irf=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
         config=irf_config_path,
     resources:
-        mem_mb="12G",
+        mem_mb=12000,
         time=30,
     conda:
         lstchain_env
