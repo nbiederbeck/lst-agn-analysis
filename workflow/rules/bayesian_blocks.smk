@@ -47,7 +47,7 @@ checkpoint calc_bayesian_blocks:
     input:
         data=build_dir / "dl4/{analysis}/light_curve.fits.gz",
         script="scripts/calc_bayesian_blocks.py",
-        config="main_config_path",
+        config=main_config_path,
     output:
         build_dir / "dl4/{analysis}/bayesian_blocks.fits.gz",
     conda:
