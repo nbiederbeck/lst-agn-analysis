@@ -4,18 +4,11 @@ from astropy.table import Table
 # I do not like having to read the data so often, but for
 # now I have not found a cleaner way.
 # It is only one small table, so not the end of the world
-def get_nth_start(wildcards):
+def get_nth_interval(wildcards):
     block = Table.read(checkpoints.calc_bayesian_blocks.get(**wildcards).output[0])[
         int(wildcards.index)
     ]
-    return str(block["start"])
-
-
-def get_nth_stop(wildcards):
-    block = Table.read(checkpoints.calc_bayesian_blocks.get(**wildcards).output[0])[
-        int(wildcards.index)
-    ]
-    return str(block["stop"])
+    return str(block["start"]), str(block["stop"])
 
 
 def bayesian_blocks_plot_targets(wildcards):
@@ -94,8 +87,7 @@ rule fit_bayesian_block:
         script="scripts/fit-model.py",
         blocks=build_dir / "dl4/{analysis}/bayesian_blocks.fits.gz",  # need that for the checkpoint
     params:
-        tstart=get_nth_start,
-        tstop=get_nth_stop,
+        interval=get_nth_interval,
     output:
         build_dir / "dl4/{analysis}/bayesian_blocks/model-best-fit-{index}.yaml",
     conda:
@@ -107,8 +99,8 @@ rule fit_bayesian_block:
             --dataset-path {input.dataset} \
             --model-config {input.model} \
             -o {output} \
-            --t-start {params.tstart} \
-            --t-stop {params.tstop} \
+            --t-start {params.interval[0]} \
+            --t-stop {params.interval[1]} \
         """
 
 
@@ -121,8 +113,7 @@ rule calc_flux_points_bayesian_block:
         script="scripts/calc_flux_points.py",
         blocks=build_dir / "dl4/{analysis}/bayesian_blocks.fits.gz",  # need that for the checkpoint
     params:
-        tstart=get_nth_start,
-        tstop=get_nth_stop,
+        interval=get_nth_interval,
     output:
         build_dir / "dl4/{analysis}/bayesian_blocks/flux_points_{index}.fits.gz",
     conda:
@@ -134,8 +125,8 @@ rule calc_flux_points_bayesian_block:
             --dataset-path {input.data} \
             --best-model-path {input.model} \
             -o {output} \
-            --t-start {params.tstart} \
-            --t-stop {params.tstop} \
+            --t-start {params.interval[0]} \
+            --t-stop {params.interval[1]} \
         """
 
 
