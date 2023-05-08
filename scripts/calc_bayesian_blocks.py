@@ -14,12 +14,18 @@ args = parser.parse_args()
 def main(input_path, output, threshold):
     lc = FluxPoints.read(input_path, format="lightcurve")
     table = lc.to_table(format="lightcurve", sed_type="flux")
+
+    # No error on t
     t_min = table["time_min"]
     t_max = table["time_max"]
-    flux = table["flux"]
     t = (t_min + t_max) / 2
-    x = flux.flatten()  # This is shape (n, 1) for some reason
-    blocks = bayesian_blocks(t=t, x=x, p0=threshold, fitness="measures")
+
+    # x is the measured quantity, sigma its uncertainty
+    x = table["flux"].flatten()
+    sigma = table["flux_err"].flatten()
+
+    blocks = bayesian_blocks(t=t, x=x, p0=threshold, fitness="measures", sigma=sigma)
+
     t = Table()
     t["start"] = blocks[:-1]
     t["stop"] = blocks[1:]
