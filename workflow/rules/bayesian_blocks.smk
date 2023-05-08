@@ -42,7 +42,7 @@ def bayesian_blocks_flux_points(wildcards):
     )
 
 
-# Either merge blocks in script or add an extra rula and target
+# Either merge blocks in script or add an extra rule and target
 checkpoint calc_bayesian_blocks:
     input:
         data=build_dir / "dl4/{analysis}/light_curve.fits.gz",
