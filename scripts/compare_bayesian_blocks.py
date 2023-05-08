@@ -14,11 +14,13 @@ args = parser.parse_args()
 
 def main(models, flux_points, output):
     # Should this be configurable?
-    # get cm fro mmatplotlibrc?
-    colors = plt.cm.RdBu(np.linspace(0, 1, len(models)))
+    # get cm from matplotlibrc?
+    colors = plt.cm.Spectral(np.linspace(0, 1, len(models)))
 
     fig, ax = plt.subplots()
 
+    # only plot the model maybe?
+    # plot pairs/triples of flux points?
     for i, (model_path, flux_points_path, color) in enumerate(
         zip(models, flux_points, colors),
     ):
@@ -26,7 +28,7 @@ def main(models, flux_points, output):
         fp.models = Models.read(model_path)
         fp.plot_spectrum(
             ax=ax,
-            kwargs_fp={"color": color, "label": ""},
+            kwargs_fp={"color": color, "label": "", "alpha": 0.3},
             kwargs_model={"color": color, "label": f"Block {i}"},
         )
 
