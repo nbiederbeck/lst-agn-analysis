@@ -5,7 +5,7 @@ from pathlib import Path
 
 import astropy.units as u
 import numpy as np
-from astropy.coordinates import AltAz, EarthLocation
+from astropy.coordinates import AltAz, EarthLocation, angular_separation
 from astropy.table import Table
 from astropy.time import Time
 from tqdm import tqdm
@@ -43,6 +43,24 @@ template_irf = "/fefs/aswg/data/mc/IRF/AllSky/{prod}/TestingDataset/{dec}/{node}
 outdir_model = build_dir / "models/model_Run{run_id}/"
 template_target_model = "/fefs/aswg/data/models/AllSky/{prod}/{dec}/"
 template_linkname_model = outdir_model.resolve().as_posix()
+
+
+def sin_delta(altaz: AltAz):
+    """Delta is the angle between pointing and magnetic field."""
+    b_inc = u.Quantity(-37.36, u.deg)
+    b_dec = u.Quantity(-4.84, u.deg)
+
+    delta = angular_separation(
+        lon1=altaz.az,
+        lat1=altaz.alt,
+        lon2=b_dec,
+        lat2=b_inc,
+    )
+    return np.sin(delta.to_value(u.rad))
+
+
+def cos_zenith(altaz: AltAz):
+    return np.cos(altaz.zen.to_value(u.rad))
 
 
 @u.quantity_input
@@ -95,6 +113,10 @@ def get_pointings_of_irfs(filelist) -> AltAz:
     return build_altaz(zd=theta * u.deg, az=az * u.deg)
 
 
+def euclidean_distance(x1, y1, x2, y2):
+    return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+
 def main() -> None:
     prod = args.prod
     dec = args.dec
@@ -104,6 +126,9 @@ def main() -> None:
     path = Path(template_irf.format(prod=prod, dec=dec, node=""))
     filelist = [p.name for p in path.parent.iterdir()]
     irf_pointings: AltAz = get_pointings_of_irfs(filelist)
+
+    irf_sin_delta = sin_delta(irf_pointings)
+    irf_cos_zenith = cos_zenith(irf_pointings)
 
     progress = tqdm(total=n_runs)
 
@@ -117,7 +142,15 @@ def main() -> None:
                 alt=run["mean_altitude"] * u.rad,
                 az=run["mean_azimuth"] * u.rad,
             )
-            nearest_irf = pointing.separation(irf_pointings).argmin()
+            sindelta = sin_delta(pointing)
+            coszenith = cos_zenith(pointing)
+
+            nearest_irf = euclidean_distance(
+                x1=sindelta,
+                y1=coszenith,
+                x2=irf_sin_delta,
+                y2=irf_cos_zenith,
+            ).argmin()
             node = filelist[nearest_irf]
 
             linkname_dl1 = Path(
@@ -133,17 +166,20 @@ def main() -> None:
             target_dl2 = Path(template_target_dl2.format(prod=prod, dec=dec, node=node))
             linkname_dl2 = Path(template_linkname_dl2.format(run_id=run_id))
 
-            if not linkname_dl1.exists():
-                linkname_dl1.parent.mkdir(exist_ok=True, parents=True)
-                linkname_dl1.symlink_to(target_dl1)
+            linkname_dl1.parent.mkdir(exist_ok=True, parents=True)
+            if linkname_dl1.exists() and linkname_dl1.is_symlink():
+                linkname_dl1.unlink()
+            linkname_dl1.symlink_to(target_dl1)
 
-            if not linkname_dl2.exists():
-                linkname_dl2.parent.mkdir(exist_ok=True, parents=True)
-                linkname_dl2.symlink_to(target_dl2)
+            linkname_dl2.parent.mkdir(exist_ok=True, parents=True)
+            if linkname_dl2.exists() and linkname_dl2.is_symlink():
+                linkname_dl2.unlink()
+            linkname_dl2.symlink_to(target_dl2)
 
-            if not linkname_model.exists():
-                linkname_model.parent.mkdir(exist_ok=True, parents=True)
-                linkname_model.symlink_to(target_model)
+            linkname_model.parent.mkdir(exist_ok=True, parents=True)
+            if linkname_model.exists() and linkname_model.is_symlink():
+                linkname_model.unlink()
+            linkname_model.symlink_to(target_model)
 
             progress.update()
 
