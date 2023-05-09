@@ -215,3 +215,37 @@ rule model_best_fit:
             --model-config {input.model} \
             -o {output} \
         """
+
+
+rule calc_skymap_per_obs:
+    output:
+        build_dir / "dl3/skymap-dl3/{run_id}.fits",
+    input:
+        data=build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
+        script="scripts/calc_skymap_gammas.py",
+        config=irf_config_path,
+        index=build_dir / "dl3/hdu-index.fits.gz",
+    wildcard_constraints:
+        run_id="\d+",  # dont match on "stacked".
+    resources:
+        # mem_mb=16000,
+        time=5,
+    conda:
+        gammapy_env
+    shell:
+        "python {input.script} -i {build_dir}/dl3 -o {output} --obs-id {wildcards.run_id} --config {input.config}"
+
+
+rule plot_skymap_dl3:
+    output:
+        build_dir / "plots/skymap-dl3/{runid}.pdf",
+    input:
+        data=build_dir / "dl3/skymap-dl3/{runid}.fits",
+        script="scripts/plot_skymap_dl3.py",
+        rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
+    conda:
+        gammapy_env
+    resources:
+        time=5,
+    shell:
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"

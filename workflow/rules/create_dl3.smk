@@ -179,3 +179,18 @@ rule stack_skymaps:
         script="scripts/stack_skymap.py",
     shell:
         "python {input.script} -i {input.data} -o {output}"
+
+
+rule stack_skymaps_dl3:
+    conda:
+        lstchain_env
+    output:
+        build_dir / "dl3/skymap-dl3/stacked.fits",
+    input:
+        data=expand(
+            build_dir / "dl3/skymap-dl3/{run_id}.fits",
+            run_id=RUN_IDS,
+        ),
+        script="scripts/stack_skymap.py",
+    shell:
+        "python {input.script} -i {input.data} -o {output}"
