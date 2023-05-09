@@ -47,6 +47,12 @@ template_linkname_model = outdir_model.resolve().as_posix()
 
 def sin_delta(altaz: AltAz):
     """Delta is the angle between pointing and magnetic field."""
+    # Values from
+    # https://geomag.bgs.ac.uk/data_service/models_compass/igrf_calc.html
+    # for La Palma coordinates and date=2021-12-01.
+    #
+    # Also used here:
+    # https://github.com/cta-observatory/lst-sim-config/issues/2
     b_inc = u.Quantity(-37.36, u.deg)
     b_dec = u.Quantity(-4.84, u.deg)
 
@@ -127,8 +133,8 @@ def main() -> None:
     filelist = [p.name for p in path.parent.iterdir()]
     irf_pointings: AltAz = get_pointings_of_irfs(filelist)
 
-    irf_sin_delta = sin_delta(irf_pointings)
-    irf_cos_zenith = cos_zenith(irf_pointings)
+    irf_sindelta = sin_delta(irf_pointings)
+    irf_coszenith = cos_zenith(irf_pointings)
 
     progress = tqdm(total=n_runs)
 
@@ -148,8 +154,8 @@ def main() -> None:
             nearest_irf = euclidean_distance(
                 x1=sindelta,
                 y1=coszenith,
-                x2=irf_sin_delta,
-                y2=irf_cos_zenith,
+                x2=irf_sindelta,
+                y2=irf_coszenith,
             ).argmin()
             node = filelist[nearest_irf]
 
