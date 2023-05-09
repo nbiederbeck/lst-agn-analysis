@@ -6,11 +6,9 @@ from gammapy.datasets import Datasets
 
 
 def select_timeframe(datasets, t_start, t_stop):
-    if t_start or t_stop:
-        t_start = Time(t_start, format="mjd") if t_start else datasets.gti.time_start[0]
-        t_stop = Time(t_stop, format="mjd") if t_stop else datasets.gti.time_stop[-1]
-        datasets = datasets.select_time(t_start, t_stop)
-    return datasets
+    t_start = Time(t_start, format="mjd") if t_start else datasets.gti.time_start[0]
+    t_stop = Time(t_stop, format="mjd") if t_stop else datasets.gti.time_stop[-1]
+    return datasets.select_time(t_start, t_stop)
 
 
 def main(  # noqa: PLR0913

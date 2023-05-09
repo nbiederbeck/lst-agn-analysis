@@ -1,7 +1,6 @@
 name: snakemake
 channels:
-  - bioconda
   - conda-forge
 dependencies:
-  - snakemake
+  - bioconda::snakemake
   - astropy

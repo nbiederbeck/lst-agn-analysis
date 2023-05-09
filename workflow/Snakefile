@@ -56,7 +56,3 @@ rule all:
         dl3_plots,
         dl4_plots,
         irf_plots,
-
-
-localrules:
-    link_paths,
