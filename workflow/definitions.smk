@@ -19,3 +19,5 @@ DECLINATION = config_agn["declination"]
 lstchain_env = config_agn.get("lstchain_enviroment", "lstchain-v0.9.13")
 gammapy_env = (env_dir / "agn-analysis.yml").resolve()
 data_selection_env = (env_dir / "data-selection.yml").resolve()
+
+bayesian_block_threshold = config_agn.get("bayesian_block_threshold", 0.0027)

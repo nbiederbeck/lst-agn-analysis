@@ -11,9 +11,13 @@ with open(build_dir / "runs.json", "r") as f:
 RUN_IDS = sorted(set(chain(*runs.values())))
 
 
+ruleorder: plot_bayesian_blocks_lightcurve > plot_dl4
+
+
 include: "rules/run_selection.smk"
 include: "rules/create_dl3.smk"
 include: "rules/post_dl3.smk"
+include: "rules/bayesian_blocks.smk"
 
 
 irf_plots = [
@@ -37,7 +41,13 @@ dl3_plots = [
 dl4_plots = [
     build_dir / f"plots/{analysis}/{plot}.pdf"
     for analysis in analyses
-    for plot in ["light_curve", "flux_points", "observation_plots"]
+    for plot in [
+        "light_curve",
+        "flux_points",
+        "observation_plots",
+        "bayesian_blocks",
+        "bayesian_blocks_comparison",
+    ]
 ]
 
 
@@ -46,9 +56,3 @@ rule all:
         dl3_plots,
         dl4_plots,
         irf_plots,
-
-
-localrules:
-    irf,
-    plot_irf,
-    link_paths,

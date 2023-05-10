@@ -25,7 +25,7 @@ def main(input_path, best_model_path, output):
         # This will fail because gammapy sets the yaxis limit in the
         # residual plot based on the max residual, so we need at least one
         # We can still plot the spectrum and flux points otherwise
-        if np.any(flux_points.data.is_ul.data.flatten()):
+        if np.any(~flux_points.data.is_ul.data.flatten()):
             fig, axes = plt.subplots(
                 nrows=2,
                 sharex=True,
