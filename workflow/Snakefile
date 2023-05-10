@@ -33,7 +33,7 @@ analyses = [
 dl3_plots = [
     build_dir / f"plots/{plot}/{run_id}.pdf"
     for run_id in RUN_IDS + ["stacked"]
-    for plot in ["theta2", "skymap", "skymap-dl3"]
+    for plot in ["theta2", "skymap", "skymap_dl3"]
 ]
 
 

@@ -219,7 +219,7 @@ rule model_best_fit:
 
 rule calc_skymap_per_obs:
     output:
-        build_dir / "dl3/skymap-dl3/{run_id}.fits",
+        build_dir / "dl3/skymap_dl3/{run_id}.fits",
     input:
         data=build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
         script="scripts/calc_skymap_gammas.py",
@@ -238,9 +238,9 @@ rule calc_skymap_per_obs:
 
 rule plot_skymap_dl3:
     output:
-        build_dir / "plots/skymap-dl3/{runid}.pdf",
+        build_dir / "plots/skymap_dl3/{runid}.pdf",
     input:
-        data=build_dir / "dl3/skymap-dl3/{runid}.fits",
+        data=build_dir / "dl3/skymap_dl3/{runid}.fits",
         script="scripts/plot_skymap_dl3.py",
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     conda:
