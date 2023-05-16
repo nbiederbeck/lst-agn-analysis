@@ -1,6 +1,6 @@
 rule dl2:
     resources:
-        mem_mb=64000,
+        mem_mb=80000,
     output:
         build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
     input:

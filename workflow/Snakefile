@@ -42,11 +42,13 @@ dl4_plots = [
     build_dir / f"plots/{analysis}/{plot}.pdf"
     for analysis in analyses
     for plot in [
+        "sensitivity",
         "light_curve",
         "flux_points",
         "observation_plots",
         "bayesian_blocks",
         "bayesian_blocks_comparison",
+        "dl4_diagnostics",
     ]
 ]
 
