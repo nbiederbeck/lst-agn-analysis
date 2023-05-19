@@ -247,6 +247,11 @@ if __name__ == "__main__":
     log.info(s)
 
     mask = np.in1d(run_ids, runsummary["runnumber"][mask])
+    log.info(f"Selected runs after cuts: {run_ids[mask]}")
+
+    mask = mask | np.isin(run_ids, config.whitelisted_runs)
+    mask = mask & (~np.isin(run_ids, config.blacklisted_runs))
+    log.info(f"Selected runs after checking whitelist/blacklist: {run_ids[mask]}")
 
     runs[mask].to_csv(args.output_runlist, index=False)
 
