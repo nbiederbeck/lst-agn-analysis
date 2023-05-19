@@ -63,8 +63,8 @@ class Config(BaseModel):
     time_start: Optional[TimeType]
     time_stop: Optional[TimeType]
 
-    whitelisted_runs: List[int] = []
-    blacklisted_runs: List[int] = []
+    always_include: List[int] = []
+    never_include: List[int] = []
 
     _val_time_start = validator("time_start", allow_reuse=True, pre=True)(ll_or_inf)
     _val_time_stop = validator("time_stop", allow_reuse=True, pre=True)(ul_or_inf)
