@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 from astropy.time import Time
@@ -62,6 +62,9 @@ class Config(BaseModel):
 
     time_start: Optional[TimeType]
     time_stop: Optional[TimeType]
+
+    always_include: List[int] = []
+    never_include: List[int] = []
 
     _val_time_start = validator("time_start", allow_reuse=True, pre=True)(ll_or_inf)
     _val_time_stop = validator("time_stop", allow_reuse=True, pre=True)(ul_or_inf)
