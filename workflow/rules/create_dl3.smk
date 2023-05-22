@@ -111,7 +111,7 @@ rule cuts_dl2_dl3:
     conda:
         lstchain_env
     output:
-        build_dir / "dl3/counts_after_gh_theta_cut_Run{run_id}.h5",
+        build_dir / "dl3/counts/after_gh_theta_cut_{run_id}.h5",
     input:
         dl2=build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
         irf=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
@@ -121,20 +121,33 @@ rule cuts_dl2_dl3:
         "python {input.script} --input-dl2 {input.dl2} --input-irf {input.irf} -c {input.config} -o {output}"
 
 
+rule stack_cuts_dl2_dl3:
+    conda:
+        lstchain_env
+    output:
+        build_dir / "dl3/counts/after_gh_theta_cut_{norm}_stacked.h5",
+    input:
+        data=expand(
+            build_dir / "dl3/counts/after_gh_theta_cut_{run_id}.h5",
+            run_id=RUN_IDS,
+        ),
+        script="scripts/stack_counts_after_cuts.py",
+        rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
+    shell:
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output} --norm {wildcards.norm}"
+
+
 rule plot_cuts_dl2_dl3:
     conda:
         lstchain_env
     output:
         build_dir / "plots/counts_after_gh_theta_cut_{norm}.pdf",
     input:
-        data=expand(
-            build_dir / "dl3/counts_after_gh_theta_cut_Run{run_id}.h5",
-            run_id=RUN_IDS,
-        ),
+        data=build_dir / "dl3/counts/after_gh_theta_cut_{norm}.h5",
         script="scripts/plot_counts_after_cuts.py",
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
     shell:
-        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output} --norm {wildcards.norm}"
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
 rule calc_skymap:
@@ -185,10 +198,10 @@ rule stack_skymaps_dl3:
     conda:
         lstchain_env
     output:
-        build_dir / "dl3/skymap-dl3/stacked.fits",
+        build_dir / "dl3/skymap_dl3/stacked.fits",
     input:
         data=expand(
-            build_dir / "dl3/skymap-dl3/{run_id}.fits",
+            build_dir / "dl3/skymap_dl3/{run_id}.fits",
             run_id=RUN_IDS,
         ),
         script="scripts/stack_skymap.py",
