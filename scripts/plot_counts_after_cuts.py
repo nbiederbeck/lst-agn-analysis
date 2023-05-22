@@ -1,75 +1,39 @@
 from argparse import ArgumentParser
 
-import numpy as np
-from astropy import units as u
 from astropy.table import Table
 from matplotlib import pyplot as plt
 
 parser = ArgumentParser()
-parser.add_argument("-i", "--input-paths", required=True, nargs="+")
+parser.add_argument("-i", "--input-path", required=True)
 parser.add_argument("-o", "--output-path", required=True)
-parser.add_argument("--norm", default="none")
 args = parser.parse_args()
 
 
-def main(input_paths, output_path, norm):
-    cuts_after_trigger = []
-    cuts_after_gh = []
-    cuts_after_gh_theta = []
-    t_effective = []
-    t_elapsed = []
-
-    for path in input_paths:
-        cuts = Table.read(path, path="cuts")
-        cuts_after_trigger.append(cuts["after_trigger"])
-        cuts_after_gh.append(cuts["after_gh"])
-        cuts_after_gh_theta.append(cuts["after_gh_theta"])
-        t_effective.append(cuts.meta["t_effective"])
-        t_elapsed.append(cuts.meta["t_elapsed"])
-
-    fig, ax = plt.subplots()
+def main(input_path, output_path):
+    cuts = Table.read(input_path, path="cuts")
 
     x = cuts["center"]
     xerr = (cuts["high"] - x, x - cuts["low"])
 
-    t_eff = u.Quantity(t_effective).reshape(-1, 1)
-    if norm == "none":
-        norm = u.Quantity(1)
-    elif norm == "eff":
-        norm = np.sum(t_eff)
-    else:
-        raise NotImplementedError(f"Unsupported norm {norm}")
-
-    cuts_after_trigger = np.sum(
-        np.array(cuts_after_trigger) / norm,
-        axis=0,
-    )
-    cuts_after_gh = np.sum(
-        np.array(cuts_after_gh) / norm,
-        axis=0,
-    )
-    cuts_after_gh_theta = np.sum(
-        np.array(cuts_after_gh_theta) / norm,
-        axis=0,
-    )
+    fig, ax = plt.subplots()
 
     ax.errorbar(
         x,
-        cuts_after_trigger,
+        cuts["after_trigger"],
         xerr=xerr,
         ls="",
         label="Trigger",
     )
     ax.errorbar(
         x,
-        cuts_after_gh,
+        cuts["after_gh"],
         xerr=xerr,
         ls="",
         label="GH Cut",
     )
     ax.errorbar(
         x,
-        cuts_after_gh_theta,
+        cuts["after_gh_theta"],
         xerr=xerr,
         ls="",
         label="Theta Cut",
@@ -78,7 +42,7 @@ def main(input_paths, output_path, norm):
     ax.set_yscale("log")
 
     ax.set_xlabel(rf"E_{{\text{{reco}}}} \:/\: {x.unit}")
-    ax.set_ylabel(cuts_after_trigger.unit)
+    ax.set_ylabel(cuts["after_trigger"].unit)
 
     ax.legend(title="Counts after")
 
