@@ -1,11 +1,8 @@
 from argparse import ArgumentParser
 
-import numpy as np
 from astropy import units as u
 from gammapy.maps import WcsNDMap
 from matplotlib import pyplot as plt
-from matplotlib.collections import PatchCollection
-from matplotlib.patches import Circle
 
 parser = ArgumentParser()
 parser.add_argument("-i", "--input-path", required=True)
@@ -34,34 +31,6 @@ def main(input_path, output_path, width, n_bins):
         ],
     ).T
 
-    patches = PatchCollection(
-        [
-            Circle(
-                (source.ra.to_value(u.deg), source.dec.to_value(u.deg)),
-                radius=0.3,
-                color="k",
-                ec="k",
-                fc="#0000",
-                fill=False,
-            ),
-        ]
-        + [
-            Circle(
-                (
-                    source.ra.to_value(u.deg) + 0.8 * np.sin(phi),
-                    source.dec.to_value(u.deg) + 0.8 * np.cos(phi),
-                ),
-                radius=0.3,
-                color="w",
-                ec="w",
-                fc="#0000",
-                fill=False,
-            )
-            for phi in np.linspace(0, 2 * np.pi, 7)
-        ],
-        match_original=True,
-    )
-
     fig, ax = plt.subplots()
 
     mesh = ax.pcolormesh(
@@ -83,8 +52,6 @@ def main(input_path, output_path, width, n_bins):
         edgecolor="k",
         label="Source",
     )
-
-    ax.add_collection(patches)
 
     ax.legend()
 
