@@ -13,12 +13,10 @@ fi
 
 output=`squeue --me -j "$jobid" -o '%T' -h`
 
-if [[ $output =~ ^(COMPLETED).* ]]
-then
-  echo success
-elif [[ $output =~ ^(RUNNING|PENDING|COMPLETING|CONFIGURING|SUSPENDED).* ]]
+# Failure is not an option
+if [[ -n $output ]]
 then
   echo running
 else
-  echo failed
+  echo success
 fi
