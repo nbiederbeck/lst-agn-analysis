@@ -39,7 +39,7 @@ rule plot_data_selection:
     output:
         build_dir / "{name}.pdf",
     wildcard_constraints:
-        name="^[^/].*",  # dont match on plots in a deeper hierarchy.
+        name="[^/]+",  # dont match on plots in a deeper hierarchy.
     conda:
         data_selection_env
     shell:
