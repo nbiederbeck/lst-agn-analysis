@@ -80,20 +80,8 @@ It is related to https://github.com/nbiederbeck/lst-agn-analysis/issues/26
 If you have run snakemake on the cluster, you can create the plots and tex files locally (using your own matplotlibrc for example).
 We separate the calculation of metrics and the plotting to make sure you can finetune plots later on without needing to
 run the expensive steps on the local machine. The tables for that are saved as either `fits.gz` or `h5`.
-
-For the data-selection plots, you need to download `build/dl1-datacheck-masked.h5`, e.g.:
-
-```
-mkdir -p build
-scp <host>:<path-to>/lst-data-selection/build/dl1-datachecks-masked.h5 build/
-```
-
-Afterwards:
+We create a helper script for that that uses `rsync`. Check how to use it:
 
 ```
-make -f local.mk
+./copy-from-cluster.py --help
 ```
-
-DEV-TODO: Do the same for the other plots (https://github.com/nbiederbeck/lst-agn-analysis/issues/29)
-If you do some `cp **/*.fits.gz` shenanigans, beware that the dl3 files are saved with
-the extension `fits.gz` as well.
