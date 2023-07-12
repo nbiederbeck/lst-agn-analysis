@@ -38,7 +38,7 @@ def main():
 
     mask_altitude = moon.alt.to_value(u.deg) < 0
     moon_light = moon_illumination(time)
-    moon_light[mask_altitude] = 1
+    moon_light[mask_altitude] = 0
 
     fig, ax = plt.subplots()
 
