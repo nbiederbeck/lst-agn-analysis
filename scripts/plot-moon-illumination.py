@@ -63,7 +63,7 @@ def main():
         transform=ax.get_yaxis_transform(),
     )
 
-    ax.set_ylabel("Pedestal Charge Std.Dev. / p.e.")
+    ax.set_ylabel("Pedestal Charge Std. Dev. / p.e.")
     ax.set_xlabel("Altitude / deg")
 
     fig.colorbar(im, ax=ax, label="Moon Illumination")
