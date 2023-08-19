@@ -15,10 +15,10 @@ parser.add_argument("--obs-id", required=True)
 parser.add_argument(
     "--width",
     help="Width of skymap",
-    default="3 deg",
+    default="2 deg",
     type=u.Quantity,
 )
-parser.add_argument("--n-bins", default=100)
+parser.add_argument("--n-bins", default=21)
 args = parser.parse_args()
 
 

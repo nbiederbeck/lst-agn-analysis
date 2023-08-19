@@ -19,10 +19,10 @@ parser.add_argument("-c", "--config", required=True)
 parser.add_argument(
     "--width",
     help="Width of skymap",
-    default="4 deg",
+    default="5 deg",
     type=u.Quantity,
 )
-parser.add_argument("--n-bins", default=100)
+parser.add_argument("--n-bins", default=51)
 args = parser.parse_args()
 
 
