@@ -21,6 +21,8 @@ def main(input_dl2, input_irf, config, output):
         config = json.load(f)
 
     events = read_data_dl2_to_QTable(input_dl2, "on")
+    mask = events['event_type'] == 32
+    events = events[mask]
 
     t_eff, t_ela = get_effective_time(events)
     events.meta["t_effective"] = t_eff
