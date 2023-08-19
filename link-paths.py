@@ -151,11 +151,9 @@ def main() -> None:
             sindelta = sin_delta(pointing)
             coszenith = cos_zenith(pointing)
 
-            nearest_irf = euclidean_distance(
-                x1=sindelta,
-                y1=coszenith,
-                x2=irf_sindelta,
-                y2=irf_coszenith,
+            nearest_irf = np.hypot(
+                sindelta - irf_sindelta,
+                coszenith - irf_coszenith,
             ).argmin()
             node = filelist[nearest_irf]
 
