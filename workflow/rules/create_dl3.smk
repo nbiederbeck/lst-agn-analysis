@@ -56,9 +56,28 @@ rule plot_irf:
         "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
-rule dl3:
+rule dl3_fix:
     output:
         build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
+    input:
+        data=build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz.bug",
+        script='scripts/fix-edisp-bug.py',
+    resources:
+        time=5,
+    conda:
+        lstchain_env
+    log:
+        build_dir / "logs/dl3/{run_id}_bugfix.log",
+    shell:
+        """
+        cp {input.data} {output}
+        python {input.script} {output}
+        """
+
+
+rule dl3:
+    output:
+        build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz.bug",
     input:
         data=build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
         irf=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
@@ -78,7 +97,8 @@ rule dl3:
             --input-irf {input.irf}  \
             --config {input.config} \
             --gzip \
-            --overwrite \
+            --overwrite
+        mv build/lst-analysis-config/dl3/dl3_LST-1.Run{wildcards.run_id}.fits.gz {output}
         """
 
 
