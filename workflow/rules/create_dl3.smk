@@ -98,7 +98,7 @@ rule dl3:
             --config {input.config} \
             --gzip \
             --overwrite
-        mv build/lst-analysis-config/dl3/dl3_LST-1.Run{wildcards.run_id}.fits.gz {output}
+        mv {build_dir}/dl3/dl3_LST-1.Run{wildcards.run_id}.fits.gz {output}
         """
 
 
