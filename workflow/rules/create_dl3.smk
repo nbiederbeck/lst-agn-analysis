@@ -47,44 +47,23 @@ rule plot_irf:
         data=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
         script="scripts/plot_irf_{irf}.py",
         rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
-    resources:
-        mem_mb=1000,
-        time=5,  # minutes
     conda:
         gammapy_env
     shell:
         "MATPLOTLIBRC={input.rc} python {input.script} -i {input.data} -o {output}"
 
 
-rule dl3_fix:
-    output:
-        build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
-    input:
-        data=build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz.bug",
-        script='scripts/fix-edisp-bug.py',
-    resources:
-        time=5,
-    conda:
-        lstchain_env
-    log:
-        build_dir / "logs/dl3/{run_id}_bugfix.log",
-    shell:
-        """
-        cp {input.data} {output}
-        python {input.script} {output}
-        """
-
-
 rule dl3:
     output:
-        build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz.bug",
+        build_dir / "dl3/dl3_LST-1.Run{run_id}.fits.gz",
     input:
         data=build_dir / "dl2/dl2_LST-1.Run{run_id}.h5",
         irf=build_dir / "irf/calculated/irf_Run{run_id}.fits.gz",
         config=irf_config_path,
+        script='scripts/fix-edisp-bug.py',
     resources:
-        mem_mb=12000,
-        time=30,
+        mem_mb=16384,
+        time=15,
     conda:
         lstchain_env
     log:
@@ -97,8 +76,9 @@ rule dl3:
             --input-irf {input.irf}  \
             --config {input.config} \
             --gzip \
-            --overwrite
-        mv {build_dir}/dl3/dl3_LST-1.Run{wildcards.run_id}.fits.gz {output}
+            --overwrite \
+	    --log-file {log}
+        python {input.script} {output} > {log}
         """
 
 
