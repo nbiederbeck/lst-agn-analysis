@@ -19,6 +19,10 @@ include: "rules/create_dl3.smk"
 include: "rules/post_dl3.smk"
 include: "rules/bayesian_blocks.smk"
 
+run_selection_plots = [
+    plots / f"{name}.pdf"
+    for name in ["moon-illumination", "cosmics", "cosmics-above", "run-pointings"]
+]
 
 irf_plots = [
     build_dir / f"plots/irf/{irf}_Run{run_id}.pdf"
@@ -52,9 +56,26 @@ dl4_plots = [
     ]
 ]
 
+rule plot_aic:
+    output:
+        build_dir / "plots/aic.pdf",
+    input:
+        data=dl4_plots, # dummy to make sure datasets are there and fit happend
+        rc=os.environ.get("MATPLOTLIBRC", config_dir / "matplotlibrc"),
+        script="scripts/compare_aic.py",
+    params:
+        indirs = [build_dir / f"dl4/{analysis}" for analysis in analyses]
+    conda:
+        gammapy_env
+    resources:
+        time=5,
+    shell:
+        "MATPLOTLIBRC={input.rc} python {input.script} -i {params.indirs} -o {output}"
 
 rule all:
     input:
+    	run_selection_plots,
         dl3_plots,
         dl4_plots,
         irf_plots,
+	build_dir / "plots/aic.pdf"
