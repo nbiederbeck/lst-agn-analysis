@@ -20,8 +20,8 @@ include: "rules/post_dl3.smk"
 include: "rules/bayesian_blocks.smk"
 
 run_selection_plots = [
-    plots / f"{name}.pdf"
-    for name in ["moon-illumination", "cosmics", "cosmics-above", "run-pointings"]
+    build_dir / f"plots/{name}.pdf"
+    for name in ["moon-illumination", "cosmics", "cosmics-above"]
 ]
 
 irf_plots = [
@@ -56,6 +56,15 @@ dl4_plots = [
     ]
 ]
 
+
+rule all:
+    input:
+    	run_selection_plots,
+        dl3_plots,
+        dl4_plots,
+        irf_plots,
+	build_dir / "plots/aic.pdf"
+
 rule plot_aic:
     output:
         build_dir / "plots/aic.pdf",
@@ -72,10 +81,3 @@ rule plot_aic:
     shell:
         "MATPLOTLIBRC={input.rc} python {input.script} -i {params.indirs} -o {output}"
 
-rule all:
-    input:
-    	run_selection_plots,
-        dl3_plots,
-        dl4_plots,
-        irf_plots,
-	build_dir / "plots/aic.pdf"

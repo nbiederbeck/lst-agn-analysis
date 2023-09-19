@@ -37,9 +37,7 @@ rule plot_data_selection:
         config=build_dir / "dl1-selection-cuts-config.json",
         script="scripts/plot-{name}.py",
     output:
-        build_dir / "{name}.pdf",
-    wildcard_constraints:
-        name="^[^/].*",  # dont match on plots in a deeper hierarchy.
+        build_dir / "plots/{name}.pdf",
     conda:
         data_selection_env
     shell:
