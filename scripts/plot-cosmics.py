@@ -28,13 +28,18 @@ def main():
         ".",
     )
     ax.set_xlim(ax.get_xlim())
-    ax.fill_between(
-        ax.get_xlim(),
-        [config.cosmics.ll],
-        [config.cosmics.ul],
-        alpha=0.1,
-        label="Selection",
-    )
+
+    ll = config.cosmics.ll
+    ul = config.cosmics.ul
+    
+    if ul and ll:
+        ax.fill_between(
+            ax.get_xlim(),
+            [ll],
+            [ul],
+            alpha=0.1,
+            label="Selection",
+        )
 
     ax.set_xlabel("Time")
     ax.set_ylabel("Rate / 1/s")

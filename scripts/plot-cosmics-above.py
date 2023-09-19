@@ -37,22 +37,30 @@ def main():
     )
 
     ax10.set_xlim(ax10.get_xlim())
-    ax10.fill_between(
-        ax10.get_xlim(),
-        config.cosmics_10.ll,
-        config.cosmics_10.ul,
-        alpha=0.1,
-        label="Selection",
-    )
+    ll10 = config.cosmics_10.ll
+    ul10 = config.cosmics_10.ul
+    if ul10 and ll10:
+        ax10.fill_between(
+            ax10.get_xlim(),
+            [ll10],
+            [ul10],
+            alpha=0.1,
+            label="Selection",
+        )
 
+    ax10.set_xlabel("Time")
+ 
     ax30.set_xlim(ax30.get_xlim())
-    ax30.fill_between(
-        ax30.get_xlim(),
-        config.cosmics_30.ll,
-        config.cosmics_30.ul,
-        alpha=0.1,
-        label="Selection",
-    )
+    ll30 = config.cosmics_30.ll
+    ul30 = config.cosmics_30.ul
+    if ul30 and ll30:
+        ax30.fill_between(
+            ax30.get_xlim(),
+            [ll30],
+            [ul30],
+            alpha=0.1,
+            label="Selection",
+        )
 
     ax10.legend()
     ax30.legend()
