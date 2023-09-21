@@ -8,7 +8,8 @@ from argparse import ArgumentParser
 
 
 def aic(stat_sums, n_parameters):
-    return 2*n_parameters - 2*stat_sums
+    # stat_sum is -2ln(L) already
+    return 2*n_parameters + stat_sums
 
 
 def relative_likelihood(aics):
